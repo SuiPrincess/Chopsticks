@@ -1,0 +1,452 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 63;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		015E9DAC9F0C8BE42407FFF6 /* Hand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F548BD74A000B40854EF304 /* Hand.swift */; };
+		0665D0FB8B6FF4910306E460 /* GameAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26EEA6D6743883AB1B72EFA0 /* GameAction.swift */; };
+		070700D05C1624B898D08B8A /* GlassButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD521C38AE129DF36DE47EE5 /* GlassButtonStyle.swift */; };
+		0773A7483F864045437B7357 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D59D9E1DB9C20722F4B6B5 /* Player.swift */; };
+		1E13C1C280D733E40A97A06E /* SplitControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3191E3FCB7EC46F019344EAF /* SplitControlView.swift */; };
+		2261777BA17040041C19F828 /* HandView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27EB645B4DDB6EDCD1304BB5 /* HandView.swift */; };
+		32A4D1A6A89FC3485D79A3EB /* ParticleEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E59634F0FD87B1BF5933D9 /* ParticleEffect.swift */; };
+		35B14BD829FBD30B91A38872 /* GlowModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B37F807AF30E58A291AEFC87 /* GlowModifier.swift */; };
+		45B59D16BAE0FBF62509C36A /* AnimationConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11A31981876C39C404B8C245 /* AnimationConstants.swift */; };
+		47677133DD35EFBBED76FA46 /* GameConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = D92E57D8E0E966DB05502F35 /* GameConfig.swift */; };
+		4D3DD1B04EF6612801ABC95A /* BackgroundGradientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77FA011A9AB218838410082C /* BackgroundGradientView.swift */; };
+		5E75D6A788F264617F7541B9 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35C5736527A4DC9BFB654335 /* MenuView.swift */; };
+		6C0AE5805DAB61C083C3B986 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC4DED73A4DA152397764961 /* AppTheme.swift */; };
+		863B3374378D7A3170B426F4 /* GameOverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C08744476ACF939755E2EF5C /* GameOverView.swift */; };
+		96C2ECCB0EDCC95C2168CEA3 /* AIDifficultyPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4C315694946EEFBD9486D9 /* AIDifficultyPickerView.swift */; };
+		A44AFB32508D53A8E20D5FC6 /* ChopsticksApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3986FA592B6089FB67D72938 /* ChopsticksApp.swift */; };
+		A4F0652EF4185570DBF7CC57 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 954E87CDC807FE7CE0335ADF /* HapticManager.swift */; };
+		C0827C62243735C40B6ABD0D /* AIEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55ACB8D5197621ADDD8A441D /* AIEngine.swift */; };
+		C81A513D63C3FCB3A00B17C6 /* GameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD409937881D7185F3B3E88 /* GameViewModel.swift */; };
+		C82E1E87863ADFBBACA7CDC1 /* RuleSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C72CEAD016BE717F23D4C93B /* RuleSettingsView.swift */; };
+		CA161231256615E5D0D61E8D /* RuleDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4B503A605BF5B71C3A38DF /* RuleDisplayView.swift */; };
+		DC6D261B4082332E3CD59263 /* DividerLineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1036CCC7B6E269FE3F743C89 /* DividerLineView.swift */; };
+		F2F590E36D69D759C4070A48 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05C3DC0AC64509D86888E8AD /* GameView.swift */; };
+		FA7C1E35C1D87D19BC04A148 /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7736242C6E7A921962DF97B9 /* GameState.swift */; };
+		FBD36EF2A118013B3ED28CF1 /* PlayerAreaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 048F3A526C6FAAAC6A3FB9A8 /* PlayerAreaView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		048F3A526C6FAAAC6A3FB9A8 /* PlayerAreaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerAreaView.swift; sourceTree = "<group>"; };
+		05C3DC0AC64509D86888E8AD /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
+		06D59D9E1DB9C20722F4B6B5 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
+		0F548BD74A000B40854EF304 /* Hand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hand.swift; sourceTree = "<group>"; };
+		1036CCC7B6E269FE3F743C89 /* DividerLineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DividerLineView.swift; sourceTree = "<group>"; };
+		11A31981876C39C404B8C245 /* AnimationConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimationConstants.swift; sourceTree = "<group>"; };
+		1C2B7B2DCC35E093A3FBE05D /* Chopsticks.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Chopsticks.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		26EEA6D6743883AB1B72EFA0 /* GameAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameAction.swift; sourceTree = "<group>"; };
+		27EB645B4DDB6EDCD1304BB5 /* HandView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandView.swift; sourceTree = "<group>"; };
+		3191E3FCB7EC46F019344EAF /* SplitControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitControlView.swift; sourceTree = "<group>"; };
+		35C5736527A4DC9BFB654335 /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
+		3986FA592B6089FB67D72938 /* ChopsticksApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChopsticksApp.swift; sourceTree = "<group>"; };
+		45E59634F0FD87B1BF5933D9 /* ParticleEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticleEffect.swift; sourceTree = "<group>"; };
+		55ACB8D5197621ADDD8A441D /* AIEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIEngine.swift; sourceTree = "<group>"; };
+		7736242C6E7A921962DF97B9 /* GameState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameState.swift; sourceTree = "<group>"; };
+		77FA011A9AB218838410082C /* BackgroundGradientView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundGradientView.swift; sourceTree = "<group>"; };
+		954E87CDC807FE7CE0335ADF /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
+		9A4B503A605BF5B71C3A38DF /* RuleDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuleDisplayView.swift; sourceTree = "<group>"; };
+		B37F807AF30E58A291AEFC87 /* GlowModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlowModifier.swift; sourceTree = "<group>"; };
+		C08744476ACF939755E2EF5C /* GameOverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverView.swift; sourceTree = "<group>"; };
+		C72CEAD016BE717F23D4C93B /* RuleSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuleSettingsView.swift; sourceTree = "<group>"; };
+		D92E57D8E0E966DB05502F35 /* GameConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameConfig.swift; sourceTree = "<group>"; };
+		DD4C315694946EEFBD9486D9 /* AIDifficultyPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIDifficultyPickerView.swift; sourceTree = "<group>"; };
+		DD521C38AE129DF36DE47EE5 /* GlassButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassButtonStyle.swift; sourceTree = "<group>"; };
+		EC4DED73A4DA152397764961 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
+		FDD409937881D7185F3B3E88 /* GameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewModel.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		239C1A84BB0F2923454D444F /* Chopsticks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Chopsticks;
+			path = .;
+			sourceTree = "<group>";
+		};
+		305BBCDE046B498B8FB04924 /* AI */ = {
+			isa = PBXGroup;
+			children = (
+				55ACB8D5197621ADDD8A441D /* AIEngine.swift */,
+			);
+			path = AI;
+			sourceTree = "<group>";
+		};
+		34BD53B58362F47B2C9B671C /* Effects */ = {
+			isa = PBXGroup;
+			children = (
+				77FA011A9AB218838410082C /* BackgroundGradientView.swift */,
+				1036CCC7B6E269FE3F743C89 /* DividerLineView.swift */,
+				B37F807AF30E58A291AEFC87 /* GlowModifier.swift */,
+				45E59634F0FD87B1BF5933D9 /* ParticleEffect.swift */,
+			);
+			path = Effects;
+			sourceTree = "<group>";
+		};
+		381DA0ADE625A7466DC1B077 = {
+			isa = PBXGroup;
+			children = (
+				305BBCDE046B498B8FB04924 /* AI */,
+				88CFC280349F16B38E9CDB04 /* App */,
+				239C1A84BB0F2923454D444F /* Chopsticks */,
+				D076A686871768DF52B1F93B /* Models */,
+				4F1F47D27807F2D5DD08FF5B /* Utilities */,
+				5D39E97BAD7B40F9556D723A /* ViewModels */,
+				9EF1699001CB6802228DCFEB /* Views */,
+				D90B372C1D7F8A88EB8D85EB /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		4F1F47D27807F2D5DD08FF5B /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				11A31981876C39C404B8C245 /* AnimationConstants.swift */,
+				EC4DED73A4DA152397764961 /* AppTheme.swift */,
+				954E87CDC807FE7CE0335ADF /* HapticManager.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		5D39E97BAD7B40F9556D723A /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				FDD409937881D7185F3B3E88 /* GameViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		88CFC280349F16B38E9CDB04 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				3986FA592B6089FB67D72938 /* ChopsticksApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		9EF1699001CB6802228DCFEB /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				DD4C315694946EEFBD9486D9 /* AIDifficultyPickerView.swift */,
+				C08744476ACF939755E2EF5C /* GameOverView.swift */,
+				05C3DC0AC64509D86888E8AD /* GameView.swift */,
+				35C5736527A4DC9BFB654335 /* MenuView.swift */,
+				9A4B503A605BF5B71C3A38DF /* RuleDisplayView.swift */,
+				C72CEAD016BE717F23D4C93B /* RuleSettingsView.swift */,
+				AF4D36F4F9C1E5F974AE395E /* Components */,
+				34BD53B58362F47B2C9B671C /* Effects */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		AF4D36F4F9C1E5F974AE395E /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				DD521C38AE129DF36DE47EE5 /* GlassButtonStyle.swift */,
+				27EB645B4DDB6EDCD1304BB5 /* HandView.swift */,
+				048F3A526C6FAAAC6A3FB9A8 /* PlayerAreaView.swift */,
+				3191E3FCB7EC46F019344EAF /* SplitControlView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		D076A686871768DF52B1F93B /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				26EEA6D6743883AB1B72EFA0 /* GameAction.swift */,
+				D92E57D8E0E966DB05502F35 /* GameConfig.swift */,
+				7736242C6E7A921962DF97B9 /* GameState.swift */,
+				0F548BD74A000B40854EF304 /* Hand.swift */,
+				06D59D9E1DB9C20722F4B6B5 /* Player.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		D90B372C1D7F8A88EB8D85EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1C2B7B2DCC35E093A3FBE05D /* Chopsticks.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B21C67B2441A083463BD59E7 /* Chopsticks */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7EFD02B2510ED1B19FBD81A5 /* Build configuration list for PBXNativeTarget "Chopsticks" */;
+			buildPhases = (
+				F74BFB724E1F0F06256A268F /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Chopsticks;
+			packageProductDependencies = (
+			);
+			productName = Chopsticks;
+			productReference = 1C2B7B2DCC35E093A3FBE05D /* Chopsticks.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		247525AA3B9D26BAEC18ABC5 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+			};
+			buildConfigurationList = 440406E48491426612020485 /* Build configuration list for PBXProject "Chopsticks" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 381DA0ADE625A7466DC1B077;
+			minimizedProjectReferenceProxies = 1;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B21C67B2441A083463BD59E7 /* Chopsticks */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F74BFB724E1F0F06256A268F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				96C2ECCB0EDCC95C2168CEA3 /* AIDifficultyPickerView.swift in Sources */,
+				C0827C62243735C40B6ABD0D /* AIEngine.swift in Sources */,
+				45B59D16BAE0FBF62509C36A /* AnimationConstants.swift in Sources */,
+				6C0AE5805DAB61C083C3B986 /* AppTheme.swift in Sources */,
+				4D3DD1B04EF6612801ABC95A /* BackgroundGradientView.swift in Sources */,
+				A44AFB32508D53A8E20D5FC6 /* ChopsticksApp.swift in Sources */,
+				DC6D261B4082332E3CD59263 /* DividerLineView.swift in Sources */,
+				0665D0FB8B6FF4910306E460 /* GameAction.swift in Sources */,
+				47677133DD35EFBBED76FA46 /* GameConfig.swift in Sources */,
+				863B3374378D7A3170B426F4 /* GameOverView.swift in Sources */,
+				FA7C1E35C1D87D19BC04A148 /* GameState.swift in Sources */,
+				F2F590E36D69D759C4070A48 /* GameView.swift in Sources */,
+				C81A513D63C3FCB3A00B17C6 /* GameViewModel.swift in Sources */,
+				070700D05C1624B898D08B8A /* GlassButtonStyle.swift in Sources */,
+				35B14BD829FBD30B91A38872 /* GlowModifier.swift in Sources */,
+				015E9DAC9F0C8BE42407FFF6 /* Hand.swift in Sources */,
+				2261777BA17040041C19F828 /* HandView.swift in Sources */,
+				A4F0652EF4185570DBF7CC57 /* HapticManager.swift in Sources */,
+				5E75D6A788F264617F7541B9 /* MenuView.swift in Sources */,
+				32A4D1A6A89FC3485D79A3EB /* ParticleEffect.swift in Sources */,
+				0773A7483F864045437B7357 /* Player.swift in Sources */,
+				FBD36EF2A118013B3ED28CF1 /* PlayerAreaView.swift in Sources */,
+				CA161231256615E5D0D61E8D /* RuleDisplayView.swift in Sources */,
+				C82E1E87863ADFBBACA7CDC1 /* RuleSettingsView.swift in Sources */,
+				1E13C1C280D733E40A97A06E /* SplitControlView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		063D7207D24032B9ECDBD35B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = GUH7SP89Y7;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chopsticks.app;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		156C1E485FDAAC9A346372D9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		71BF9B5AA74695690443E704 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = GUH7SP89Y7;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chopsticks.app;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		7F7CBF6EA42089BBC211C2BE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		440406E48491426612020485 /* Build configuration list for PBXProject "Chopsticks" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7F7CBF6EA42089BBC211C2BE /* Debug */,
+				156C1E485FDAAC9A346372D9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7EFD02B2510ED1B19FBD81A5 /* Build configuration list for PBXNativeTarget "Chopsticks" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				063D7207D24032B9ECDBD35B /* Debug */,
+				71BF9B5AA74695690443E704 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 247525AA3B9D26BAEC18ABC5 /* Project object */;
+}
