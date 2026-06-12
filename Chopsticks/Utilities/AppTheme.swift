@@ -16,7 +16,6 @@ enum AppTheme {
 
     // Glass
     static let glassBorder = Color.white.opacity(0.15)
-    static let glassFill = Color.white.opacity(0.06)
 
     // Gradients
     static let accentGradient = LinearGradient(
@@ -25,27 +24,9 @@ enum AppTheme {
         endPoint: .bottomTrailing
     )
 
-    static let player1Gradient = LinearGradient(
-        colors: [player1Color, player1Color.opacity(0.6)],
-        startPoint: .top,
-        endPoint: .bottom
-    )
-
-    static let player2Gradient = LinearGradient(
-        colors: [player2Color, player2Color.opacity(0.6)],
-        startPoint: .top,
-        endPoint: .bottom
-    )
-
     static let goldGradient = LinearGradient(
         colors: [.yellow, .orange],
         startPoint: .top,
         endPoint: .bottom
     )
-
-    static let explosionColors: [Color] = [.red, .orange, .yellow, .white, accent]
-
-    static func playerColor(for playerId: UUID, player1Id: UUID) -> Color {
-        playerId == player1Id ? player1Color : player2Color
-    }
 }

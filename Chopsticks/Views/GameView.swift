@@ -86,6 +86,8 @@ struct GameView: View {
             if viewModel.showSplitPanel {
                 let color = viewModel.isPlayer1Turn ? AppTheme.player1Color : AppTheme.player2Color
                 SplitControlView(viewModel: viewModel, playerColor: color)
+                    // 対面プレイではPlayer 2側に向ける
+                    .rotationEffect(.degrees(!viewModel.isVsAI && !viewModel.isPlayer1Turn ? 180 : 0))
             }
 
             if viewModel.isGameOver {

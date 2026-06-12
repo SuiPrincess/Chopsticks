@@ -8,6 +8,11 @@ struct MenuView: View {
     @State private var navigateToGame = false
     @State private var titleGlow: CGFloat = 0.3
 
+    // 前の画面の閉じるアニメーション完了後（onDismiss）に次を出すためのフラグ。
+    // 同時にpresentすると遷移が無視されることがある。
+    @State private var pendingRuleConfirmation = false
+    @State private var pendingGameStart = false
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -98,23 +103,33 @@ struct MenuView: View {
                 RuleSettingsView(config: $config)
                     .presentationDetents([.large])
             }
-            .sheet(isPresented: $showAIDifficultyPicker) {
+            .sheet(isPresented: $showAIDifficultyPicker, onDismiss: {
+                if pendingRuleConfirmation {
+                    pendingRuleConfirmation = false
+                    showRuleConfirmation = true
+                }
+            }) {
                 AIDifficultyPickerView(
                     difficulty: $config.aiDifficulty,
                     onStart: {
+                        pendingRuleConfirmation = true
                         showAIDifficultyPicker = false
-                        showRuleConfirmation = true
                     }
                 )
                 .presentationDetents([.medium])
             }
-            .fullScreenCover(isPresented: $showRuleConfirmation) {
+            .fullScreenCover(isPresented: $showRuleConfirmation, onDismiss: {
+                if pendingGameStart {
+                    pendingGameStart = false
+                    navigateToGame = true
+                }
+            }) {
                 RuleDisplayView(
                     config: config,
                     isPreGame: true,
                     onStart: {
+                        pendingGameStart = true
                         showRuleConfirmation = false
-                        navigateToGame = true
                     },
                     onDismiss: { showRuleConfirmation = false }
                 )
