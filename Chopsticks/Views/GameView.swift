@@ -5,6 +5,7 @@ struct GameView: View {
     @State private var showQuitConfirm = false
     @State private var shakePhase: CGFloat = 0
     @State private var bannerEvent: BattleEvent?
+    @AppStorage("tutorial.completed") private var tutorialCompleted = false
     @Environment(\.dismiss) private var dismiss
 
     init(config: GameConfig) {
@@ -91,6 +92,13 @@ struct GameView: View {
                     .id(event.id)
             }
 
+            // 初プレイのコーチマーク（最初の2手番だけ）
+            if showsTutorialHint {
+                TutorialHintView(text: tutorialHintText)
+                    .rotationEffect(.degrees(!viewModel.isVsAI && !viewModel.isPlayer1Turn ? 180 : 0))
+                    .offset(y: !viewModel.isVsAI && !viewModel.isPlayer1Turn ? -90 : 90)
+            }
+
             if viewModel.showSplitPanel {
                 let color = viewModel.isPlayer1Turn ? AppTheme.player1Color : AppTheme.player2Color
                 SplitControlView(viewModel: viewModel, playerColor: color)
@@ -103,6 +111,9 @@ struct GameView: View {
             }
         }
         .statusBarHidden()
+        .onChange(of: viewModel.state.turnCount) { _, count in
+            if count >= 2 { tutorialCompleted = true }
+        }
         .onChange(of: viewModel.shakeTrigger) { _, _ in
             withAnimation(.linear(duration: 0.4)) { shakePhase += 1 }
         }
@@ -128,6 +139,51 @@ struct GameView: View {
         .alert("ゲームをやめますか？", isPresented: $showQuitConfirm) {
             Button("やめる", role: .destructive) { dismiss() }
             Button("続ける", role: .cancel) {}
+        }
+    }
+
+    private var showsTutorialHint: Bool {
+        !tutorialCompleted
+            && viewModel.state.turnCount < 2
+            && !viewModel.isAITurn
+            && !viewModel.isGameOver
+            && !viewModel.showSplitPanel
+    }
+
+    private var tutorialHintText: String {
+        viewModel.selectedAttackerHandId == nil
+            ? "① 自分の手をタップしてえらぶ"
+            : "② 相手の手をタップしてこうげき！"
+    }
+}
+
+/// 初プレイ時のコーチマーク
+private struct TutorialHintView: View {
+    let text: String
+    @State private var pulse = false
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "hand.point.up.left.fill")
+                .font(.system(size: 14))
+            Text(text)
+                .font(.system(size: 14, weight: .semibold, design: .rounded))
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(
+            Capsule()
+                .fill(.ultraThinMaterial)
+                .overlay(Capsule().stroke(AppTheme.accent.opacity(0.5), lineWidth: 1))
+        )
+        .shadow(color: AppTheme.accent.opacity(0.4), radius: 10)
+        .scaleEffect(pulse ? 1.04 : 1.0)
+        .allowsHitTesting(false)
+        .onAppear {
+            withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
+                pulse = true
+            }
         }
     }
 }

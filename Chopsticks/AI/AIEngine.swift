@@ -21,6 +21,32 @@ struct AIEngine {
         }
     }
 
+    /// ランク戦用: レベル1〜10で段階的に強くなる。
+    /// 低レベルはランダム行動が混ざり、高レベルほど深く読む。
+    static func chooseAction(
+        state: GameState,
+        level: Int,
+        attacksUsedThisTurn: Int = 0
+    ) -> GameAction? {
+        let actions = generateAllActions(state: state)
+        guard !actions.isEmpty else { return nil }
+
+        let clamped = min(max(level, 1), 10)
+        // Lv.1: 76%ランダム → Lv.10: 0%ランダム
+        let randomMoveChance = max(0.0, 0.85 - 0.09 * Double(clamped))
+        if Double.random(in: 0..<1) < randomMoveChance {
+            return actions.randomElement()
+        }
+        // Lv.1: 1手読み → Lv.10: フル探索
+        let depthCap = 1 + clamped / 2
+        return chooseBestAction(
+            state: state,
+            actions: actions,
+            attacksUsed: attacksUsedThisTurn,
+            depthCap: depthCap
+        )
+    }
+
     // MARK: - Action Generation
 
     static func generateAllActions(state: GameState) -> [GameAction] {
@@ -73,9 +99,14 @@ struct AIEngine {
         return 6
     }
 
-    private static func chooseBestAction(state: GameState, actions: [GameAction], attacksUsed: Int) -> GameAction {
+    private static func chooseBestAction(
+        state: GameState,
+        actions: [GameAction],
+        attacksUsed: Int,
+        depthCap: Int = .max
+    ) -> GameAction {
         let aiId = state.currentPlayerId
-        let depth = searchDepth(for: state)
+        let depth = min(searchDepth(for: state), depthCap)
         var bestScore = Int.min
         var bestActions: [GameAction] = []
 

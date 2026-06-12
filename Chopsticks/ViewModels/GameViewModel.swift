@@ -19,6 +19,8 @@ final class GameViewModel {
     private(set) var battleEvent: BattleEvent?
     /// 手が死ぬたびに進むカウンタ。画面シェイクのトリガー。
     private(set) var shakeTrigger = 0
+    /// この勝利でランクが上がったか（リザルト演出用）
+    private(set) var didRankUp = false
     var showSplitPanel: Bool = false
     var showRules: Bool = false
 
@@ -65,7 +67,13 @@ final class GameViewModel {
     // MARK: - Actions
     func newGame() {
         gameGeneration += 1
-        state = GameState(config: state.config)
+        didRankUp = false
+        var config = state.config
+        // ランク戦の再戦は最新レベルのCPUと
+        if config.aiLevel != nil {
+            config.aiLevel = GameStats.shared.rankLevel
+        }
+        state = GameState(config: config)
         selectedAttackerHandId = nil
         attacksThisTurn = 0
         showSplitPanel = false
@@ -159,11 +167,21 @@ final class GameViewModel {
             self.isAIThinking = false
             guard self.isAITurn, case .playing = self.state.phase else { return }
 
-            guard let action = AIEngine.chooseAction(
-                state: self.state,
-                difficulty: self.config.aiDifficulty,
-                attacksUsedThisTurn: self.attacksThisTurn
-            ) else {
+            let action: GameAction?
+            if let level = self.config.aiLevel {
+                action = AIEngine.chooseAction(
+                    state: self.state,
+                    level: level,
+                    attacksUsedThisTurn: self.attacksThisTurn
+                )
+            } else {
+                action = AIEngine.chooseAction(
+                    state: self.state,
+                    difficulty: self.config.aiDifficulty,
+                    attacksUsedThisTurn: self.attacksThisTurn
+                )
+            }
+            guard let action else {
                 // 行動がなければ手番を返す（通常起こらない）
                 self.attacksThisTurn = 0
                 self.advanceTurn()
@@ -238,8 +256,13 @@ final class GameViewModel {
 
         state.phase = .gameOver(winnerId: winnerId)
         HapticManager.victory()
+        GameStats.shared.recordDailyPlay()
         if isVsAI {
-            GameStats.shared.recordGame(playerWon: winnerId == state.player1.id)
+            let playerWon = winnerId == state.player1.id
+            GameStats.shared.recordGame(playerWon: playerWon)
+            if playerWon, state.config.aiLevel != nil {
+                didRankUp = GameStats.shared.registerRankedWin()
+            }
         }
         return true
     }

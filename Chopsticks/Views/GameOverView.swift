@@ -1,4 +1,5 @@
 import SwiftUI
+import StoreKit
 
 struct GameOverView: View {
     let viewModel: GameViewModel
@@ -6,6 +7,7 @@ struct GameOverView: View {
 
     @State private var appeared = false
     @State private var confetti: [ConfettiPiece] = []
+    @Environment(\.requestReview) private var requestReview
 
     var body: some View {
         ZStack {
@@ -53,6 +55,13 @@ struct GameOverView: View {
                             .foregroundStyle(AppTheme.goldGradient)
                             .tracking(2)
                     }
+
+                    if viewModel.didRankUp {
+                        Text("⬆️ RANK UP! 次は Lv.\(GameStats.shared.rankLevel)")
+                            .font(.system(size: 16, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.orange)
+                            .tracking(1)
+                    }
                 }
 
                 VStack(spacing: 6) {
@@ -75,6 +84,15 @@ struct GameOverView: View {
                         onDismiss()
                     }
                     .buttonStyle(GlassButtonStyle(isPrimary: false))
+
+                    if !humanLostToAI && viewModel.isVsAI {
+                        ShareLink(item: shareText) {
+                            Label("結果を自慢する", systemImage: "square.and.arrow.up")
+                                .font(.system(size: 13, weight: .medium, design: .rounded))
+                                .foregroundStyle(.white.opacity(0.6))
+                        }
+                        .padding(.top, 4)
+                    }
                 }
                 .padding(.horizontal, 40)
             }
@@ -83,7 +101,33 @@ struct GameOverView: View {
         }
         .onAppear {
             withAnimation(Anim.gameOver) { appeared = true }
-            if !humanLostToAI { spawnConfetti() }
+            if !humanLostToAI {
+                spawnConfetti()
+                requestReviewIfDeserved()
+            }
+        }
+    }
+
+    private var shareText: String {
+        let stats = GameStats.shared
+        if let beatenLevel = viewModel.config.aiLevel {
+            return "割り箸バトルでCPU Lv.\(beatenLevel)を撃破！現在ランクLv.\(stats.rankLevel) 🔥 #Chopsticks"
+        }
+        if stats.currentStreak >= 2 {
+            return "割り箸バトルでCPUに\(stats.currentStreak)連勝中！🔥 #Chopsticks"
+        }
+        return "割り箸バトルでCPUに勝利！✌️ #Chopsticks"
+    }
+
+    /// 「気分が良い瞬間」だけレビューを依頼する（バージョンごとに1回）
+    private func requestReviewIfDeserved() {
+        let stats = GameStats.shared
+        guard stats.shouldRequestReview() else { return }
+        stats.markReviewRequested()
+        Task { @MainActor in
+            // 勝利演出が落ち着いてから出す
+            try? await Task.sleep(for: .seconds(2))
+            requestReview()
         }
     }
 

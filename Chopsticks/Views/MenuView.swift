@@ -55,8 +55,22 @@ struct MenuView: View {
                     // Buttons
                     VStack(spacing: 12) {
                         // 2P Local
+                        // ランク戦（メインの進行ループ）
+                        Button {
+                            config.gameMode = .vsAI
+                            config.aiLevel = GameStats.shared.rankLevel
+                            showRuleConfirmation = true
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "trophy.fill")
+                                Text(rankButtonLabel)
+                            }
+                        }
+                        .buttonStyle(GlassButtonStyle(color: .orange))
+
                         Button {
                             config.gameMode = .localTwoPlayer
+                            config.aiLevel = nil
                             showRuleConfirmation = true
                         } label: {
                             HStack(spacing: 8) {
@@ -66,14 +80,15 @@ struct MenuView: View {
                         }
                         .buttonStyle(GlassButtonStyle())
 
-                        // VS AI
+                        // VS AI (フリー対戦)
                         Button {
                             config.gameMode = .vsAI
+                            config.aiLevel = nil
                             showAIDifficultyPicker = true
                         } label: {
                             HStack(spacing: 8) {
                                 Image(systemName: "cpu")
-                                Text("CPU対戦")
+                                Text("フリー対戦")
                             }
                         }
                         .buttonStyle(GlassButtonStyle(color: AppTheme.accentSecondary))
@@ -184,11 +199,22 @@ struct MenuView: View {
         HapticManager.split()
     }
 
+    private var rankButtonLabel: String {
+        let level = GameStats.shared.rankLevel
+        return level >= GameStats.maxRankLevel
+            ? "ランク戦 Lv.MAX"
+            : "ランク戦 — Lv.\(level)に挑戦"
+    }
+
     @ViewBuilder
     private var statsIndicator: some View {
         let stats = GameStats.shared
         if stats.wins + stats.losses > 0 {
             HStack(spacing: 8) {
+                if stats.dailyStreak >= 2 {
+                    Text("🗓️ \(stats.dailyStreak)日連続")
+                        .foregroundStyle(.cyan)
+                }
                 if stats.currentStreak >= 2 {
                     Text("🔥 \(stats.currentStreak)連勝中")
                         .foregroundStyle(.orange)

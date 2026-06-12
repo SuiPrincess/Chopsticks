@@ -22,7 +22,12 @@ struct GameState: Equatable {
 
     init(config: GameConfig = GameConfig()) {
         let p1 = Player(name: "Player 1", handCount: config.handCount)
-        let p2Name = config.gameMode == .vsAI ? "CPU" : "Player 2"
+        let p2Name: String
+        if config.gameMode == .vsAI {
+            p2Name = config.aiLevel.map { "CPU Lv.\($0)" } ?? "CPU"
+        } else {
+            p2Name = "Player 2"
+        }
         let p2 = Player(name: p2Name, handCount: config.handCount)
         self.player1 = p1
         self.player2 = p2
