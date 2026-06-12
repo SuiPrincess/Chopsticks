@@ -24,28 +24,49 @@ struct GameOverView: View {
 
             VStack(spacing: 28) {
                 // Trophy
-                Image(systemName: "trophy.fill")
-                    .font(.system(size: 56))
-                    .foregroundStyle(AppTheme.goldGradient)
-                    .shadow(color: .yellow.opacity(0.5), radius: 16)
-
-                VStack(spacing: 8) {
-                    Text(viewModel.winnerName ?? "")
-                        .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white)
-
-                    Text("WIN!")
-                        .font(.system(size: 20, weight: .heavy, design: .rounded))
-                        .foregroundStyle(AppTheme.accentGradient)
-                        .tracking(6)
+                if humanLostToAI {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 56))
+                        .foregroundStyle(.white.opacity(0.3))
+                } else {
+                    Image(systemName: "trophy.fill")
+                        .font(.system(size: 56))
+                        .foregroundStyle(AppTheme.goldGradient)
+                        .shadow(color: .yellow.opacity(0.5), radius: 16)
                 }
 
-                Text("\(viewModel.state.turnCount) turns")
-                    .font(.system(size: 14, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.5))
+                VStack(spacing: 8) {
+                    Text(humanLostToAI ? "LOSE..." : (viewModel.winnerName ?? ""))
+                        .font(.system(size: 32, weight: .bold, design: .rounded))
+                        .foregroundStyle(humanLostToAI ? .white.opacity(0.7) : .white)
+
+                    Text(humanLostToAI ? "もう一回挑戦しよう" : "WIN!")
+                        .font(.system(size: humanLostToAI ? 14 : 20, weight: .heavy, design: .rounded))
+                        .foregroundStyle(humanLostToAI
+                            ? AnyShapeStyle(Color.white.opacity(0.5))
+                            : AnyShapeStyle(AppTheme.accentGradient))
+                        .tracking(humanLostToAI ? 1 : 6)
+
+                    if viewModel.isPerfectWin && !humanLostToAI {
+                        Text("💯 PERFECT!")
+                            .font(.system(size: 15, weight: .heavy, design: .rounded))
+                            .foregroundStyle(AppTheme.goldGradient)
+                            .tracking(2)
+                    }
+                }
+
+                VStack(spacing: 6) {
+                    Text("\(viewModel.state.turnCount) turns")
+                        .font(.system(size: 14, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.5))
+
+                    if viewModel.isVsAI {
+                        statsLines
+                    }
+                }
 
                 VStack(spacing: 12) {
-                    Button("Play Again") {
+                    Button(humanLostToAI ? "リベンジ!" : "Play Again") {
                         viewModel.newGame()
                     }
                     .buttonStyle(GlassButtonStyle())
@@ -62,8 +83,30 @@ struct GameOverView: View {
         }
         .onAppear {
             withAnimation(Anim.gameOver) { appeared = true }
-            spawnConfetti()
+            if !humanLostToAI { spawnConfetti() }
         }
+    }
+
+    private var humanLostToAI: Bool {
+        viewModel.isVsAI && viewModel.winner?.id == viewModel.state.player2.id
+    }
+
+    @ViewBuilder
+    private var statsLines: some View {
+        let stats = GameStats.shared
+        if stats.currentStreak >= 2 {
+            Text("🔥 \(stats.currentStreak)連勝中!")
+                .font(.system(size: 15, weight: .bold, design: .rounded))
+                .foregroundStyle(.orange)
+        }
+        if stats.didSetNewRecord {
+            Text("✨ 自己ベスト更新!")
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .foregroundStyle(.yellow)
+        }
+        Text("通算 \(stats.wins)勝 \(stats.losses)敗・ベスト連勝 \(stats.bestStreak)")
+            .font(.system(size: 12, design: .rounded))
+            .foregroundStyle(.white.opacity(0.4))
     }
 
     private func spawnConfetti() {

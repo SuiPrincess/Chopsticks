@@ -3,6 +3,8 @@ import SwiftUI
 struct GameView: View {
     @State private var viewModel: GameViewModel
     @State private var showQuitConfirm = false
+    @State private var shakePhase: CGFloat = 0
+    @State private var bannerEvent: BattleEvent?
     @Environment(\.dismiss) private var dismiss
 
     init(config: GameConfig) {
@@ -82,6 +84,12 @@ struct GameView: View {
                 )
             }
             .ignoresSafeArea()
+            .modifier(ShakeEffect(animatableData: shakePhase))
+
+            if let event = bannerEvent {
+                BattleEventBanner(event: event)
+                    .id(event.id)
+            }
 
             if viewModel.showSplitPanel {
                 let color = viewModel.isPlayer1Turn ? AppTheme.player1Color : AppTheme.player2Color
@@ -95,6 +103,21 @@ struct GameView: View {
             }
         }
         .statusBarHidden()
+        .onChange(of: viewModel.shakeTrigger) { _, _ in
+            withAnimation(.linear(duration: 0.4)) { shakePhase += 1 }
+        }
+        .onChange(of: viewModel.battleEvent) { _, event in
+            guard let event else { return }
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.55)) {
+                bannerEvent = event
+            }
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(1))
+                if bannerEvent?.id == event.id {
+                    withAnimation(.easeOut(duration: 0.3)) { bannerEvent = nil }
+                }
+            }
+        }
         .sheet(isPresented: $viewModel.showRules) {
             RuleDisplayView(
                 config: viewModel.config,
@@ -106,5 +129,21 @@ struct GameView: View {
             Button("やめる", role: .destructive) { dismiss() }
             Button("続ける", role: .cancel) {}
         }
+    }
+}
+
+/// 画面中央に弾けるように出るイベントテキスト
+private struct BattleEventBanner: View {
+    let event: BattleEvent
+
+    var body: some View {
+        Text(event.text)
+            .font(.system(size: 42, weight: .black, design: .rounded))
+            .italic()
+            .foregroundStyle(event.color)
+            .shadow(color: event.color.opacity(0.8), radius: 14)
+            .shadow(color: event.color.opacity(0.4), radius: 30)
+            .transition(.scale(scale: 0.3).combined(with: .opacity))
+            .allowsHitTesting(false)
     }
 }

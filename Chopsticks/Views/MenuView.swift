@@ -78,17 +78,28 @@ struct MenuView: View {
                         }
                         .buttonStyle(GlassButtonStyle(color: AppTheme.accentSecondary))
 
-                        // Rules
-                        Button {
-                            showRuleSettings = true
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "gearshape")
-                                Text("ルール設定")
+                        // Rules + random rules
+                        HStack(spacing: 12) {
+                            Button {
+                                showRuleSettings = true
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "gearshape")
+                                    Text("ルール設定")
+                                }
                             }
-                        }
-                        .buttonStyle(GlassButtonStyle(isPrimary: false))
+                            .buttonStyle(GlassButtonStyle(isPrimary: false))
 
+                            Button {
+                                randomizeRules()
+                            } label: {
+                                Image(systemName: "dice.fill")
+                            }
+                            .buttonStyle(GlassButtonStyle(color: .orange))
+                            .frame(width: 64)
+                        }
+
+                        statsIndicator
                         activeRulesIndicator
                     }
                     .padding(.horizontal, 40)
@@ -137,6 +148,57 @@ struct MenuView: View {
         }
         .onAppear {
             withAnimation(Anim.glowPulse) { titleGlow = 0.8 }
+        }
+    }
+
+    /// 特殊ルールをランダムに組み合わせて毎回違うゲームにする
+    private func randomizeRules() {
+        func chance(_ probability: Double) -> Bool {
+            Double.random(in: 0..<1) < probability
+        }
+
+        var newConfig = config
+        newConfig.isOverflowWrapEnabled = chance(0.7)
+        newConfig.isSplittingEnabled = chance(0.5)
+        newConfig.isDeadHandRevivalEnabled = newConfig.isSplittingEnabled && chance(0.4)
+        newConfig.handCount = chance(0.25) ? 3 : 2
+        newConfig.isPoisonEnabled = chance(0.3)
+        newConfig.isBombEnabled = chance(0.3)
+        newConfig.isMirrorEnabled = chance(0.3)
+        newConfig.isDoubleTapEnabled = chance(0.3)
+
+        // 全部OFFの退屈な結果は避け、どれか1つは必ず入れる
+        if !newConfig.isSplittingEnabled && !newConfig.isPoisonEnabled
+            && !newConfig.isBombEnabled && !newConfig.isMirrorEnabled
+            && !newConfig.isDoubleTapEnabled {
+            switch Int.random(in: 0..<5) {
+            case 0: newConfig.isSplittingEnabled = true
+            case 1: newConfig.isPoisonEnabled = true
+            case 2: newConfig.isBombEnabled = true
+            case 3: newConfig.isMirrorEnabled = true
+            default: newConfig.isDoubleTapEnabled = true
+            }
+        }
+
+        withAnimation(.spring(response: 0.3)) { config = newConfig }
+        HapticManager.split()
+    }
+
+    @ViewBuilder
+    private var statsIndicator: some View {
+        let stats = GameStats.shared
+        if stats.wins + stats.losses > 0 {
+            HStack(spacing: 8) {
+                if stats.currentStreak >= 2 {
+                    Text("🔥 \(stats.currentStreak)連勝中")
+                        .foregroundStyle(.orange)
+                }
+                Text("CPU戦 \(stats.wins)勝 \(stats.losses)敗")
+                Text("ベスト連勝 \(stats.bestStreak)")
+            }
+            .font(.system(size: 11, weight: .medium, design: .rounded))
+            .foregroundStyle(.white.opacity(0.45))
+            .padding(.top, 8)
         }
     }
 

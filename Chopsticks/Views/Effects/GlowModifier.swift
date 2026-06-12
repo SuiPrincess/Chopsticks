@@ -28,3 +28,13 @@ extension View {
         modifier(GlowPulse(isActive: isActive, color: color))
     }
 }
+
+/// animatableDataが1進むごとに左右3往復する画面シェイク
+struct ShakeEffect: GeometryEffect {
+    var animatableData: CGFloat
+
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        let translation = 7 * sin(animatableData * .pi * 6)
+        return ProjectionTransform(CGAffineTransform(translationX: translation, y: 0))
+    }
+}

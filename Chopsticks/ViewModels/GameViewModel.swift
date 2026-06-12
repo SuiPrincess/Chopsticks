@@ -1,5 +1,12 @@
 import SwiftUI
 
+/// 画面中央に一瞬表示する戦闘イベントバナー
+struct BattleEvent: Identifiable, Equatable {
+    let id = UUID()
+    let text: String
+    let color: Color
+}
+
 @Observable
 @MainActor
 final class GameViewModel {
@@ -8,6 +15,10 @@ final class GameViewModel {
     private(set) var selectedAttackerHandId: UUID?
     private(set) var attacksThisTurn: Int = 0
     private(set) var isAIThinking: Bool = false
+    /// 直近の戦闘イベント（バナー表示用）
+    private(set) var battleEvent: BattleEvent?
+    /// 手が死ぬたびに進むカウンタ。画面シェイクのトリガー。
+    private(set) var shakeTrigger = 0
     var showSplitPanel: Bool = false
     var showRules: Bool = false
 
@@ -25,9 +36,17 @@ final class GameViewModel {
         return false
     }
 
-    var winnerName: String? {
+    var winner: Player? {
         guard case .gameOver(let winnerId) = state.phase else { return nil }
-        return winnerId == state.player1.id ? state.player1.name : state.player2.name
+        return winnerId == state.player1.id ? state.player1 : state.player2
+    }
+
+    var winnerName: String? { winner?.name }
+
+    /// 勝者が一本も手を失わずに勝ったか
+    var isPerfectWin: Bool {
+        guard let winner else { return false }
+        return winner.hands.allSatisfy(\.isAlive)
     }
 
     var isAITurn: Bool {
@@ -51,6 +70,7 @@ final class GameViewModel {
         attacksThisTurn = 0
         showSplitPanel = false
         isAIThinking = false
+        battleEvent = nil
     }
 
     func selectAttackerHand(_ handId: UUID) {
@@ -74,6 +94,7 @@ final class GameViewModel {
 
         let result = state.apply(.tap(attackerHandId: attackerHandId, targetHandId: targetHandId))
         playFeedback(for: result, isSplit: false)
+        let announced = announce(result)
 
         selectedAttackerHandId = nil
 
@@ -82,6 +103,9 @@ final class GameViewModel {
         // ダブルタップ: 1ターンに2回攻撃
         if config.isDoubleTapEnabled && attacksThisTurn == 0 {
             attacksThisTurn = 1
+            if !announced {
+                battleEvent = BattleEvent(text: "もう1回!", color: .purple)
+            }
             if isAITurn { triggerAITurn() }
             return
         }
@@ -100,6 +124,7 @@ final class GameViewModel {
 
         let result = state.apply(.split(newDistribution: newDistribution))
         playFeedback(for: result, isSplit: true)
+        announce(result)
 
         showSplitPanel = false
         selectedAttackerHandId = nil
@@ -159,6 +184,25 @@ final class GameViewModel {
     }
 
     // MARK: - Private
+
+    /// 派手な結果をバナーとシェイクで演出する。何か表示したらtrue。
+    @discardableResult
+    private func announce(_ result: ActionResult) -> Bool {
+        if !result.deadHandIds.isEmpty {
+            shakeTrigger += 1
+        }
+        if result.bombTriggered {
+            battleEvent = BattleEvent(text: "BOOM!", color: .orange)
+        } else if result.poisonTriggered {
+            battleEvent = BattleEvent(text: "POISON!", color: .green)
+        } else if !result.deadHandIds.isEmpty {
+            battleEvent = BattleEvent(text: "BREAK!", color: .red)
+        } else {
+            return false
+        }
+        return true
+    }
+
     private func playFeedback(for result: ActionResult, isSplit: Bool) {
         if isSplit {
             HapticManager.split()
@@ -183,16 +227,20 @@ final class GameViewModel {
 
     @discardableResult
     private func checkWinCondition() -> Bool {
+        let winnerId: UUID
         if state.player1.isDefeated {
-            state.phase = .gameOver(winnerId: state.player2.id)
-            HapticManager.victory()
-            return true
+            winnerId = state.player2.id
+        } else if state.player2.isDefeated {
+            winnerId = state.player1.id
+        } else {
+            return false
         }
-        if state.player2.isDefeated {
-            state.phase = .gameOver(winnerId: state.player1.id)
-            HapticManager.victory()
-            return true
+
+        state.phase = .gameOver(winnerId: winnerId)
+        HapticManager.victory()
+        if isVsAI {
+            GameStats.shared.recordGame(playerWon: winnerId == state.player1.id)
         }
-        return false
+        return true
     }
 }
