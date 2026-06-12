@@ -26,6 +26,11 @@ final class GameViewModel {
 
     /// newGame()のたびに進む世代番号。前のゲームのAIタスクの誤発火を防ぐ。
     private var gameGeneration = 0
+    /// 2人対戦の再戦で先手を交代するためのフラグ
+    private var player1StartsNext = true
+
+    /// このターン数に達したらサドンデス判定（千日手・膠着対策）
+    static let turnLimit = 60
 
     // MARK: - Computed
     var currentPlayer: Player { state.currentPlayer }
@@ -34,9 +39,11 @@ final class GameViewModel {
     var config: GameConfig { state.config }
 
     var isGameOver: Bool {
-        if case .gameOver = state.phase { return true }
-        return false
+        if case .playing = state.phase { return false }
+        return true
     }
+
+    var isDraw: Bool { state.phase == .draw }
 
     var winner: Player? {
         guard case .gameOver(let winnerId) = state.phase else { return nil }
@@ -73,7 +80,14 @@ final class GameViewModel {
         if config.aiLevel != nil {
             config.aiLevel = GameStats.shared.rankLevel
         }
-        state = GameState(config: config)
+        // 2人対戦の再戦は先手を交代（CPU戦は常に人間が先手）
+        if config.gameMode == .localTwoPlayer {
+            player1StartsNext.toggle()
+        }
+        state = GameState(
+            config: config,
+            player1Starts: config.gameMode == .vsAI || player1StartsNext
+        )
         selectedAttackerHandId = nil
         attacksThisTurn = 0
         showSplitPanel = false
@@ -238,6 +252,14 @@ final class GameViewModel {
         state.switchTurn()
         HapticManager.turnSwitch()
 
+        if state.turnCount >= Self.turnLimit {
+            resolveSuddenDeath()
+            return
+        }
+        if state.turnCount == Self.turnLimit - 10 {
+            battleEvent = BattleEvent(text: "あと10ターンで判定!", color: .yellow)
+        }
+
         if isAITurn {
             triggerAITurn()
         }
@@ -245,25 +267,51 @@ final class GameViewModel {
 
     @discardableResult
     private func checkWinCondition() -> Bool {
-        let winnerId: UUID
-        if state.player1.isDefeated {
-            winnerId = state.player2.id
-        } else if state.player2.isDefeated {
-            winnerId = state.player1.id
-        } else {
-            return false
-        }
+        let p1Dead = state.player1.isDefeated
+        let p2Dead = state.player2.isDefeated
+        guard p1Dead || p2Dead else { return false }
 
-        state.phase = .gameOver(winnerId: winnerId)
+        let winnerId: UUID
+        if p1Dead && p2Dead {
+            // 相打ち（爆弾連鎖・相討ち毒など）はとどめを刺した手番側の勝ち
+            winnerId = state.currentPlayerId
+        } else if p1Dead {
+            winnerId = state.player2.id
+        } else {
+            winnerId = state.player1.id
+        }
+        finishGame(winnerId: winnerId)
+        return true
+    }
+
+    /// ターン上限到達時の判定: 生きてる手の数 → 指の合計が少ない方 → 引き分け
+    private func resolveSuddenDeath() {
+        let p1 = state.player1
+        let p2 = state.player2
+        if p1.aliveHands.count != p2.aliveHands.count {
+            finishGame(winnerId: p1.aliveHands.count > p2.aliveHands.count ? p1.id : p2.id)
+        } else if p1.totalFingers != p2.totalFingers {
+            finishGame(winnerId: p1.totalFingers < p2.totalFingers ? p1.id : p2.id)
+        } else {
+            finishGame(winnerId: nil)
+        }
+    }
+
+    /// winnerId == nil は引き分け
+    private func finishGame(winnerId: UUID?) {
+        if let winnerId {
+            state.phase = .gameOver(winnerId: winnerId)
+        } else {
+            state.phase = .draw
+        }
         HapticManager.victory()
         GameStats.shared.recordDailyPlay()
-        if isVsAI {
+        if isVsAI, let winnerId {
             let playerWon = winnerId == state.player1.id
             GameStats.shared.recordGame(playerWon: playerWon)
             if playerWon, state.config.aiLevel != nil {
                 didRankUp = GameStats.shared.registerRankedWin()
             }
         }
-        return true
     }
 }

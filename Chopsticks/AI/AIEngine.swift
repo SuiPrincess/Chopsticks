@@ -148,10 +148,15 @@ struct AIEngine {
         next.apply(action)
 
         // 終局判定（plyの分だけ減点し、早い勝ち・遅い負けを好む）
+        // 相打ちはとどめを刺した手番側（next.currentPlayerIdはまだ切替前）の勝ち
         let ai = aiId == next.player1.id ? next.player1 : next.player2
         let opponent = aiId == next.player1.id ? next.player2 : next.player1
-        if ai.isDefeated { return -winScore + ply }
-        if opponent.isDefeated { return winScore - ply }
+        if ai.isDefeated || opponent.isDefeated {
+            let aiWins = (ai.isDefeated && opponent.isDefeated)
+                ? next.currentPlayerId == aiId
+                : opponent.isDefeated
+            return aiWins ? winScore - ply : -winScore + ply
+        }
 
         if depth <= 0 { return evaluateState(next, for: aiId) }
 

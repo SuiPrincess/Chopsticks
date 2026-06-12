@@ -7,6 +7,8 @@ struct HandView: View {
     let isInteractable: Bool
     let onTap: () -> Void
     var compact: Bool = false
+    /// 毒ルール有効時、この手の攻撃が毒（相討ち即死）になることを示す
+    var showsPoisonBadge: Bool = false
 
     @State private var showDeath = false
     @State private var previousAlive = true
@@ -68,6 +70,13 @@ struct HandView: View {
             ParticleExplosionView(isActive: showDeath, color: accentColor)
         }
         .frame(width: cardWidth, height: cardHeight)
+        .overlay(alignment: .topTrailing) {
+            if showsPoisonBadge && hand.isAlive {
+                Text("☠️")
+                    .font(.system(size: compact ? 12 : 15))
+                    .padding(compact ? 5 : 7)
+            }
+        }
         .opacity(isInteractable || isSelected ? 1.0 : (hand.isAlive ? 0.7 : 0.4))
         .scaleEffect(isSelected ? 1.05 : 1.0)
         .animation(Anim.finger, value: hand.fingerCount)

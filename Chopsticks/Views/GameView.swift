@@ -25,6 +25,7 @@ struct GameView: View {
                     selectedAttackerHandId: viewModel.selectedAttackerHandId,
                     isSplittingEnabled: viewModel.config.isSplittingEnabled,
                     isAttackPhase: viewModel.isPlayer1Turn && viewModel.selectedAttackerHandId != nil,
+                    isPoisonEnabled: viewModel.config.isPoisonEnabled,
                     isAI: viewModel.isVsAI,
                     isAIThinking: viewModel.isAIThinking,
                     onHandTapped: { viewModel.handleHandTap($0) },
@@ -80,6 +81,7 @@ struct GameView: View {
                     selectedAttackerHandId: viewModel.selectedAttackerHandId,
                     isSplittingEnabled: viewModel.config.isSplittingEnabled,
                     isAttackPhase: !viewModel.isPlayer1Turn && viewModel.selectedAttackerHandId != nil,
+                    isPoisonEnabled: viewModel.config.isPoisonEnabled,
                     onHandTapped: { viewModel.handleHandTap($0) },
                     onSplitTapped: { viewModel.showSplitPanel = true }
                 )

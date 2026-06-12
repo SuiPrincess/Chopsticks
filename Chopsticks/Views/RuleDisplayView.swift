@@ -81,6 +81,7 @@ struct RuleDisplayView: View {
             RuleItem(icon: "hand.point.up.left.fill", text: "自分の手を選んでから、相手の手をタップして攻撃"),
             RuleItem(icon: "plus", text: "叩かれた手に、攻撃側の指の本数が加算される"),
             RuleItem(icon: "xmark.circle.fill", text: "全ての手が死んだプレイヤーの負け"),
+            RuleItem(icon: "hourglass", text: "\(GameViewModel.turnLimit)ターンで決着しない場合は判定（手の数→指が少ない方）"),
         ]
         if config.handCount == 3 {
             items.insert(RuleItem(icon: "hand.raised.fingers.spread", text: "3本手モード: 通常より多い手で戦略的に!"), at: 1)
@@ -112,7 +113,7 @@ struct RuleDisplayView: View {
             items.append(RuleItem(icon: "heart.fill", text: "復活: 分割で死亡した手を復活させられる"))
         }
         if config.isPoisonEnabled {
-            items.append(RuleItem(icon: "drop.fill", text: "毒: 指1本の攻撃で相手の手を即死"))
+            items.append(RuleItem(icon: "drop.fill", text: "毒: 指1本の攻撃で相手の手を即死（毒を使った手も死ぬ相討ち）"))
         }
         if config.isBombEnabled {
             items.append(RuleItem(icon: "flame.circle.fill", text: "爆弾: 手が4になると爆発し全他の手に1ダメージ"))

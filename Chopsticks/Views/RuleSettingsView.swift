@@ -56,7 +56,7 @@ struct RuleSettingsView: View {
 
                         ruleCard {
                             Toggle(isOn: $config.isPoisonEnabled) {
-                                ruleLabel("毒", desc: "指1本で攻撃すると相手の手を即死させる")
+                                ruleLabel("毒", desc: "指1本の攻撃で相手の手を即死。ただし毒を使った手も死ぬ（相討ち）")
                             }
                             .tint(.green)
                         }

@@ -3,6 +3,8 @@ import Foundation
 enum GamePhase: Equatable {
     case playing
     case gameOver(winnerId: UUID)
+    /// ターン上限のサドンデス判定で完全に同点だった場合
+    case draw
 }
 
 /// アクション適用の結果。演出（ハプティクス・エフェクト）の判断に使う。
@@ -20,7 +22,7 @@ struct GameState: Equatable {
     var config: GameConfig
     var turnCount: Int
 
-    init(config: GameConfig = GameConfig()) {
+    init(config: GameConfig = GameConfig(), player1Starts: Bool = true) {
         let p1 = Player(name: "Player 1", handCount: config.handCount)
         let p2Name: String
         if config.gameMode == .vsAI {
@@ -31,7 +33,7 @@ struct GameState: Equatable {
         let p2 = Player(name: p2Name, handCount: config.handCount)
         self.player1 = p1
         self.player2 = p2
-        self.currentPlayerId = p1.id
+        self.currentPlayerId = player1Starts ? p1.id : p2.id
         self.phase = .playing
         self.config = config
         self.turnCount = 0
@@ -79,12 +81,17 @@ extension GameState {
         let overflowWraps = config.isOverflowWrapEnabled
         let attackingFingers = attackerHand.fingerCount
 
-        // 毒: 指1本で攻撃すると相手の手を即死させる
+        // 毒（相討ち）: 指1本で攻撃すると相手の手を即死させるが、毒を使った手も死ぬ。
+        // 開始時の手は全て指1本のため、ノーリスク即死だと先手必勝になってしまう。
         if config.isPoisonEnabled && attackingFingers == 1 {
             withOpponentPlayer { player in
                 player.updateHand(id: targetHandId) { $0.fingerCount = 0 }
             }
+            withCurrentPlayer { player in
+                player.updateHand(id: attackerHandId) { $0.fingerCount = 0 }
+            }
             result.poisonTriggered = true
+            result.deadHandIds.append(attackerHandId)
         } else {
             withOpponentPlayer { player in
                 player.updateHand(id: targetHandId) {
@@ -96,8 +103,8 @@ extension GameState {
             result.deadHandIds.append(targetHandId)
         }
 
-        // ミラー: 攻撃した本数が自分の手にも加算される
-        if config.isMirrorEnabled {
+        // ミラー: 攻撃した本数が自分の手にも加算される（毒で既に死んだ手には適用しない）
+        if config.isMirrorEnabled && !result.poisonTriggered {
             withCurrentPlayer { player in
                 player.updateHand(id: attackerHandId) {
                     $0.receiveTap(from: attackingFingers, overflowWraps: overflowWraps)

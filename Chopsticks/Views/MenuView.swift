@@ -13,6 +13,20 @@ struct MenuView: View {
     @State private var pendingRuleConfirmation = false
     @State private var pendingGameStart = false
 
+    /// ランク戦用の固定設定。非nilのときはユーザーのルール設定より優先する。
+    /// ルール設定の影響を受けると毒ルール等でランクが攻略できてしまうため。
+    @State private var rankedConfig: GameConfig?
+
+    private var activeConfig: GameConfig { rankedConfig ?? config }
+
+    /// ランク戦は標準ルール固定（ループあり・分割なし・特殊ルールなし）
+    private static func makeRankedConfig() -> GameConfig {
+        var rankedConfig = GameConfig()
+        rankedConfig.gameMode = .vsAI
+        rankedConfig.aiLevel = GameStats.shared.rankLevel
+        return rankedConfig
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -54,11 +68,9 @@ struct MenuView: View {
 
                     // Buttons
                     VStack(spacing: 12) {
-                        // 2P Local
-                        // ランク戦（メインの進行ループ）
+                        // ランク戦（メインの進行ループ・固定標準ルール）
                         Button {
-                            config.gameMode = .vsAI
-                            config.aiLevel = GameStats.shared.rankLevel
+                            rankedConfig = Self.makeRankedConfig()
                             showRuleConfirmation = true
                         } label: {
                             HStack(spacing: 8) {
@@ -68,7 +80,9 @@ struct MenuView: View {
                         }
                         .buttonStyle(GlassButtonStyle(color: .orange))
 
+                        // 2P Local
                         Button {
+                            rankedConfig = nil
                             config.gameMode = .localTwoPlayer
                             config.aiLevel = nil
                             showRuleConfirmation = true
@@ -82,6 +96,7 @@ struct MenuView: View {
 
                         // VS AI (フリー対戦)
                         Button {
+                            rankedConfig = nil
                             config.gameMode = .vsAI
                             config.aiLevel = nil
                             showAIDifficultyPicker = true
@@ -122,7 +137,7 @@ struct MenuView: View {
                 }
             }
             .navigationDestination(isPresented: $navigateToGame) {
-                GameView(config: config)
+                GameView(config: activeConfig)
                     .navigationBarBackButtonHidden()
             }
             .sheet(isPresented: $showRuleSettings) {
@@ -151,7 +166,7 @@ struct MenuView: View {
                 }
             }) {
                 RuleDisplayView(
-                    config: config,
+                    config: activeConfig,
                     isPreGame: true,
                     onStart: {
                         pendingGameStart = true
