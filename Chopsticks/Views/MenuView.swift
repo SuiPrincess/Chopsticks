@@ -1,4 +1,5 @@
 import SwiftUI
+import GameKit
 
 struct MenuView: View {
     @State private var config = GameConfig()
@@ -26,6 +27,12 @@ struct MenuView: View {
         rankedConfig.aiLevel = GameStats.shared.rankLevel
         return rankedConfig
     }
+
+    // Multiplayer
+    @State private var showNearbyMatch = false
+    @State private var showGameKitMatchmaker = false
+    @State private var multiplayerService: (any MultiplayerService)?
+    @State private var gameCenterManager = GameCenterManager.shared
 
     var body: some View {
         NavigationStack {
@@ -108,6 +115,32 @@ struct MenuView: View {
                         }
                         .buttonStyle(GlassButtonStyle(color: AppTheme.accentSecondary))
 
+                        // Nearby (Multipeer)
+                        Button {
+                            config.gameMode = .nearby
+                            showNearbyMatch = true
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "antenna.radiowaves.left.and.right")
+                                Text("近くの人と対戦")
+                            }
+                        }
+                        .buttonStyle(GlassButtonStyle(color: .green))
+
+                        // Online (Game Center)
+                        Button {
+                            config.gameMode = .online
+                            showGameKitMatchmaker = true
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "globe")
+                                Text("オンライン対戦")
+                            }
+                        }
+                        .buttonStyle(GlassButtonStyle(color: .orange))
+                        .opacity(gameCenterManager.isAuthenticated ? 1 : 0.4)
+                        .disabled(!gameCenterManager.isAuthenticated)
+
                         // Rules + random rules
                         HStack(spacing: 12) {
                             Button {
@@ -131,14 +164,24 @@ struct MenuView: View {
 
                         statsIndicator
                         activeRulesIndicator
+
+                        if !gameCenterManager.isAuthenticated {
+                            Text("Game Centerにログインするとオンライン対戦が可能")
+                                .font(.system(size: 11, design: .rounded))
+                                .foregroundStyle(.white.opacity(0.3))
+                                .multilineTextAlignment(.center)
+                        }
                     }
                     .padding(.horizontal, 40)
                     .padding(.bottom, 50)
                 }
             }
             .navigationDestination(isPresented: $navigateToGame) {
-                GameView(config: activeConfig)
+                GameView(config: activeConfig, multiplayerService: multiplayerService)
                     .navigationBarBackButtonHidden()
+                    .onDisappear {
+                        multiplayerService = nil
+                    }
             }
             .sheet(isPresented: $showRuleSettings) {
                 RuleSettingsView(config: $config)
@@ -175,9 +218,33 @@ struct MenuView: View {
                     onDismiss: { showRuleConfirmation = false }
                 )
             }
+            .fullScreenCover(isPresented: $showNearbyMatch) {
+                NearbyMatchView(
+                    config: $config,
+                    onConnected: { service in
+                        multiplayerService = service
+                        showNearbyMatch = false
+                        showRuleConfirmation = true
+                    },
+                    onCancel: { showNearbyMatch = false }
+                )
+            }
+            .sheet(isPresented: $showGameKitMatchmaker) {
+                GameKitMatchmakerView(
+                    onMatchFound: { match in
+                        let service = GameKitService()
+                        service.configure(with: match)
+                        multiplayerService = service
+                        showGameKitMatchmaker = false
+                        showRuleConfirmation = true
+                    },
+                    onCancel: { showGameKitMatchmaker = false }
+                )
+            }
         }
         .onAppear {
             withAnimation(Anim.glowPulse) { titleGlow = 0.8 }
+            GameCenterManager.shared.authenticateLocalPlayer()
         }
     }
 

@@ -1,6 +1,6 @@
 import Foundation
 
-struct Player: Identifiable, Equatable {
+struct Player: Identifiable, Equatable, Codable {
     let id: UUID
     let name: String
     var hands: [Hand]

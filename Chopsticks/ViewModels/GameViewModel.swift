@@ -29,6 +29,14 @@ final class GameViewModel {
     /// 2人対戦の再戦で先手を交代するためのフラグ
     private var player1StartsNext = true
 
+    // MARK: - Multiplayer
+    var multiplayerService: (any MultiplayerService)?
+    var localPlayerId: UUID?
+    var showDisconnectAlert: Bool = false
+    var showRematchRequest: Bool = false
+    var isWaitingForRematch: Bool = false
+    private var isExecutingRemoteAction: Bool = false
+
     /// このターン数に達したらサドンデス判定（千日手・膠着対策）
     static let turnLimit = 60
 
@@ -66,15 +74,93 @@ final class GameViewModel {
         state.config.gameMode == .vsAI
     }
 
+    var isMultiplayer: Bool {
+        config.isMultiplayer
+    }
+
+    var isLocalTurn: Bool {
+        if !isMultiplayer { return true }
+        guard let localId = localPlayerId else { return false }
+        return state.currentPlayerId == localId
+    }
+
+    var isRemoteControlled: Bool {
+        isMultiplayer && !isLocalTurn
+    }
+
     // MARK: - Init
     init(config: GameConfig = GameConfig()) {
         self.state = GameState(config: config)
+    }
+
+    // MARK: - Multiplayer Setup
+    func setupMultiplayer(service: any MultiplayerService) {
+        self.multiplayerService = service
+        service.onMessageReceived = { [weak self] message in
+            self?.handleRemoteMessage(message)
+        }
+        service.onConnectionChanged = { [weak self] connected in
+            if !connected {
+                self?.showDisconnectAlert = true
+            }
+        }
+    }
+
+    func startMultiplayerGame(asHost: Bool, opponentName: String) {
+        if asHost {
+            localPlayerId = state.player1.id
+            state.player2 = Player(id: state.player2.id, name: opponentName, handCount: config.handCount)
+            multiplayerService?.send(.gameStart(state))
+        }
+    }
+
+    func handleRemoteMessage(_ message: MultiplayerMessage) {
+        switch message {
+        case .gameStart(let gameState):
+            // ゲストがゲーム状態を受信
+            self.state = gameState
+            self.localPlayerId = gameState.player2.id
+        case .action(let action):
+            executeRemoteAction(action)
+        case .stateSync(let syncState):
+            self.state = syncState
+        case .rematchRequest:
+            showRematchRequest = true
+        case .rematchAccepted:
+            isWaitingForRematch = false
+            newGame()
+            if let service = multiplayerService, service.isHost {
+                service.send(.gameStart(state))
+            }
+        case .disconnect:
+            showDisconnectAlert = true
+        case .configProposal, .configAccepted:
+            break
+        }
+    }
+
+    func requestRematch() {
+        isWaitingForRematch = true
+        multiplayerService?.send(.rematchRequest)
+    }
+
+    func acceptRematch() {
+        showRematchRequest = false
+        multiplayerService?.send(.rematchAccepted)
+        newGame()
+    }
+
+    func disconnectMultiplayer() {
+        multiplayerService?.disconnect()
+        multiplayerService = nil
+        localPlayerId = nil
     }
 
     // MARK: - Actions
     func newGame() {
         gameGeneration += 1
         didRankUp = false
+        let previousLocalId = localPlayerId
         var config = state.config
         // ランク戦の再戦は最新レベルのCPUと
         if config.aiLevel != nil {
@@ -93,11 +179,24 @@ final class GameViewModel {
         showSplitPanel = false
         isAIThinking = false
         battleEvent = nil
+        isWaitingForRematch = false
+        showRematchRequest = false
+
+        // マルチプレイ時はホスト=player1を維持
+        if isMultiplayer, let service = multiplayerService {
+            if service.isHost {
+                localPlayerId = state.player1.id
+                state.player2 = Player(id: state.player2.id, name: service.opponentName, handCount: config.handCount)
+            } else {
+                localPlayerId = previousLocalId
+            }
+        }
     }
 
     func selectAttackerHand(_ handId: UUID) {
         guard case .playing = state.phase else { return }
         guard !isAITurn else { return }
+        guard !isRemoteControlled else { return }
         guard let hand = currentPlayer.hand(for: handId), hand.isAlive else { return }
 
         if selectedAttackerHandId == handId {
@@ -113,6 +212,11 @@ final class GameViewModel {
         guard let attackerHandId = selectedAttackerHandId else { return }
         guard let attackerHand = currentPlayer.hand(for: attackerHandId), attackerHand.isAlive else { return }
         guard let targetHand = opponentPlayer.hand(for: targetHandId), targetHand.isAlive else { return }
+
+        // マルチプレイ: ローカルアクションを相手に送信
+        if isMultiplayer && !isExecutingRemoteAction {
+            multiplayerService?.send(.action(.tap(attackerHandId: attackerHandId, targetHandId: targetHandId)))
+        }
 
         let result = state.apply(.tap(attackerHandId: attackerHandId, targetHandId: targetHandId))
         playFeedback(for: result, isSplit: false)
@@ -144,6 +248,11 @@ final class GameViewModel {
             allowRevival: config.isDeadHandRevivalEnabled
         ) else { return }
 
+        // マルチプレイ: ローカルアクションを相手に送信
+        if isMultiplayer && !isExecutingRemoteAction {
+            multiplayerService?.send(.action(.split(newDistribution: newDistribution)))
+        }
+
         let result = state.apply(.split(newDistribution: newDistribution))
         playFeedback(for: result, isSplit: true)
         announce(result)
@@ -160,12 +269,26 @@ final class GameViewModel {
     func handleHandTap(_ handId: UUID) {
         guard case .playing = state.phase else { return }
         guard !isAITurn else { return }
+        guard !isRemoteControlled else { return }
 
         if currentPlayer.hand(for: handId) != nil {
             selectAttackerHand(handId)
         } else if opponentPlayer.hand(for: handId) != nil, selectedAttackerHandId != nil {
             tapOpponentHand(handId)
         }
+    }
+
+    // MARK: - Remote Action Execution
+    private func executeRemoteAction(_ action: GameAction) {
+        isExecutingRemoteAction = true
+        switch action {
+        case .tap(let attackerHandId, let targetHandId):
+            selectedAttackerHandId = attackerHandId
+            tapOpponentHand(targetHandId)
+        case .split(let distribution):
+            performSplit(newDistribution: distribution)
+        }
+        isExecutingRemoteAction = false
     }
 
     // MARK: - AI

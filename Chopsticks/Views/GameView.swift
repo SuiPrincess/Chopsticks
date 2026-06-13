@@ -8,8 +8,16 @@ struct GameView: View {
     @AppStorage("tutorial.completed") private var tutorialCompleted = false
     @Environment(\.dismiss) private var dismiss
 
-    init(config: GameConfig) {
+    private var multiplayerService: (any MultiplayerService)?
+
+    init(config: GameConfig, multiplayerService: (any MultiplayerService)? = nil) {
         _viewModel = State(initialValue: GameViewModel(config: config))
+        self.multiplayerService = multiplayerService
+    }
+
+    /// マルチプレイ/AI時は回転しない（対面プレイ不要）
+    private var shouldRotatePlayer2: Bool {
+        !viewModel.isVsAI && !viewModel.isMultiplayer
     }
 
     var body: some View {
@@ -31,8 +39,7 @@ struct GameView: View {
                     onHandTapped: { viewModel.handleHandTap($0) },
                     onSplitTapped: { viewModel.showSplitPanel = true }
                 )
-                // AI対戦時は回転しない（対面プレイ不要）
-                .rotationEffect(.degrees(viewModel.isVsAI ? 0 : 180))
+                .rotationEffect(.degrees(shouldRotatePlayer2 ? 180 : 0))
 
                 // Center bar
                 ZStack {
@@ -51,6 +58,20 @@ struct GameView: View {
                                         .fill(.ultraThinMaterial)
                                         .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 0.5))
                                 )
+                        }
+
+                        Spacer()
+
+                        // マルチプレイ時: 待機インジケーター
+                        if viewModel.isMultiplayer && viewModel.isRemoteControlled {
+                            HStack(spacing: 4) {
+                                ProgressView()
+                                    .tint(.white.opacity(0.5))
+                                    .scaleEffect(0.6)
+                                Text("相手のターン")
+                                    .font(.system(size: 10, design: .rounded))
+                                    .foregroundStyle(.white.opacity(0.4))
+                            }
                         }
 
                         Spacer()
@@ -109,7 +130,12 @@ struct GameView: View {
             }
 
             if viewModel.isGameOver {
-                GameOverView(viewModel: viewModel, onDismiss: { dismiss() })
+                GameOverView(viewModel: viewModel, onDismiss: {
+                    if viewModel.isMultiplayer {
+                        viewModel.disconnectMultiplayer()
+                    }
+                    dismiss()
+                })
             }
         }
         .statusBarHidden()
@@ -139,8 +165,25 @@ struct GameView: View {
             .presentationDetents([.large])
         }
         .alert("ゲームをやめますか？", isPresented: $showQuitConfirm) {
-            Button("やめる", role: .destructive) { dismiss() }
+            Button("やめる", role: .destructive) {
+                if viewModel.isMultiplayer {
+                    viewModel.disconnectMultiplayer()
+                }
+                dismiss()
+            }
             Button("続ける", role: .cancel) {}
+        }
+        .alert("接続が切れました", isPresented: $viewModel.showDisconnectAlert) {
+            Button("OK") { dismiss() }
+        }
+        .onAppear {
+            if let service = multiplayerService {
+                viewModel.setupMultiplayer(service: service)
+                viewModel.startMultiplayerGame(
+                    asHost: service.isHost,
+                    opponentName: service.opponentName
+                )
+            }
         }
     }
 

@@ -8,21 +8,27 @@
 
 /* Begin PBXBuildFile section */
 		015E9DAC9F0C8BE42407FFF6 /* Hand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F548BD74A000B40854EF304 /* Hand.swift */; };
+		04B71C915AF50568023EEAE8 /* GameKitMatchmakerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8642B252412CDE90EFB28FDF /* GameKitMatchmakerView.swift */; };
 		0665D0FB8B6FF4910306E460 /* GameAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26EEA6D6743883AB1B72EFA0 /* GameAction.swift */; };
 		070700D05C1624B898D08B8A /* GlassButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD521C38AE129DF36DE47EE5 /* GlassButtonStyle.swift */; };
 		0773A7483F864045437B7357 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D59D9E1DB9C20722F4B6B5 /* Player.swift */; };
 		1E13C1C280D733E40A97A06E /* SplitControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3191E3FCB7EC46F019344EAF /* SplitControlView.swift */; };
+		225BE23378652208B9ACE9D3 /* GameCenterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 518DF398D70AC34155207DCC /* GameCenterManager.swift */; };
 		2261777BA17040041C19F828 /* HandView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27EB645B4DDB6EDCD1304BB5 /* HandView.swift */; };
+		2AC90EB283EFB971340567F2 /* MultiplayerMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D143CECA33DC09F22827174 /* MultiplayerMessage.swift */; };
 		32A4D1A6A89FC3485D79A3EB /* ParticleEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E59634F0FD87B1BF5933D9 /* ParticleEffect.swift */; };
 		35B14BD829FBD30B91A38872 /* GlowModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B37F807AF30E58A291AEFC87 /* GlowModifier.swift */; };
 		45B59D16BAE0FBF62509C36A /* AnimationConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11A31981876C39C404B8C245 /* AnimationConstants.swift */; };
 		47677133DD35EFBBED76FA46 /* GameConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = D92E57D8E0E966DB05502F35 /* GameConfig.swift */; };
-		7C3F2E1D9A8B4C5D6E7F0A1B /* GameStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E1A9D34C2F5B6E8A0D1C42 /* GameStats.swift */; };
 		4D3DD1B04EF6612801ABC95A /* BackgroundGradientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77FA011A9AB218838410082C /* BackgroundGradientView.swift */; };
 		5E75D6A788F264617F7541B9 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35C5736527A4DC9BFB654335 /* MenuView.swift */; };
+		6A6E50BBCD4FC66A3D6BD1D7 /* MultipeerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D3B1AD46D44330C57C6504A /* MultipeerService.swift */; };
 		6C0AE5805DAB61C083C3B986 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC4DED73A4DA152397764961 /* AppTheme.swift */; };
+		7C3F2E1D9A8B4C5D6E7F0A1B /* GameStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E1A9D34C2F5B6E8A0D1C42 /* GameStats.swift */; };
+		82D1A744123218A77AE52D8E /* NearbyMatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CDD5FD71AFFA36303FF058B /* NearbyMatchView.swift */; };
 		863B3374378D7A3170B426F4 /* GameOverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C08744476ACF939755E2EF5C /* GameOverView.swift */; };
 		96C2ECCB0EDCC95C2168CEA3 /* AIDifficultyPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4C315694946EEFBD9486D9 /* AIDifficultyPickerView.swift */; };
+		A19E1DC60E6249F84643FD2E /* MultiplayerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A0C1A32579E77E769BFA1E /* MultiplayerService.swift */; };
 		A44AFB32508D53A8E20D5FC6 /* ChopsticksApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3986FA592B6089FB67D72938 /* ChopsticksApp.swift */; };
 		A4F0652EF4185570DBF7CC57 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 954E87CDC807FE7CE0335ADF /* HapticManager.swift */; };
 		C0827C62243735C40B6ABD0D /* AIEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55ACB8D5197621ADDD8A441D /* AIEngine.swift */; };
@@ -30,6 +36,7 @@
 		C82E1E87863ADFBBACA7CDC1 /* RuleSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C72CEAD016BE717F23D4C93B /* RuleSettingsView.swift */; };
 		CA161231256615E5D0D61E8D /* RuleDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4B503A605BF5B71C3A38DF /* RuleDisplayView.swift */; };
 		DC6D261B4082332E3CD59263 /* DividerLineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1036CCC7B6E269FE3F743C89 /* DividerLineView.swift */; };
+		EEFDE255FBEC2AAA552285F4 /* GameKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E0987714C799685F00D4E3A /* GameKitService.swift */; };
 		F2F590E36D69D759C4070A48 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05C3DC0AC64509D86888E8AD /* GameView.swift */; };
 		FA7C1E35C1D87D19BC04A148 /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7736242C6E7A921962DF97B9 /* GameState.swift */; };
 		FBD36EF2A118013B3ED28CF1 /* PlayerAreaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 048F3A526C6FAAAC6A3FB9A8 /* PlayerAreaView.swift */; };
@@ -39,29 +46,37 @@
 		048F3A526C6FAAAC6A3FB9A8 /* PlayerAreaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerAreaView.swift; sourceTree = "<group>"; };
 		05C3DC0AC64509D86888E8AD /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
 		06D59D9E1DB9C20722F4B6B5 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
+		0E0987714C799685F00D4E3A /* GameKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameKitService.swift; sourceTree = "<group>"; };
 		0F548BD74A000B40854EF304 /* Hand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hand.swift; sourceTree = "<group>"; };
 		1036CCC7B6E269FE3F743C89 /* DividerLineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DividerLineView.swift; sourceTree = "<group>"; };
 		11A31981876C39C404B8C245 /* AnimationConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimationConstants.swift; sourceTree = "<group>"; };
 		1C2B7B2DCC35E093A3FBE05D /* Chopsticks.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Chopsticks.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D143CECA33DC09F22827174 /* MultiplayerMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiplayerMessage.swift; sourceTree = "<group>"; };
+		25A0C1A32579E77E769BFA1E /* MultiplayerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiplayerService.swift; sourceTree = "<group>"; };
 		26EEA6D6743883AB1B72EFA0 /* GameAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameAction.swift; sourceTree = "<group>"; };
 		27EB645B4DDB6EDCD1304BB5 /* HandView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandView.swift; sourceTree = "<group>"; };
 		3191E3FCB7EC46F019344EAF /* SplitControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitControlView.swift; sourceTree = "<group>"; };
 		35C5736527A4DC9BFB654335 /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
 		3986FA592B6089FB67D72938 /* ChopsticksApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChopsticksApp.swift; sourceTree = "<group>"; };
+		3CDD5FD71AFFA36303FF058B /* NearbyMatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NearbyMatchView.swift; sourceTree = "<group>"; };
 		45E59634F0FD87B1BF5933D9 /* ParticleEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticleEffect.swift; sourceTree = "<group>"; };
+		518DF398D70AC34155207DCC /* GameCenterManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCenterManager.swift; sourceTree = "<group>"; };
 		55ACB8D5197621ADDD8A441D /* AIEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIEngine.swift; sourceTree = "<group>"; };
+		6D3B1AD46D44330C57C6504A /* MultipeerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipeerService.swift; sourceTree = "<group>"; };
 		7736242C6E7A921962DF97B9 /* GameState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameState.swift; sourceTree = "<group>"; };
 		77FA011A9AB218838410082C /* BackgroundGradientView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundGradientView.swift; sourceTree = "<group>"; };
+		8642B252412CDE90EFB28FDF /* GameKitMatchmakerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameKitMatchmakerView.swift; sourceTree = "<group>"; };
 		954E87CDC807FE7CE0335ADF /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
 		9A4B503A605BF5B71C3A38DF /* RuleDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuleDisplayView.swift; sourceTree = "<group>"; };
 		B37F807AF30E58A291AEFC87 /* GlowModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlowModifier.swift; sourceTree = "<group>"; };
+		B7E1A9D34C2F5B6E8A0D1C42 /* GameStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameStats.swift; sourceTree = "<group>"; };
 		C08744476ACF939755E2EF5C /* GameOverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverView.swift; sourceTree = "<group>"; };
 		C72CEAD016BE717F23D4C93B /* RuleSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuleSettingsView.swift; sourceTree = "<group>"; };
 		D92E57D8E0E966DB05502F35 /* GameConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameConfig.swift; sourceTree = "<group>"; };
-		B7E1A9D34C2F5B6E8A0D1C42 /* GameStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameStats.swift; sourceTree = "<group>"; };
 		DD4C315694946EEFBD9486D9 /* AIDifficultyPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIDifficultyPickerView.swift; sourceTree = "<group>"; };
 		DD521C38AE129DF36DE47EE5 /* GlassButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassButtonStyle.swift; sourceTree = "<group>"; };
 		EC4DED73A4DA152397764961 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
+		EE45D2D66A0FEE63003021BD /* Chopsticks.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Chopsticks.entitlements; sourceTree = "<group>"; };
 		FDD409937881D7185F3B3E88 /* GameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -69,6 +84,7 @@
 		239C1A84BB0F2923454D444F /* Chopsticks */ = {
 			isa = PBXGroup;
 			children = (
+				EE45D2D66A0FEE63003021BD /* Chopsticks.entitlements */,
 			);
 			name = Chopsticks;
 			path = .;
@@ -100,6 +116,7 @@
 				88CFC280349F16B38E9CDB04 /* App */,
 				239C1A84BB0F2923454D444F /* Chopsticks */,
 				D076A686871768DF52B1F93B /* Models */,
+				B58F0EEFC9EF74342C1A23EE /* Networking */,
 				4F1F47D27807F2D5DD08FF5B /* Utilities */,
 				5D39E97BAD7B40F9556D723A /* ViewModels */,
 				9EF1699001CB6802228DCFEB /* Views */,
@@ -126,6 +143,15 @@
 			path = ViewModels;
 			sourceTree = "<group>";
 		};
+		75E48562951A0D89B6014685 /* Multipeer */ = {
+			isa = PBXGroup;
+			children = (
+				6D3B1AD46D44330C57C6504A /* MultipeerService.swift */,
+				3CDD5FD71AFFA36303FF058B /* NearbyMatchView.swift */,
+			);
+			path = Multipeer;
+			sourceTree = "<group>";
+		};
 		88CFC280349F16B38E9CDB04 /* App */ = {
 			isa = PBXGroup;
 			children = (
@@ -149,6 +175,16 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		A5E4F1F0CD6860C3EE00A01E /* GameKit */ = {
+			isa = PBXGroup;
+			children = (
+				518DF398D70AC34155207DCC /* GameCenterManager.swift */,
+				8642B252412CDE90EFB28FDF /* GameKitMatchmakerView.swift */,
+				0E0987714C799685F00D4E3A /* GameKitService.swift */,
+			);
+			path = GameKit;
+			sourceTree = "<group>";
+		};
 		AF4D36F4F9C1E5F974AE395E /* Components */ = {
 			isa = PBXGroup;
 			children = (
@@ -158,6 +194,17 @@
 				3191E3FCB7EC46F019344EAF /* SplitControlView.swift */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		B58F0EEFC9EF74342C1A23EE /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				1D143CECA33DC09F22827174 /* MultiplayerMessage.swift */,
+				25A0C1A32579E77E769BFA1E /* MultiplayerService.swift */,
+				A5E4F1F0CD6860C3EE00A01E /* GameKit */,
+				75E48562951A0D89B6014685 /* Multipeer */,
+			);
+			path = Networking;
 			sourceTree = "<group>";
 		};
 		D076A686871768DF52B1F93B /* Models */ = {
@@ -240,7 +287,10 @@
 				A44AFB32508D53A8E20D5FC6 /* ChopsticksApp.swift in Sources */,
 				DC6D261B4082332E3CD59263 /* DividerLineView.swift in Sources */,
 				0665D0FB8B6FF4910306E460 /* GameAction.swift in Sources */,
+				225BE23378652208B9ACE9D3 /* GameCenterManager.swift in Sources */,
 				47677133DD35EFBBED76FA46 /* GameConfig.swift in Sources */,
+				04B71C915AF50568023EEAE8 /* GameKitMatchmakerView.swift in Sources */,
+				EEFDE255FBEC2AAA552285F4 /* GameKitService.swift in Sources */,
 				863B3374378D7A3170B426F4 /* GameOverView.swift in Sources */,
 				FA7C1E35C1D87D19BC04A148 /* GameState.swift in Sources */,
 				7C3F2E1D9A8B4C5D6E7F0A1B /* GameStats.swift in Sources */,
@@ -252,6 +302,10 @@
 				2261777BA17040041C19F828 /* HandView.swift in Sources */,
 				A4F0652EF4185570DBF7CC57 /* HapticManager.swift in Sources */,
 				5E75D6A788F264617F7541B9 /* MenuView.swift in Sources */,
+				6A6E50BBCD4FC66A3D6BD1D7 /* MultipeerService.swift in Sources */,
+				2AC90EB283EFB971340567F2 /* MultiplayerMessage.swift in Sources */,
+				A19E1DC60E6249F84643FD2E /* MultiplayerService.swift in Sources */,
+				82D1A744123218A77AE52D8E /* NearbyMatchView.swift in Sources */,
 				32A4D1A6A89FC3485D79A3EB /* ParticleEffect.swift in Sources */,
 				0773A7483F864045437B7357 /* Player.swift in Sources */,
 				FBD36EF2A118013B3ED28CF1 /* PlayerAreaView.swift in Sources */,
@@ -268,10 +322,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Chopsticks.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = GUH7SP89Y7;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_GCSupportsGameCenterMVC = YES;
+				INFOPLIST_KEY_NSBonjourServices = _chopsticks._tcp;
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "近くのプレイヤーと対戦するために使用します";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -280,7 +338,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.chopsticks.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.suiprincess.chopsticks;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.9;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -347,10 +405,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Chopsticks.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = GUH7SP89Y7;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_GCSupportsGameCenterMVC = YES;
+				INFOPLIST_KEY_NSBonjourServices = _chopsticks._tcp;
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "近くのプレイヤーと対戦するために使用します";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -359,7 +421,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.chopsticks.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.suiprincess.chopsticks;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.9;
 				TARGETED_DEVICE_FAMILY = "1,2";
