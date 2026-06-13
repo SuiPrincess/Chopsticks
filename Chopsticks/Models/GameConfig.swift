@@ -1,11 +1,13 @@
 import Foundation
 
-enum GameMode: Equatable {
+enum GameMode: String, Equatable, Codable {
     case localTwoPlayer
     case vsAI
+    case online
+    case nearby
 }
 
-enum AIDifficulty: String, CaseIterable, Equatable {
+enum AIDifficulty: String, CaseIterable, Equatable, Codable {
     case easy
     case hard
 
@@ -17,7 +19,7 @@ enum AIDifficulty: String, CaseIterable, Equatable {
     }
 }
 
-struct GameConfig: Equatable {
+struct GameConfig: Equatable, Codable {
     // 基本
     var isSplittingEnabled: Bool = false
     var isOverflowWrapEnabled: Bool = true
@@ -35,4 +37,8 @@ struct GameConfig: Equatable {
     var isBombEnabled: Bool = false
     var isMirrorEnabled: Bool = false
     var isDoubleTapEnabled: Bool = false
+
+    var isMultiplayer: Bool {
+        gameMode == .online || gameMode == .nearby
+    }
 }

@@ -79,23 +79,47 @@ struct GameOverView: View {
                 }
 
                 VStack(spacing: 12) {
-                    Button(humanLostToAI ? "リベンジ!" : "Play Again") {
-                        viewModel.newGame()
-                    }
-                    .buttonStyle(GlassButtonStyle())
-
-                    Button("Menu") {
-                        onDismiss()
-                    }
-                    .buttonStyle(GlassButtonStyle(isPrimary: false))
-
-                    if isWinTitle && viewModel.isVsAI {
-                        ShareLink(item: shareText) {
-                            Label("結果を自慢する", systemImage: "square.and.arrow.up")
-                                .font(.system(size: 13, weight: .medium, design: .rounded))
-                                .foregroundStyle(.white.opacity(0.6))
+                    if viewModel.isMultiplayer {
+                        // マルチプレイ: リマッチ
+                        if viewModel.isWaitingForRematch {
+                            HStack(spacing: 8) {
+                                ProgressView()
+                                    .tint(.white)
+                                Text("リマッチ待機中...")
+                                    .font(.system(size: 14, design: .rounded))
+                                    .foregroundStyle(.white.opacity(0.6))
+                            }
+                        } else {
+                            Button("リマッチ") {
+                                viewModel.requestRematch()
+                            }
+                            .buttonStyle(GlassButtonStyle())
                         }
-                        .padding(.top, 4)
+
+                        Button("切断して戻る") {
+                            viewModel.disconnectMultiplayer()
+                            onDismiss()
+                        }
+                        .buttonStyle(GlassButtonStyle(isPrimary: false))
+                    } else {
+                        Button(humanLostToAI ? "リベンジ!" : "Play Again") {
+                            viewModel.newGame()
+                        }
+                        .buttonStyle(GlassButtonStyle())
+
+                        Button("Menu") {
+                            onDismiss()
+                        }
+                        .buttonStyle(GlassButtonStyle(isPrimary: false))
+
+                        if isWinTitle && viewModel.isVsAI {
+                            ShareLink(item: shareText) {
+                                Label("結果を自慢する", systemImage: "square.and.arrow.up")
+                                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                                    .foregroundStyle(.white.opacity(0.6))
+                            }
+                            .padding(.top, 4)
+                        }
                     }
                 }
                 .padding(.horizontal, 40)
@@ -108,6 +132,18 @@ struct GameOverView: View {
             if isWinTitle {
                 spawnConfetti()
                 requestReviewIfDeserved()
+            }
+        }
+        // リマッチ要求を受信
+        .alert("リマッチしますか？", isPresented: Binding(
+            get: { viewModel.showRematchRequest },
+            set: { viewModel.showRematchRequest = $0 }
+        )) {
+            Button("OK") { viewModel.acceptRematch() }
+            Button("いいえ", role: .cancel) {
+                viewModel.showRematchRequest = false
+                viewModel.disconnectMultiplayer()
+                onDismiss()
             }
         }
     }

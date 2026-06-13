@@ -1,10 +1,44 @@
 import Foundation
 
-enum GamePhase: Equatable {
+enum GamePhase: Equatable, Codable {
     case playing
     case gameOver(winnerId: UUID)
     /// ターン上限のサドンデス判定で完全に同点だった場合
     case draw
+
+    // MARK: - Codable
+    private enum CodingKeys: String, CodingKey {
+        case type, winnerId
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        switch self {
+        case .playing:
+            try container.encode("playing", forKey: .type)
+        case .gameOver(let winnerId):
+            try container.encode("gameOver", forKey: .type)
+            try container.encode(winnerId, forKey: .winnerId)
+        case .draw:
+            try container.encode("draw", forKey: .type)
+        }
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let type = try container.decode(String.self, forKey: .type)
+        switch type {
+        case "playing":
+            self = .playing
+        case "gameOver":
+            let winnerId = try container.decode(UUID.self, forKey: .winnerId)
+            self = .gameOver(winnerId: winnerId)
+        case "draw":
+            self = .draw
+        default:
+            throw DecodingError.dataCorruptedError(forKey: .type, in: container, debugDescription: "Unknown type: \(type)")
+        }
+    }
 }
 
 /// アクション適用の結果。演出（ハプティクス・エフェクト）の判断に使う。
@@ -14,7 +48,7 @@ struct ActionResult: Equatable {
     var bombTriggered = false
 }
 
-struct GameState: Equatable {
+struct GameState: Equatable, Codable {
     var player1: Player
     var player2: Player
     var currentPlayerId: UUID
@@ -25,9 +59,12 @@ struct GameState: Equatable {
     init(config: GameConfig = GameConfig(), player1Starts: Bool = true) {
         let p1 = Player(name: "Player 1", handCount: config.handCount)
         let p2Name: String
-        if config.gameMode == .vsAI {
+        switch config.gameMode {
+        case .vsAI:
             p2Name = config.aiLevel.map { "CPU Lv.\($0)" } ?? "CPU"
-        } else {
+        case .online, .nearby:
+            p2Name = "対戦相手"
+        case .localTwoPlayer:
             p2Name = "Player 2"
         }
         let p2 = Player(name: p2Name, handCount: config.handCount)
