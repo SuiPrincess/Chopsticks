@@ -23,16 +23,12 @@ struct Player: Identifiable, Equatable {
     }
 
     func isValidSplit(newDistribution: [Int], allowRevival: Bool) -> Bool {
-        let total = totalFingers
         guard newDistribution.count == hands.count else { return false }
-        guard newDistribution.reduce(0, +) == total else { return false }
+        guard newDistribution.reduce(0, +) == totalFingers else { return false }
         guard newDistribution.allSatisfy({ $0 >= 0 && $0 <= 4 }) else { return false }
+        // 並べ替えただけの分割は盤面が実質変わらない（＝パス）ため不可
         let current = hands.map(\.fingerCount)
-        guard newDistribution != current else { return false }
-        // 2手の場合、左右入れ替えは同じ状態なので不可
-        if hands.count == 2 {
-            guard newDistribution.sorted() != current.sorted() else { return false }
-        }
+        guard newDistribution.sorted() != current.sorted() else { return false }
         if !allowRevival {
             for (i, hand) in hands.enumerated() {
                 if !hand.isAlive && newDistribution[i] > 0 { return false }

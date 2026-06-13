@@ -77,6 +77,13 @@ struct SplitControlView: View {
                     .font(.system(size: 12, design: .rounded))
                     .foregroundStyle(currentTotal == total ? .white.opacity(0.5) : .red)
 
+                // 爆弾ルールでは4本にした手が即爆発するため事前に警告
+                if viewModel.config.isBombEnabled && distribution.contains(4) {
+                    Label("4本にした手は分割直後に爆発します！", systemImage: "flame.fill")
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.orange)
+                }
+
                 // Buttons
                 HStack(spacing: 12) {
                     Button("キャンセル") {

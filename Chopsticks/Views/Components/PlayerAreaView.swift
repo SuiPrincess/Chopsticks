@@ -7,6 +7,7 @@ struct PlayerAreaView: View {
     let selectedAttackerHandId: UUID?
     let isSplittingEnabled: Bool
     let isAttackPhase: Bool
+    let isPoisonEnabled: Bool
     let isAI: Bool
     let isAIThinking: Bool
     let onHandTapped: (UUID) -> Void
@@ -19,6 +20,7 @@ struct PlayerAreaView: View {
         selectedAttackerHandId: UUID?,
         isSplittingEnabled: Bool,
         isAttackPhase: Bool,
+        isPoisonEnabled: Bool = false,
         isAI: Bool = false,
         isAIThinking: Bool = false,
         onHandTapped: @escaping (UUID) -> Void,
@@ -30,6 +32,7 @@ struct PlayerAreaView: View {
         self.selectedAttackerHandId = selectedAttackerHandId
         self.isSplittingEnabled = isSplittingEnabled
         self.isAttackPhase = isAttackPhase
+        self.isPoisonEnabled = isPoisonEnabled
         self.isAI = isAI
         self.isAIThinking = isAIThinking
         self.onHandTapped = onHandTapped
@@ -68,7 +71,8 @@ struct PlayerAreaView: View {
                         isSelected: selectedAttackerHandId == hand.id,
                         isInteractable: handInteractable(hand),
                         onTap: { onHandTapped(hand.id) },
-                        compact: isCompact
+                        compact: isCompact,
+                        showsPoisonBadge: isPoisonEnabled && hand.fingerCount == 1
                     )
                 }
             }

@@ -3,6 +3,9 @@ import SwiftUI
 struct GameView: View {
     @State private var viewModel: GameViewModel
     @State private var showQuitConfirm = false
+    @State private var shakePhase: CGFloat = 0
+    @State private var bannerEvent: BattleEvent?
+    @AppStorage("tutorial.completed") private var tutorialCompleted = false
     @Environment(\.dismiss) private var dismiss
 
     init(config: GameConfig) {
@@ -22,6 +25,7 @@ struct GameView: View {
                     selectedAttackerHandId: viewModel.selectedAttackerHandId,
                     isSplittingEnabled: viewModel.config.isSplittingEnabled,
                     isAttackPhase: viewModel.isPlayer1Turn && viewModel.selectedAttackerHandId != nil,
+                    isPoisonEnabled: viewModel.config.isPoisonEnabled,
                     isAI: viewModel.isVsAI,
                     isAIThinking: viewModel.isAIThinking,
                     onHandTapped: { viewModel.handleHandTap($0) },
@@ -77,15 +81,31 @@ struct GameView: View {
                     selectedAttackerHandId: viewModel.selectedAttackerHandId,
                     isSplittingEnabled: viewModel.config.isSplittingEnabled,
                     isAttackPhase: !viewModel.isPlayer1Turn && viewModel.selectedAttackerHandId != nil,
+                    isPoisonEnabled: viewModel.config.isPoisonEnabled,
                     onHandTapped: { viewModel.handleHandTap($0) },
                     onSplitTapped: { viewModel.showSplitPanel = true }
                 )
             }
             .ignoresSafeArea()
+            .modifier(ShakeEffect(animatableData: shakePhase))
+
+            if let event = bannerEvent {
+                BattleEventBanner(event: event)
+                    .id(event.id)
+            }
+
+            // 初プレイのコーチマーク（最初の2手番だけ）
+            if showsTutorialHint {
+                TutorialHintView(text: tutorialHintText)
+                    .rotationEffect(.degrees(!viewModel.isVsAI && !viewModel.isPlayer1Turn ? 180 : 0))
+                    .offset(y: !viewModel.isVsAI && !viewModel.isPlayer1Turn ? -90 : 90)
+            }
 
             if viewModel.showSplitPanel {
                 let color = viewModel.isPlayer1Turn ? AppTheme.player1Color : AppTheme.player2Color
                 SplitControlView(viewModel: viewModel, playerColor: color)
+                    // 対面プレイではPlayer 2側に向ける
+                    .rotationEffect(.degrees(!viewModel.isVsAI && !viewModel.isPlayer1Turn ? 180 : 0))
             }
 
             if viewModel.isGameOver {
@@ -93,6 +113,24 @@ struct GameView: View {
             }
         }
         .statusBarHidden()
+        .onChange(of: viewModel.state.turnCount) { _, count in
+            if count >= 2 { tutorialCompleted = true }
+        }
+        .onChange(of: viewModel.shakeTrigger) { _, _ in
+            withAnimation(.linear(duration: 0.4)) { shakePhase += 1 }
+        }
+        .onChange(of: viewModel.battleEvent) { _, event in
+            guard let event else { return }
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.55)) {
+                bannerEvent = event
+            }
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(1))
+                if bannerEvent?.id == event.id {
+                    withAnimation(.easeOut(duration: 0.3)) { bannerEvent = nil }
+                }
+            }
+        }
         .sheet(isPresented: $viewModel.showRules) {
             RuleDisplayView(
                 config: viewModel.config,
@@ -104,5 +142,66 @@ struct GameView: View {
             Button("やめる", role: .destructive) { dismiss() }
             Button("続ける", role: .cancel) {}
         }
+    }
+
+    private var showsTutorialHint: Bool {
+        !tutorialCompleted
+            && viewModel.state.turnCount < 2
+            && !viewModel.isAITurn
+            && !viewModel.isGameOver
+            && !viewModel.showSplitPanel
+    }
+
+    private var tutorialHintText: String {
+        viewModel.selectedAttackerHandId == nil
+            ? "① 自分の手をタップしてえらぶ"
+            : "② 相手の手をタップしてこうげき！"
+    }
+}
+
+/// 初プレイ時のコーチマーク
+private struct TutorialHintView: View {
+    let text: String
+    @State private var pulse = false
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "hand.point.up.left.fill")
+                .font(.system(size: 14))
+            Text(text)
+                .font(.system(size: 14, weight: .semibold, design: .rounded))
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(
+            Capsule()
+                .fill(.ultraThinMaterial)
+                .overlay(Capsule().stroke(AppTheme.accent.opacity(0.5), lineWidth: 1))
+        )
+        .shadow(color: AppTheme.accent.opacity(0.4), radius: 10)
+        .scaleEffect(pulse ? 1.04 : 1.0)
+        .allowsHitTesting(false)
+        .onAppear {
+            withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
+                pulse = true
+            }
+        }
+    }
+}
+
+/// 画面中央に弾けるように出るイベントテキスト
+private struct BattleEventBanner: View {
+    let event: BattleEvent
+
+    var body: some View {
+        Text(event.text)
+            .font(.system(size: 42, weight: .black, design: .rounded))
+            .italic()
+            .foregroundStyle(event.color)
+            .shadow(color: event.color.opacity(0.8), radius: 14)
+            .shadow(color: event.color.opacity(0.4), radius: 30)
+            .transition(.scale(scale: 0.3).combined(with: .opacity))
+            .allowsHitTesting(false)
     }
 }

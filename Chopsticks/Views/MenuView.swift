@@ -8,6 +8,25 @@ struct MenuView: View {
     @State private var navigateToGame = false
     @State private var titleGlow: CGFloat = 0.3
 
+    // 前の画面の閉じるアニメーション完了後（onDismiss）に次を出すためのフラグ。
+    // 同時にpresentすると遷移が無視されることがある。
+    @State private var pendingRuleConfirmation = false
+    @State private var pendingGameStart = false
+
+    /// ランク戦用の固定設定。非nilのときはユーザーのルール設定より優先する。
+    /// ルール設定の影響を受けると毒ルール等でランクが攻略できてしまうため。
+    @State private var rankedConfig: GameConfig?
+
+    private var activeConfig: GameConfig { rankedConfig ?? config }
+
+    /// ランク戦は標準ルール固定（ループあり・分割なし・特殊ルールなし）
+    private static func makeRankedConfig() -> GameConfig {
+        var rankedConfig = GameConfig()
+        rankedConfig.gameMode = .vsAI
+        rankedConfig.aiLevel = GameStats.shared.rankLevel
+        return rankedConfig
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -49,9 +68,23 @@ struct MenuView: View {
 
                     // Buttons
                     VStack(spacing: 12) {
+                        // ランク戦（メインの進行ループ・固定標準ルール）
+                        Button {
+                            rankedConfig = Self.makeRankedConfig()
+                            showRuleConfirmation = true
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "trophy.fill")
+                                Text(rankButtonLabel)
+                            }
+                        }
+                        .buttonStyle(GlassButtonStyle(color: .orange))
+
                         // 2P Local
                         Button {
+                            rankedConfig = nil
                             config.gameMode = .localTwoPlayer
+                            config.aiLevel = nil
                             showRuleConfirmation = true
                         } label: {
                             HStack(spacing: 8) {
@@ -61,29 +94,42 @@ struct MenuView: View {
                         }
                         .buttonStyle(GlassButtonStyle())
 
-                        // VS AI
+                        // VS AI (フリー対戦)
                         Button {
+                            rankedConfig = nil
                             config.gameMode = .vsAI
+                            config.aiLevel = nil
                             showAIDifficultyPicker = true
                         } label: {
                             HStack(spacing: 8) {
                                 Image(systemName: "cpu")
-                                Text("CPU対戦")
+                                Text("フリー対戦")
                             }
                         }
                         .buttonStyle(GlassButtonStyle(color: AppTheme.accentSecondary))
 
-                        // Rules
-                        Button {
-                            showRuleSettings = true
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "gearshape")
-                                Text("ルール設定")
+                        // Rules + random rules
+                        HStack(spacing: 12) {
+                            Button {
+                                showRuleSettings = true
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "gearshape")
+                                    Text("ルール設定")
+                                }
                             }
-                        }
-                        .buttonStyle(GlassButtonStyle(isPrimary: false))
+                            .buttonStyle(GlassButtonStyle(isPrimary: false))
 
+                            Button {
+                                randomizeRules()
+                            } label: {
+                                Image(systemName: "dice.fill")
+                            }
+                            .buttonStyle(GlassButtonStyle(color: .orange))
+                            .frame(width: 64)
+                        }
+
+                        statsIndicator
                         activeRulesIndicator
                     }
                     .padding(.horizontal, 40)
@@ -91,30 +137,40 @@ struct MenuView: View {
                 }
             }
             .navigationDestination(isPresented: $navigateToGame) {
-                GameView(config: config)
+                GameView(config: activeConfig)
                     .navigationBarBackButtonHidden()
             }
             .sheet(isPresented: $showRuleSettings) {
                 RuleSettingsView(config: $config)
                     .presentationDetents([.large])
             }
-            .sheet(isPresented: $showAIDifficultyPicker) {
+            .sheet(isPresented: $showAIDifficultyPicker, onDismiss: {
+                if pendingRuleConfirmation {
+                    pendingRuleConfirmation = false
+                    showRuleConfirmation = true
+                }
+            }) {
                 AIDifficultyPickerView(
                     difficulty: $config.aiDifficulty,
                     onStart: {
+                        pendingRuleConfirmation = true
                         showAIDifficultyPicker = false
-                        showRuleConfirmation = true
                     }
                 )
                 .presentationDetents([.medium])
             }
-            .fullScreenCover(isPresented: $showRuleConfirmation) {
+            .fullScreenCover(isPresented: $showRuleConfirmation, onDismiss: {
+                if pendingGameStart {
+                    pendingGameStart = false
+                    navigateToGame = true
+                }
+            }) {
                 RuleDisplayView(
-                    config: config,
+                    config: activeConfig,
                     isPreGame: true,
                     onStart: {
+                        pendingGameStart = true
                         showRuleConfirmation = false
-                        navigateToGame = true
                     },
                     onDismiss: { showRuleConfirmation = false }
                 )
@@ -122,6 +178,68 @@ struct MenuView: View {
         }
         .onAppear {
             withAnimation(Anim.glowPulse) { titleGlow = 0.8 }
+        }
+    }
+
+    /// 特殊ルールをランダムに組み合わせて毎回違うゲームにする
+    private func randomizeRules() {
+        func chance(_ probability: Double) -> Bool {
+            Double.random(in: 0..<1) < probability
+        }
+
+        var newConfig = config
+        newConfig.isOverflowWrapEnabled = chance(0.7)
+        newConfig.isSplittingEnabled = chance(0.5)
+        newConfig.isDeadHandRevivalEnabled = newConfig.isSplittingEnabled && chance(0.4)
+        newConfig.handCount = chance(0.25) ? 3 : 2
+        newConfig.isPoisonEnabled = chance(0.3)
+        newConfig.isBombEnabled = chance(0.3)
+        newConfig.isMirrorEnabled = chance(0.3)
+        newConfig.isDoubleTapEnabled = chance(0.3)
+
+        // 全部OFFの退屈な結果は避け、どれか1つは必ず入れる
+        if !newConfig.isSplittingEnabled && !newConfig.isPoisonEnabled
+            && !newConfig.isBombEnabled && !newConfig.isMirrorEnabled
+            && !newConfig.isDoubleTapEnabled {
+            switch Int.random(in: 0..<5) {
+            case 0: newConfig.isSplittingEnabled = true
+            case 1: newConfig.isPoisonEnabled = true
+            case 2: newConfig.isBombEnabled = true
+            case 3: newConfig.isMirrorEnabled = true
+            default: newConfig.isDoubleTapEnabled = true
+            }
+        }
+
+        withAnimation(.spring(response: 0.3)) { config = newConfig }
+        HapticManager.split()
+    }
+
+    private var rankButtonLabel: String {
+        let level = GameStats.shared.rankLevel
+        return level >= GameStats.maxRankLevel
+            ? "ランク戦 Lv.MAX"
+            : "ランク戦 — Lv.\(level)に挑戦"
+    }
+
+    @ViewBuilder
+    private var statsIndicator: some View {
+        let stats = GameStats.shared
+        if stats.wins + stats.losses > 0 {
+            HStack(spacing: 8) {
+                if stats.dailyStreak >= 2 {
+                    Text("🗓️ \(stats.dailyStreak)日連続")
+                        .foregroundStyle(.cyan)
+                }
+                if stats.currentStreak >= 2 {
+                    Text("🔥 \(stats.currentStreak)連勝中")
+                        .foregroundStyle(.orange)
+                }
+                Text("CPU戦 \(stats.wins)勝 \(stats.losses)敗")
+                Text("ベスト連勝 \(stats.bestStreak)")
+            }
+            .font(.system(size: 11, weight: .medium, design: .rounded))
+            .foregroundStyle(.white.opacity(0.45))
+            .padding(.top, 8)
         }
     }
 

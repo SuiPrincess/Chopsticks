@@ -27,6 +27,8 @@ struct GameConfig: Equatable {
     // モード
     var gameMode: GameMode = .localTwoPlayer
     var aiDifficulty: AIDifficulty = .easy
+    /// ランク戦のCPUレベル（1〜10）。nilならフリー対戦（aiDifficultyを使用）。
+    var aiLevel: Int? = nil
 
     // エキセントリックルール
     var isPoisonEnabled: Bool = false

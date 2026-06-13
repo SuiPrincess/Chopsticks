@@ -17,6 +17,7 @@
 		35B14BD829FBD30B91A38872 /* GlowModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B37F807AF30E58A291AEFC87 /* GlowModifier.swift */; };
 		45B59D16BAE0FBF62509C36A /* AnimationConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11A31981876C39C404B8C245 /* AnimationConstants.swift */; };
 		47677133DD35EFBBED76FA46 /* GameConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = D92E57D8E0E966DB05502F35 /* GameConfig.swift */; };
+		7C3F2E1D9A8B4C5D6E7F0A1B /* GameStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E1A9D34C2F5B6E8A0D1C42 /* GameStats.swift */; };
 		4D3DD1B04EF6612801ABC95A /* BackgroundGradientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77FA011A9AB218838410082C /* BackgroundGradientView.swift */; };
 		5E75D6A788F264617F7541B9 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35C5736527A4DC9BFB654335 /* MenuView.swift */; };
 		6C0AE5805DAB61C083C3B986 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC4DED73A4DA152397764961 /* AppTheme.swift */; };
@@ -57,6 +58,7 @@
 		C08744476ACF939755E2EF5C /* GameOverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverView.swift; sourceTree = "<group>"; };
 		C72CEAD016BE717F23D4C93B /* RuleSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuleSettingsView.swift; sourceTree = "<group>"; };
 		D92E57D8E0E966DB05502F35 /* GameConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameConfig.swift; sourceTree = "<group>"; };
+		B7E1A9D34C2F5B6E8A0D1C42 /* GameStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameStats.swift; sourceTree = "<group>"; };
 		DD4C315694946EEFBD9486D9 /* AIDifficultyPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIDifficultyPickerView.swift; sourceTree = "<group>"; };
 		DD521C38AE129DF36DE47EE5 /* GlassButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassButtonStyle.swift; sourceTree = "<group>"; };
 		EC4DED73A4DA152397764961 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
@@ -110,6 +112,7 @@
 			children = (
 				11A31981876C39C404B8C245 /* AnimationConstants.swift */,
 				EC4DED73A4DA152397764961 /* AppTheme.swift */,
+				B7E1A9D34C2F5B6E8A0D1C42 /* GameStats.swift */,
 				954E87CDC807FE7CE0335ADF /* HapticManager.swift */,
 			);
 			path = Utilities;
@@ -240,6 +243,7 @@
 				47677133DD35EFBBED76FA46 /* GameConfig.swift in Sources */,
 				863B3374378D7A3170B426F4 /* GameOverView.swift in Sources */,
 				FA7C1E35C1D87D19BC04A148 /* GameState.swift in Sources */,
+				7C3F2E1D9A8B4C5D6E7F0A1B /* GameStats.swift in Sources */,
 				F2F590E36D69D759C4070A48 /* GameView.swift in Sources */,
 				C81A513D63C3FCB3A00B17C6 /* GameViewModel.swift in Sources */,
 				070700D05C1624B898D08B8A /* GlassButtonStyle.swift in Sources */,
