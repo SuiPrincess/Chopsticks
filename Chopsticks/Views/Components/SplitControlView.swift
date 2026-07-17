@@ -19,7 +19,16 @@ struct SplitControlView: View {
         self.viewModel = viewModel
         self.playerColor = playerColor
         let player = viewModel.currentPlayer
-        _distribution = State(initialValue: player.hands.map(\.fingerCount))
+        // ヒントが分割を提案しているなら、その配分をプリセットする
+        if case .split(let suggestion)? = viewModel.hintAction,
+           player.isValidSplit(
+               newDistribution: suggestion,
+               allowRevival: viewModel.config.isDeadHandRevivalEnabled
+           ) {
+            _distribution = State(initialValue: suggestion)
+        } else {
+            _distribution = State(initialValue: player.hands.map(\.fingerCount))
+        }
     }
 
     var body: some View {
