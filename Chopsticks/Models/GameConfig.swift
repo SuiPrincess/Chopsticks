@@ -33,6 +33,8 @@ struct GameConfig: Equatable, Codable {
     var aiDifficulty: AIDifficulty = .easy
     /// ランク戦のCPUレベル（1〜10）。nilならフリー対戦（aiDifficultyを使用）。
     var aiLevel: Int? = nil
+    /// 🎯 今日の挑戦（日替わりルール・1日1回クリア記録）
+    var isDailyChallenge: Bool = false
 
     // エキセントリックルール
     var isPoisonEnabled: Bool = false

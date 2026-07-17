@@ -51,7 +51,9 @@ final class GameSessionStore {
         let mode: String
         switch config.gameMode {
         case .vsAI:
-            if let level = config.aiLevel {
+            if config.isDailyChallenge {
+                mode = "今日の挑戦"
+            } else if let level = config.aiLevel {
                 mode = "ランク戦 Lv.\(level)"
             } else {
                 mode = "CPU戦（\(config.aiDifficulty.label)）"

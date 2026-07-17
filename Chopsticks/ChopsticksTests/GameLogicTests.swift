@@ -223,6 +223,23 @@ final class GameLogicTests: XCTestCase {
         XCTAssertEqual(decoded, state)
     }
 
+    // MARK: - 今日の挑戦
+
+    func testDailyChallengeConfigIsDeterministicPerDay() {
+        let date = Date(timeIntervalSince1970: 1_800_000_000)
+        let first = DailyChallenge.config(for: date)
+        let second = DailyChallenge.config(for: date)
+        XCTAssertEqual(first, second, "同じ日は必ず同じルール")
+        XCTAssertTrue(first.isDailyChallenge)
+        XCTAssertEqual(first.gameMode, .vsAI)
+        XCTAssertNil(first.aiLevel)
+        XCTAssertTrue(
+            first.isSplittingEnabled || first.isPoisonEnabled || first.isBombEnabled
+                || first.isMirrorEnabled || first.isDoubleTapEnabled,
+            "少なくとも1つは特殊ルールが入る"
+        )
+    }
+
     func testMultiplayerMessageCodableRoundTrip() throws {
         let state = GameState()
         let action = GameAction.tap(

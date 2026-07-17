@@ -279,6 +279,28 @@ struct MenuView: View {
                 }
                 .buttonStyle(GlassButtonStyle(color: .orange))
 
+                // 🎯 今日の挑戦（日替わりルール・全ユーザー共通・1日1回クリア記録）
+                Button {
+                    rankedConfig = DailyChallenge.config()
+                    showRuleConfirmation = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: GameStats.shared.isDailyChallengeClearedToday
+                              ? "checkmark.seal.fill"
+                              : "target")
+                        Text("今日の挑戦 — \(DailyChallenge.title())")
+                        if GameStats.shared.isDailyChallengeClearedToday {
+                            Text("クリア済")
+                                .font(.system(size: 10, weight: .semibold, design: .rounded))
+                                .foregroundStyle(.black)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Capsule().fill(Color.cyan))
+                        }
+                    }
+                }
+                .buttonStyle(GlassButtonStyle(color: .cyan))
+
                 // 2P Local
                 Button {
                     rankedConfig = nil

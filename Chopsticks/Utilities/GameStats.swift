@@ -19,6 +19,8 @@ final class GameStats {
     private var lastPlayDay: Date?
     /// 直近の記録で自己ベスト連勝を更新したか
     private(set) var didSetNewRecord = false
+    /// 🎯 今日の挑戦を最後にクリアした日
+    private(set) var lastDailyChallengeClear: Date?
 
     private enum Key {
         static let wins = "stats.cpu.wins"
@@ -29,6 +31,7 @@ final class GameStats {
         static let dailyStreak = "stats.daily.streak"
         static let lastPlayDay = "stats.daily.lastPlayDay"
         static let reviewedVersion = "review.requestedVersion"
+        static let dailyChallengeClear = "stats.dailyChallenge.lastClear"
     }
 
     private init() {
@@ -40,6 +43,19 @@ final class GameStats {
         rankLevel = max(1, defaults.integer(forKey: Key.rankLevel))
         dailyStreak = defaults.integer(forKey: Key.dailyStreak)
         lastPlayDay = defaults.object(forKey: Key.lastPlayDay) as? Date
+        lastDailyChallengeClear = defaults.object(forKey: Key.dailyChallengeClear) as? Date
+    }
+
+    // MARK: - 今日の挑戦
+
+    var isDailyChallengeClearedToday: Bool {
+        guard let last = lastDailyChallengeClear else { return false }
+        return Calendar.current.isDate(last, inSameDayAs: .now)
+    }
+
+    func markDailyChallengeCleared() {
+        lastDailyChallengeClear = .now
+        UserDefaults.standard.set(lastDailyChallengeClear, forKey: Key.dailyChallengeClear)
     }
 
     func recordGame(playerWon: Bool) {

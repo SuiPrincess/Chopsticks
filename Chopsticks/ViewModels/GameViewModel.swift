@@ -617,6 +617,9 @@ final class GameViewModel {
                 didRankUp = GameStats.shared.registerRankedWin()
                 GameCenterManager.shared.submitRankLevel(GameStats.shared.rankLevel)
             }
+            if playerWon, state.config.isDailyChallenge {
+                GameStats.shared.markDailyChallengeCleared()
+            }
             if playerWon {
                 reportAchievements()
             }

@@ -60,6 +60,13 @@ struct GameOverView: View {
                             .tracking(2)
                     }
 
+                    if viewModel.config.isDailyChallenge && isWinTitle {
+                        Text("🎯 今日の挑戦クリア！また明日！")
+                            .font(.system(size: 15, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.cyan)
+                            .tracking(1)
+                    }
+
                     if viewModel.didRankUp {
                         Text("⬆️ RANK UP! 次は Lv.\(GameStats.shared.rankLevel)")
                             .font(.system(size: 16, weight: .heavy, design: .rounded))
