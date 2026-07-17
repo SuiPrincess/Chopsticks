@@ -4,6 +4,8 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var settings = SettingsStore.shared
+    @AppStorage("tutorial.completed") private var tutorialCompleted = false
+    @State private var didResetTutorial = false
 
     private var appVersion: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0"
@@ -43,6 +45,27 @@ struct SettingsView: View {
                             .onChange(of: settings.isHapticsEnabled) { _, enabled in
                                 if enabled { HapticManager.handSelect() }
                             }
+                        }
+
+                        settingCard {
+                            Button {
+                                tutorialCompleted = false
+                                didResetTutorial = true
+                            } label: {
+                                HStack {
+                                    settingLabel(
+                                        "チュートリアルをもう一度見る",
+                                        desc: "次のゲーム開始時に操作ガイドを表示",
+                                        icon: "graduationcap.fill"
+                                    )
+                                    Spacer()
+                                    if didResetTutorial {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundStyle(.green)
+                                    }
+                                }
+                            }
+                            .disabled(didResetTutorial)
                         }
 
                         Text("Chopsticks（割り箸） v\(appVersion)")

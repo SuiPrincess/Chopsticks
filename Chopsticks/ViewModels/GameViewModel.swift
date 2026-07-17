@@ -529,8 +529,16 @@ final class GameViewModel {
         if didRankUp {
             SoundManager.play(.rankup)
         } else if let winnerId {
-            let humanLostToAI = isVsAI && winnerId == state.player2.id
-            SoundManager.play(humanLostToAI ? .lose : .win)
+            let localLost: Bool
+            if isVsAI {
+                localLost = winnerId == state.player2.id
+            } else if isMultiplayer {
+                localLost = winnerId != localPlayerId
+            } else {
+                // 1台の2人対戦は必ず誰かが勝つので勝利音
+                localLost = false
+            }
+            SoundManager.play(localLost ? .lose : .win)
         }
     }
 }
