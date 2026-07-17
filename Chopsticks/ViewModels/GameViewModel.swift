@@ -21,6 +21,11 @@ final class GameViewModel {
     private(set) var shakeTrigger = 0
     /// この勝利でランクが上がったか（リザルト演出用）
     private(set) var didRankUp = false
+    /// このゲームの勝利で今日の挑戦/今週の試練のクリアが実際に記録されたか。
+    /// 日/週をまたいだ古いルールでの勝利は記録されないため、
+    /// リザルトの演出・シェア文言はconfigではなくこちらを見る
+    private(set) var didClearDailyChallenge = false
+    private(set) var didClearWeeklyChallenge = false
     /// この勝利で報酬テーマが解放されたか（リザルト演出用）
     private(set) var unlockedRewardTheme: Theme?
     /// 直前のゲームのリプレイ（リザルトの「リプレイを見る」用）
@@ -253,6 +258,8 @@ final class GameViewModel {
     func newGame() {
         gameGeneration += 1
         didRankUp = false
+        didClearDailyChallenge = false
+        didClearWeeklyChallenge = false
         unlockedRewardTheme = nil
         lastReplay = nil
         actionLog = []
@@ -663,9 +670,11 @@ final class GameViewModel {
                 // 新しい期間のクリアにしない（現在の生成ルールと一致する場合のみ記録）
                 if state.config.isDailyChallenge, state.config == DailyChallenge.config() {
                     GameStats.shared.markDailyChallengeCleared()
+                    didClearDailyChallenge = true
                 }
                 if state.config.isWeeklyChallenge, state.config == WeeklyChallenge.config() {
                     GameStats.shared.markWeeklyChallengeCleared()
+                    didClearWeeklyChallenge = true
                 }
                 if state.config.aiLevel == nil && state.config.aiDifficulty == .oni {
                     GameStats.shared.recordOniWin()

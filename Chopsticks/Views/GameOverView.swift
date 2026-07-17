@@ -63,14 +63,14 @@ struct GameOverView: View {
                             .tracking(2)
                     }
 
-                    if viewModel.config.isDailyChallenge && isWinTitle {
+                    if viewModel.didClearDailyChallenge && isWinTitle {
                         Text("🎯 今日の挑戦クリア！また明日！")
                             .font(.system(size: 15, weight: .heavy, design: .rounded))
                             .foregroundStyle(.cyan)
                             .tracking(1)
                     }
 
-                    if viewModel.config.isWeeklyChallenge && isWinTitle {
+                    if viewModel.didClearWeeklyChallenge && isWinTitle {
                         Text("⚔️ 今週の試練クリア！鬼に勝った！")
                             .font(.system(size: 15, weight: .heavy, design: .rounded))
                             .foregroundStyle(.purple)
@@ -225,20 +225,23 @@ struct GameOverView: View {
         }
     }
 
-    /// sheetを閉じ終えてからリマッチ要求alertを出し直す
+    /// sheetを閉じ終えてからリマッチ要求alertを出し直す。
+    /// sheetを閉じている間に相手が切断していたら、切断alertを優先して破棄する
     private func presentPendingRematchAlert() {
         if pendingRematchAlert {
             pendingRematchAlert = false
-            viewModel.showRematchRequest = true
+            if !viewModel.showDisconnectAlert {
+                viewModel.showRematchRequest = true
+            }
         }
     }
 
     private var shareText: String {
         let stats = GameStats.shared
-        if viewModel.config.isWeeklyChallenge {
+        if viewModel.didClearWeeklyChallenge {
             return String(localized: "割り箸バトル「今週の試練 \(WeeklyChallenge.title())」クリア！⚔️ 今週の鬼を攻略した #Chopsticks")
         }
-        if viewModel.config.isDailyChallenge {
+        if viewModel.didClearDailyChallenge {
             return String(localized: "割り箸バトル「今日の挑戦 \(DailyChallenge.title())」クリア！🎯 きみは解けた？ #Chopsticks")
         }
         if let beatenLevel = viewModel.config.aiLevel {

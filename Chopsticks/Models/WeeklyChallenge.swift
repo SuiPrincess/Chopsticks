@@ -4,12 +4,13 @@ import Foundation
 /// 「今日の挑戦」より高難度のガチ勢向けチャレンジ。
 enum WeeklyChallenge {
 
-    /// 週替わりで採用するルール構成。厳密ソルバーで
-    /// 「先手（人間）に必勝戦略が存在し、最適応答でも9手以上かかる」ことを
-    /// 確認済みの構成だけを載せている。後手必勝の構成は鬼AI相手に
-    /// 「絶対に勝てない週」になり、数手で終わる構成は自明なチーズになるため除外。
-    /// 毒はパリティ退化、ミラーは全構成が不成立で全面除外。
-    /// 分析はdocs/ai-notes.md参照。
+    /// 週替わりで採用するルール構成。厳密ソルバー（tools/analysis/exact_solver.py、
+    /// Swiftの爆弾スナップショット意味論に忠実）で「先手（人間）に必勝戦略が存在し、
+    /// 最適応答でも9手以上かかる」ことを確認済みの構成だけを載せている。
+    /// 後手必勝の構成は鬼AI相手に「絶対に勝てない週」になり、
+    /// 数手で終わる構成は自明なチーズになるため除外。
+    /// 毒はパリティ退化、ミラーは全構成が不成立、爆弾×3本手も後手必勝で除外。
+    /// 分析はdocs/ai-notes.md参照。リスト変更時は必ずソルバーを再実行すること。
     private struct Trial {
         var wrap: Bool
         var handCount: Int
@@ -20,8 +21,6 @@ enum WeeklyChallenge {
     }
 
     private static let trials: [Trial] = [
-        Trial(wrap: true, handCount: 3, splitting: true, revival: true, bomb: true, doubleTap: true),
-        Trial(wrap: false, handCount: 3, splitting: true, revival: true, bomb: true, doubleTap: true),
         Trial(wrap: true, handCount: 2, splitting: true, revival: true, bomb: true),
         Trial(wrap: false, handCount: 2, splitting: true, revival: true, bomb: true),
         Trial(wrap: true, handCount: 3, splitting: true, doubleTap: true),

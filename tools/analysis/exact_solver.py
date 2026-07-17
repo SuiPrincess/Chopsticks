@@ -33,23 +33,31 @@ def receive(fingers, add, wrap):
 
 
 def process_bombs(mine, theirs, wrap):
+    """Swift GameState.processBombs()と同一のセマンティクス。
+
+    Swiftは `for hand in player1.hands + player2.hands` で反復するため、
+    スイープ開始時点の**値コピーのスナップショット**で爆発判定される。
+    つまり同時に4になった複数の手は、先の爆発のスプラッシュで死んでいても
+    全て爆発する（生値で再スキャンする実装とは結果が異なるので注意）。"""
     mine, theirs = list(mine), list(theirs)
-    exploded = True
-    while exploded:
-        exploded = False
-        for hands in (mine, theirs):
-            for i, f in enumerate(hands):
-                if f == 4:
-                    hands[i] = 0
-                    exploded = True
-                    for hs in (mine, theirs):
-                        for j in range(len(hs)):
-                            if hs is hands and j == i:
-                                continue
-                            hs[j] = receive(hs[j], 1, wrap)
-                    break
-            if exploded:
-                break
+    exploded = set()  # (side, index)
+    did = True
+    while did:
+        did = False
+        snapshot = [("m", i, mine[i]) for i in range(len(mine))] \
+            + [("t", i, theirs[i]) for i in range(len(theirs))]
+        for side, i, f in snapshot:
+            if f != 4 or (side, i) in exploded:
+                continue
+            exploded.add((side, i))
+            did = True
+            hands = mine if side == "m" else theirs
+            hands[i] = 0
+            for other_side, hs in (("m", mine), ("t", theirs)):
+                for j in range(len(hs)):
+                    if other_side == side and j == i:
+                        continue
+                    hs[j] = receive(hs[j], 1, wrap)
     return tuple(mine), tuple(theirs)
 
 
