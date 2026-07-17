@@ -23,7 +23,8 @@ Chopsticks - 割り箸バトル
 ▼ 遊び方いろいろ
 ・ランク戦 — CPU Lv.1〜10を勝ち上がるラダー。勝つほど賢くなる
 ・今日の挑戦 — 毎日変わる特殊ルールに世界中のプレイヤーが同じ条件で挑戦。通算クリアで限定テーマも解放
-・フリー対戦 — かんたん／つよい／鬼の3段階。「鬼」に勝てたら自慢していい
+・今週の試練 — 週替わりのガチ勢向けチャレンジ。難易度「鬼」＋特殊ルール3種
+・フリー対戦 — かんたん／つよい／鬼の3段階。「鬼」に勝てたら自慢していい（限定テーマ「オニ」も解放）
 ・2人対戦 — 1台を挟んで向かい合って対戦
 ・近くの人と対戦 — Wi-Fi/Bluetoothでオフライン対戦
 ・オンライン対戦 — Game Centerで世界と対戦
@@ -64,7 +65,8 @@ The rules are simple: pick one of your hands, tap an opponent's hand, and your f
 ▼ Many ways to play
 - Ranked — climb the CPU ladder from Lv.1 to Lv.10. Every win makes the next CPU smarter
 - Daily Challenge — one shared rule set for every player in the world, refreshed daily. Clear it repeatedly to unlock an exclusive theme
-- Free Play — three difficulties: Easy, Strong, and Oni. Beat Oni and brag about it
+- Weekly Trial — a hardcore weekly gauntlet: Oni difficulty plus 3 special rules
+- Free Play — three difficulties: Easy, Strong, and Oni. Beat Oni to brag — and to unlock the exclusive Oni theme
 - 2 Players — face off on a single device
 - Nearby Match — offline battles over Wi-Fi/Bluetooth
 - Online — matchmaking via Game Center
