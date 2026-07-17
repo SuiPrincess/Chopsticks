@@ -207,19 +207,26 @@ final class GameViewModelTests: XCTestCase {
         let original = store.selectedThemeID
         defer { store.selectedThemeID = original }
 
-        store.select(.neon, isPremiumPurchased: false, challengeClears: 0)
+        store.select(.neon, isPremiumPurchased: false, challengeClears: 0, oniWins: 0)
         XCTAssertEqual(store.selectedThemeID, Theme.neon.id)
-        store.select(.sunset, isPremiumPurchased: false, challengeClears: 0)
+        store.select(.sunset, isPremiumPurchased: false, challengeClears: 0, oniWins: 0)
         XCTAssertEqual(store.selectedThemeID, Theme.neon.id, "未購入ではプレミアムテーマを選べない")
-        store.select(.sunset, isPremiumPurchased: true, challengeClears: 0)
+        store.select(.sunset, isPremiumPurchased: true, challengeClears: 0, oniWins: 0)
         XCTAssertEqual(store.selectedThemeID, Theme.sunset.id, "プレミアムなら選べる")
 
-        store.select(.midnight, isPremiumPurchased: true, challengeClears: 6)
+        store.select(.midnight, isPremiumPurchased: true, challengeClears: 6, oniWins: 0)
         XCTAssertEqual(store.selectedThemeID, Theme.sunset.id,
                        "報酬テーマはプレミアムでも回数不足なら選べない")
-        store.select(.midnight, isPremiumPurchased: false, challengeClears: 7)
+        store.select(.midnight, isPremiumPurchased: false, challengeClears: 7, oniWins: 0)
         XCTAssertEqual(store.selectedThemeID, Theme.midnight.id,
                        "通算7回クリアで課金なしでも解放される")
+
+        store.select(.oni, isPremiumPurchased: true, challengeClears: 99, oniWins: 0)
+        XCTAssertEqual(store.selectedThemeID, Theme.midnight.id,
+                       "オニは鬼に勝つまでプレミアムでも選べない")
+        store.select(.oni, isPremiumPurchased: false, challengeClears: 0, oniWins: 1)
+        XCTAssertEqual(store.selectedThemeID, Theme.oni.id,
+                       "鬼に1勝すれば課金なしでも解放される")
     }
 
     func testDailyChallengeClearCountIncrementsOncePerDay() {

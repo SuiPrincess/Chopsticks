@@ -34,8 +34,10 @@ SwiftUI製iOSゲーム（iOS 17+ / Xcode 16）。詳細はREADME.md参照。
 ## テスト
 
 - Xcode: Cmd+U（ChopsticksTestsターゲット、TEST_HOST=アプリ）
-- CI: .github/workflows/ci.yml（macOSランナー・iOSシミュレータ）
-- Linux環境にはSwiftがないため、ロジック変更の検証には
+- CI: .github/workflows/ci.yml（macOSランナー・iOSシミュレータ＋ubuntuのローカライズ検証）。
+  mainに加えて `claude/**` ブランチへのpushでも実行されるため、
+  Linux環境からでもプッシュすれば実コンパイル＋全テストのフィードバックが得られる
+- Linux環境にはSwiftがないため、ロジック変更の一次検証には
   tree-sitter-swiftでの構文チェックと、必要ならPythonでの参照実装が有効
 
 ## known quirks
@@ -50,6 +52,9 @@ SwiftUI製iOSゲーム（iOS 17+ / Xcode 16）。詳細はREADME.md参照。
   差し替える場合は同名で上書きすればpbxproj変更は不要
 - GameConfigはカスタムinit(from:)でdecodeIfPresent。フィールド追加時も
   同じパターンで書くこと（旧保存データ・バージョン混在マルチプレイ互換のため）
+- @Observableクラスのinit内では、全プロパティ初期化完了までselfのプロパティを
+  「読む」とコンパイルエラーになる（マクロのアクセサ経由になるため）。
+  ローカル変数を組み立ててから代入すること
 - ローカライズ: キーは日本語原文。en.lprojに英訳、ja.lprojは意図的に空。
   String型の文脈はString(localized:)、三項演算子は各分岐を包む。
   文字列を追加したら tools/localization/gen_localization.py で欠落0を検証すること

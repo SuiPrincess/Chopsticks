@@ -654,19 +654,28 @@ final class GameViewModel {
                 didRankUp = GameStats.shared.registerRankedWin()
                 GameCenterManager.shared.submitRankLevel(GameStats.shared.rankLevel)
             }
-            if playerWon, state.config.isDailyChallenge {
-                let clearsBefore = GameStats.shared.dailyChallengeClearCount
-                GameStats.shared.markDailyChallengeCleared()
-                let clearsAfter = GameStats.shared.dailyChallengeClearCount
-                // このクリアで解放条件をまたいだ報酬テーマがあれば演出する
-                unlockedRewardTheme = Theme.all.first { theme in
-                    if case .dailyChallengeClears(let required) = theme.unlock {
-                        return clearsBefore < required && clearsAfter >= required
-                    }
-                    return false
-                }
-            }
             if playerWon {
+                let clearsBefore = GameStats.shared.dailyChallengeClearCount
+                let oniBefore = GameStats.shared.oniWins
+                if state.config.isDailyChallenge {
+                    GameStats.shared.markDailyChallengeCleared()
+                }
+                if state.config.aiLevel == nil && state.config.aiDifficulty == .oni {
+                    GameStats.shared.recordOniWin()
+                }
+                // この勝利で解放条件をまたいだ報酬テーマがあれば演出する。
+                // プレミアムテーマは常にロック扱い（before==after）なので検出されない
+                let clearsAfter = GameStats.shared.dailyChallengeClearCount
+                let oniAfter = GameStats.shared.oniWins
+                unlockedRewardTheme = Theme.all.first { theme in
+                    let lockedBefore = !theme.isUnlocked(
+                        isPremiumPurchased: false, challengeClears: clearsBefore, oniWins: oniBefore
+                    )
+                    let unlockedNow = theme.isUnlocked(
+                        isPremiumPurchased: false, challengeClears: clearsAfter, oniWins: oniAfter
+                    )
+                    return lockedBefore && unlockedNow
+                }
                 reportAchievements()
             }
         }

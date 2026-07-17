@@ -186,9 +186,11 @@ struct ShopView: View {
     private func themeRow(_ theme: Theme) -> some View {
         let isSelected = themeStore.selectedThemeID == theme.id
         let challengeClears = GameStats.shared.dailyChallengeClearCount
+        let oniWins = GameStats.shared.oniWins
         let isLocked = !theme.isUnlocked(
             isPremiumPurchased: store.isPremium,
-            challengeClears: challengeClears
+            challengeClears: challengeClears,
+            oniWins: oniWins
         )
 
         Button {
@@ -198,7 +200,8 @@ struct ShopView: View {
                 themeStore.select(
                     theme,
                     isPremiumPurchased: store.isPremium,
-                    challengeClears: challengeClears
+                    challengeClears: challengeClears,
+                    oniWins: oniWins
                 )
                 HapticManager.handSelect()
             }
@@ -225,14 +228,29 @@ struct ShopView: View {
                             .font(.system(size: 11, design: .rounded))
                             .foregroundStyle(.cyan.opacity(0.8))
                     }
+                    if case .oniWins = theme.unlock, isLocked {
+                        Text("難易度「鬼」に勝利で解放")
+                            .font(.system(size: 11, design: .rounded))
+                            .foregroundStyle(.orange.opacity(0.85))
+                    }
                 }
 
                 Spacer()
 
                 if isLocked {
-                    Image(systemName: theme.isPremium ? "lock.fill" : "target")
-                        .font(.system(size: 13))
-                        .foregroundStyle(theme.isPremium ? .yellow.opacity(0.7) : .cyan.opacity(0.7))
+                    if theme.isPremium {
+                        Image(systemName: "lock.fill")
+                            .font(.system(size: 13))
+                            .foregroundStyle(.yellow.opacity(0.7))
+                    } else if case .oniWins = theme.unlock {
+                        Image(systemName: "flame.fill")
+                            .font(.system(size: 13))
+                            .foregroundStyle(.orange.opacity(0.8))
+                    } else {
+                        Image(systemName: "target")
+                            .font(.system(size: 13))
+                            .foregroundStyle(.cyan.opacity(0.7))
+                    }
                 } else if isSelected {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundStyle(AppTheme.accent)

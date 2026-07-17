@@ -46,6 +46,8 @@ TRANSLATIONS = {
     "1勝して連続プレイ日数をつなごう！CPUが待ってます": "Win one game to keep your daily streak alive! The CPU is waiting",
 
     # ---- Themes ----
+    "オニ": "Oni",
+    "難易度「鬼」に勝利で解放": "Beat the Oni difficulty to unlock",
     "ネオン": "Neon",
     "サンセット": "Sunset",
     "マトリックス": "Matrix",

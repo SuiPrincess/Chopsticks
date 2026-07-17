@@ -7,6 +7,8 @@ enum ThemeUnlock: Equatable {
     case premium
     /// 「今日の挑戦」を通算n回クリアで解放（プレミアム不要の報酬テーマ）
     case dailyChallengeClears(Int)
+    /// 難易度「鬼」にn回勝利で解放（プレミアム不要の報酬テーマ）
+    case oniWins(Int)
 }
 
 /// カラーテーマ。プレミアム購入または報酬条件で解放される。
@@ -25,7 +27,7 @@ struct Theme: Identifiable, Equatable {
 
     var isPremium: Bool { unlock == .premium }
 
-    func isUnlocked(isPremiumPurchased: Bool, challengeClears: Int) -> Bool {
+    func isUnlocked(isPremiumPurchased: Bool, challengeClears: Int, oniWins: Int) -> Bool {
         switch unlock {
         case .free:
             return true
@@ -33,6 +35,8 @@ struct Theme: Identifiable, Equatable {
             return isPremiumPurchased
         case .dailyChallengeClears(let required):
             return challengeClears >= required
+        case .oniWins(let required):
+            return oniWins >= required
         }
     }
 }
@@ -131,7 +135,21 @@ extension Theme {
         bgDeep: Color(red: 0.05, green: 0.02, blue: 0.10)
     )
 
-    static let all: [Theme] = [.neon, .sunset, .matrix, .sakura, .luxeGold, .deepSea, .midnight]
+    /// 🔥 報酬テーマ: 難易度「鬼」に勝利で解放（課金不要）
+    static let oni = Theme(
+        id: "oni",
+        name: String(localized: "オニ"),
+        unlock: .oniWins(1),
+        player1: Color(red: 1.0, green: 0.5, blue: 0.3),
+        player2: Color(red: 0.75, green: 0.78, blue: 0.88),
+        accent: Color(red: 1.0, green: 0.4, blue: 0.25),
+        accentSecondary: Color(red: 0.85, green: 0.15, blue: 0.3),
+        bgDark: Color(red: 0.06, green: 0.01, blue: 0.01),
+        bgMid: Color(red: 0.12, green: 0.03, blue: 0.03),
+        bgDeep: Color(red: 0.10, green: 0.02, blue: 0.06)
+    )
+
+    static let all: [Theme] = [.neon, .sunset, .matrix, .sakura, .luxeGold, .deepSea, .midnight, .oni]
 }
 
 /// 選択中のテーマ。AppThemeのアクセサ経由で全Viewが参照する。
@@ -158,10 +176,11 @@ final class ThemeStore {
     }
 
     /// 解放済みのテーマのみ選択できる
-    func select(_ theme: Theme, isPremiumPurchased: Bool, challengeClears: Int) {
+    func select(_ theme: Theme, isPremiumPurchased: Bool, challengeClears: Int, oniWins: Int) {
         guard theme.isUnlocked(
             isPremiumPurchased: isPremiumPurchased,
-            challengeClears: challengeClears
+            challengeClears: challengeClears,
+            oniWins: oniWins
         ) else { return }
         selectedThemeID = theme.id
     }

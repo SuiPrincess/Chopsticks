@@ -53,6 +53,7 @@
 "もう1回!" = "One more!";
 "もう一回挑戦しよう" = "Give it another shot";
 "やめる" = "Quit";
+"オニ" = "Oni";
 "オンライン対戦" = "Online Match";
 "オーバーフロー" = "Overflow";
 "カラーテーマ" = "Color Themes";
@@ -240,6 +241,7 @@
 "部屋を探しています" = "Looking for rooms";
 "部屋を探す" = "Find Room";
 "開発者に差し入れ" = "Tip the Developer";
+"難易度「鬼」に勝利で解放" = "Beat the Oni difficulty to unlock";
 "鬼" = "Oni";
 "🎁 限定テーマ「%@」を解放!" = "🎁 Exclusive theme “%@” unlocked!";
 "🎯 今日の挑戦クリア！また明日！" = "🎯 Daily Challenge cleared! See you tomorrow!";

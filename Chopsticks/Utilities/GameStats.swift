@@ -26,6 +26,8 @@ final class GameStats {
     private(set) var lastDailyChallengeClear: Date?
     /// 🎯 今日の挑戦の通算クリア回数（1日1回までカウント。報酬テーマの解放条件）
     private(set) var dailyChallengeClearCount: Int
+    /// 🔥 難易度「鬼」への通算勝利数（報酬テーマの解放条件）
+    private(set) var oniWins: Int
 
     private enum Key {
         static let wins = "stats.cpu.wins"
@@ -38,6 +40,7 @@ final class GameStats {
         static let reviewedVersion = "review.requestedVersion"
         static let dailyChallengeClear = "stats.dailyChallenge.lastClear"
         static let dailyChallengeCount = "stats.dailyChallenge.clearCount"
+        static let oniWins = "stats.oniWins"
     }
 
     init(defaults: UserDefaults) {
@@ -51,6 +54,13 @@ final class GameStats {
         lastPlayDay = defaults.object(forKey: Key.lastPlayDay) as? Date
         lastDailyChallengeClear = defaults.object(forKey: Key.dailyChallengeClear) as? Date
         dailyChallengeClearCount = defaults.integer(forKey: Key.dailyChallengeCount)
+        oniWins = defaults.integer(forKey: Key.oniWins)
+    }
+
+    /// 🔥 難易度「鬼」への勝利を記録する（報酬テーマの解放条件）
+    func recordOniWin() {
+        oniWins += 1
+        defaults.set(oniWins, forKey: Key.oniWins)
     }
 
     // MARK: - 今日の挑戦
@@ -146,6 +156,8 @@ final class GameStats {
         defaults.removeObject(forKey: Key.dailyChallengeClear)
         dailyChallengeClearCount = 0
         defaults.removeObject(forKey: Key.dailyChallengeCount)
+        oniWins = 0
+        defaults.removeObject(forKey: Key.oniWins)
         save()
     }
 

@@ -181,12 +181,25 @@ final class StoreLogicTests: XCTestCase {
         XCTAssertNil(store.savedGame, "マルチプレイは保存しない")
     }
 
+    // MARK: - 鬼勝利数（報酬テーマ「オニ」の解放条件）
+
+    func testOniWinsPersistAndReset() {
+        let stats = GameStats(defaults: defaults)
+        XCTAssertEqual(stats.oniWins, 0)
+        stats.recordOniWin()
+        stats.recordOniWin()
+        XCTAssertEqual(GameStats(defaults: defaults).oniWins, 2, "鬼勝利数は永続化される")
+        stats.reset()
+        XCTAssertEqual(stats.oniWins, 0)
+        XCTAssertEqual(GameStats(defaults: defaults).oniWins, 0, "リセットで消える")
+    }
+
     // MARK: - ThemeStore
 
     func testThemeStorePersistsSelection() {
         let store = ThemeStore(defaults: defaults)
         XCTAssertEqual(store.current.id, Theme.neon.id, "デフォルトはネオン")
-        store.select(.sunset, isPremiumPurchased: true, challengeClears: 0)
+        store.select(.sunset, isPremiumPurchased: true, challengeClears: 0, oniWins: 0)
 
         let reloaded = ThemeStore(defaults: defaults)
         XCTAssertEqual(reloaded.current.id, Theme.sunset.id)
