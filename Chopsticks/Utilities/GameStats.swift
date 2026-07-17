@@ -100,6 +100,19 @@ final class GameStats {
         UserDefaults.standard.set(appVersion, forKey: Key.reviewedVersion)
     }
 
+    /// 全戦績を初期化する（戦績画面の「リセット」用）
+    func reset() {
+        wins = 0
+        losses = 0
+        currentStreak = 0
+        bestStreak = 0
+        rankLevel = 1
+        dailyStreak = 0
+        lastPlayDay = nil
+        didSetNewRecord = false
+        save()
+    }
+
     private func save() {
         let defaults = UserDefaults.standard
         defaults.set(wins, forKey: Key.wins)
@@ -110,6 +123,8 @@ final class GameStats {
         defaults.set(dailyStreak, forKey: Key.dailyStreak)
         if let lastPlayDay {
             defaults.set(lastPlayDay, forKey: Key.lastPlayDay)
+        } else {
+            defaults.removeObject(forKey: Key.lastPlayDay)
         }
     }
 }

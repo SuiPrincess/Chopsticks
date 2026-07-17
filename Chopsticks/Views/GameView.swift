@@ -10,8 +10,12 @@ struct GameView: View {
 
     private var multiplayerService: (any MultiplayerService)?
 
-    init(config: GameConfig, multiplayerService: (any MultiplayerService)? = nil) {
-        _viewModel = State(initialValue: GameViewModel(config: config))
+    init(
+        config: GameConfig,
+        multiplayerService: (any MultiplayerService)? = nil,
+        savedGame: SavedGame? = nil
+    ) {
+        _viewModel = State(initialValue: GameViewModel(config: config, restoring: savedGame))
         self.multiplayerService = multiplayerService
     }
 
@@ -172,6 +176,10 @@ struct GameView: View {
                 dismiss()
             }
             Button("続ける", role: .cancel) {}
+        } message: {
+            if !viewModel.isMultiplayer && !viewModel.isGameOver {
+                Text("進行中のゲームは自動保存され、メニューの「続きから」で再開できます")
+            }
         }
         .alert("接続が切れました", isPresented: $viewModel.showDisconnectAlert) {
             Button("OK") { dismiss() }
@@ -184,6 +192,8 @@ struct GameView: View {
                     opponentName: service.opponentName
                 )
             }
+            // 復元したゲームがCPUの手番で中断されていた場合に再開する
+            viewModel.triggerAITurn()
         }
     }
 

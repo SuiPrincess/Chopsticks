@@ -6,6 +6,8 @@ struct MenuView: View {
     @State private var showRuleSettings = false
     @State private var showRuleConfirmation = false
     @State private var showAIDifficultyPicker = false
+    @State private var showStats = false
+    @State private var showSettings = false
     @State private var navigateToGame = false
     @State private var titleGlow: CGFloat = 0.3
 
@@ -33,6 +35,10 @@ struct MenuView: View {
     @State private var showGameKitMatchmaker = false
     @State private var multiplayerService: (any MultiplayerService)?
     @State private var gameCenterManager = GameCenterManager.shared
+
+    // 中断ゲームの再開
+    @State private var sessionStore = GameSessionStore.shared
+    @State private var resumeGame: SavedGame?
 
     var body: some View {
         NavigationStack {
@@ -75,6 +81,26 @@ struct MenuView: View {
 
                     // Buttons
                     VStack(spacing: 12) {
+                        // 中断したゲームの再開
+                        if let saved = sessionStore.savedGame,
+                           let description = sessionStore.resumeDescription {
+                            Button {
+                                resumeGame = saved
+                                navigateToGame = true
+                            } label: {
+                                VStack(spacing: 3) {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "arrow.uturn.forward.circle.fill")
+                                        Text("続きから")
+                                    }
+                                    Text(description)
+                                        .font(.system(size: 11, design: .rounded))
+                                        .foregroundStyle(.white.opacity(0.55))
+                                }
+                            }
+                            .buttonStyle(GlassButtonStyle(color: .cyan))
+                        }
+
                         // ランク戦（メインの進行ループ・固定標準ルール）
                         Button {
                             rankedConfig = Self.makeRankedConfig()
@@ -141,7 +167,7 @@ struct MenuView: View {
                         .opacity(gameCenterManager.isAuthenticated ? 1 : 0.4)
                         .disabled(!gameCenterManager.isAuthenticated)
 
-                        // Rules + random rules
+                        // Rules + random rules + stats
                         HStack(spacing: 12) {
                             Button {
                                 showRuleSettings = true
@@ -160,6 +186,14 @@ struct MenuView: View {
                             }
                             .buttonStyle(GlassButtonStyle(color: .orange))
                             .frame(width: 64)
+
+                            Button {
+                                showStats = true
+                            } label: {
+                                Image(systemName: "chart.bar.fill")
+                            }
+                            .buttonStyle(GlassButtonStyle(color: .cyan, isPrimary: false))
+                            .frame(width: 64)
                         }
 
                         statsIndicator
@@ -176,16 +210,47 @@ struct MenuView: View {
                     .padding(.bottom, 50)
                 }
             }
+            .overlay(alignment: .topTrailing) {
+                Button {
+                    showSettings = true
+                } label: {
+                    Image(systemName: "gearshape.fill")
+                        .font(.system(size: 15))
+                        .foregroundStyle(.white.opacity(0.45))
+                        .frame(width: 38, height: 38)
+                        .background(
+                            Circle()
+                                .fill(.ultraThinMaterial)
+                                .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 0.5))
+                        )
+                }
+                .accessibilityLabel("設定")
+                .padding(.trailing, 20)
+                .padding(.top, 8)
+            }
             .navigationDestination(isPresented: $navigateToGame) {
-                GameView(config: activeConfig, multiplayerService: multiplayerService)
-                    .navigationBarBackButtonHidden()
-                    .onDisappear {
-                        multiplayerService = nil
-                    }
+                GameView(
+                    config: resumeGame?.state.config ?? activeConfig,
+                    multiplayerService: multiplayerService,
+                    savedGame: resumeGame
+                )
+                .navigationBarBackButtonHidden()
+                .onDisappear {
+                    multiplayerService = nil
+                    resumeGame = nil
+                }
             }
             .sheet(isPresented: $showRuleSettings) {
                 RuleSettingsView(config: $config)
                     .presentationDetents([.large])
+            }
+            .sheet(isPresented: $showStats) {
+                StatsView()
+                    .presentationDetents([.large])
+            }
+            .sheet(isPresented: $showSettings) {
+                SettingsView()
+                    .presentationDetents([.medium])
             }
             .sheet(isPresented: $showAIDifficultyPicker, onDismiss: {
                 if pendingRuleConfirmation {
@@ -245,6 +310,7 @@ struct MenuView: View {
         .onAppear {
             withAnimation(Anim.glowPulse) { titleGlow = 0.8 }
             GameCenterManager.shared.authenticateLocalPlayer()
+            SoundManager.prepare()
         }
     }
 

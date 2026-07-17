@@ -43,6 +43,21 @@
 		6ED0BB0173C41B2A9D3E5F04 /* GameLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED0AA0173C41B2A9D3E5F01 /* GameLogicTests.swift */; };
 		6ED0BB0273C41B2A9D3E5F05 /* AIEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED0AA0273C41B2A9D3E5F02 /* AIEngineTests.swift */; };
 		6ED0BB0373C41B2A9D3E5F06 /* GameViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED0AA0373C41B2A9D3E5F03 /* GameViewModelTests.swift */; };
+		6ED1BB0173C41B2A9D3E6101 /* GameSessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED1AA0173C41B2A9D3E6001 /* GameSessionStore.swift */; };
+		6ED1BB0273C41B2A9D3E6102 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED1AA0273C41B2A9D3E6002 /* SettingsStore.swift */; };
+		6ED1BB0373C41B2A9D3E6103 /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED1AA0373C41B2A9D3E6003 /* SoundManager.swift */; };
+		6ED1BB0473C41B2A9D3E6104 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED1AA0473C41B2A9D3E6004 /* StatsView.swift */; };
+		6ED1BB0573C41B2A9D3E6105 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED1AA0573C41B2A9D3E6005 /* SettingsView.swift */; };
+		6ED1BB0673C41B2A9D3E6106 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6ED1AA0673C41B2A9D3E6006 /* Assets.xcassets */; };
+		6ED1BB0773C41B2A9D3E6107 /* tap.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6ED1AA0773C41B2A9D3E6007 /* tap.wav */; };
+		6ED1BB0873C41B2A9D3E6108 /* select.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6ED1AA0873C41B2A9D3E6008 /* select.wav */; };
+		6ED1BB0973C41B2A9D3E6109 /* split.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6ED1AA0973C41B2A9D3E6009 /* split.wav */; };
+		6ED1BB0A73C41B2A9D3E610A /* break.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6ED1AA0A73C41B2A9D3E600A /* break.wav */; };
+		6ED1BB0B73C41B2A9D3E610B /* boom.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6ED1AA0B73C41B2A9D3E600B /* boom.wav */; };
+		6ED1BB0C73C41B2A9D3E610C /* poison.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6ED1AA0C73C41B2A9D3E600C /* poison.wav */; };
+		6ED1BB0D73C41B2A9D3E610D /* win.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6ED1AA0D73C41B2A9D3E600D /* win.wav */; };
+		6ED1BB0E73C41B2A9D3E610E /* lose.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6ED1AA0E73C41B2A9D3E600E /* lose.wav */; };
+		6ED1BB0F73C41B2A9D3E610F /* rankup.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6ED1AA0F73C41B2A9D3E600F /* rankup.wav */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -85,12 +100,28 @@
 		6ED0AA0273C41B2A9D3E5F02 /* AIEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIEngineTests.swift; sourceTree = "<group>"; };
 		6ED0AA0373C41B2A9D3E5F03 /* GameViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewModelTests.swift; sourceTree = "<group>"; };
 		6ED0DD0173C41B2A9D3E5F08 /* ChopsticksTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChopsticksTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6ED1AA0173C41B2A9D3E6001 /* GameSessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSessionStore.swift; sourceTree = "<group>"; };
+		6ED1AA0273C41B2A9D3E6002 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		6ED1AA0373C41B2A9D3E6003 /* SoundManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundManager.swift; sourceTree = "<group>"; };
+		6ED1AA0473C41B2A9D3E6004 /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
+		6ED1AA0573C41B2A9D3E6005 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		6ED1AA0673C41B2A9D3E6006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		6ED1AA0773C41B2A9D3E6007 /* tap.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = tap.wav; sourceTree = "<group>"; };
+		6ED1AA0873C41B2A9D3E6008 /* select.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = select.wav; sourceTree = "<group>"; };
+		6ED1AA0973C41B2A9D3E6009 /* split.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = split.wav; sourceTree = "<group>"; };
+		6ED1AA0A73C41B2A9D3E600A /* break.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = break.wav; sourceTree = "<group>"; };
+		6ED1AA0B73C41B2A9D3E600B /* boom.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = boom.wav; sourceTree = "<group>"; };
+		6ED1AA0C73C41B2A9D3E600C /* poison.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = poison.wav; sourceTree = "<group>"; };
+		6ED1AA0D73C41B2A9D3E600D /* win.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = win.wav; sourceTree = "<group>"; };
+		6ED1AA0E73C41B2A9D3E600E /* lose.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = lose.wav; sourceTree = "<group>"; };
+		6ED1AA0F73C41B2A9D3E600F /* rankup.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = rankup.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		239C1A84BB0F2923454D444F /* Chopsticks */ = {
 			isa = PBXGroup;
 			children = (
+				6ED1AA0673C41B2A9D3E6006 /* Assets.xcassets */,
 				EE45D2D66A0FEE63003021BD /* Chopsticks.entitlements */,
 			);
 			name = Chopsticks;
@@ -125,6 +156,7 @@
 				6ED0CC0173C41B2A9D3E5F07 /* ChopsticksTests */,
 				D076A686871768DF52B1F93B /* Models */,
 				B58F0EEFC9EF74342C1A23EE /* Networking */,
+				6ED1CC0173C41B2A9D3E6201 /* Sounds */,
 				4F1F47D27807F2D5DD08FF5B /* Utilities */,
 				5D39E97BAD7B40F9556D723A /* ViewModels */,
 				9EF1699001CB6802228DCFEB /* Views */,
@@ -137,10 +169,29 @@
 			children = (
 				11A31981876C39C404B8C245 /* AnimationConstants.swift */,
 				EC4DED73A4DA152397764961 /* AppTheme.swift */,
+				6ED1AA0173C41B2A9D3E6001 /* GameSessionStore.swift */,
 				B7E1A9D34C2F5B6E8A0D1C42 /* GameStats.swift */,
 				954E87CDC807FE7CE0335ADF /* HapticManager.swift */,
+				6ED1AA0273C41B2A9D3E6002 /* SettingsStore.swift */,
+				6ED1AA0373C41B2A9D3E6003 /* SoundManager.swift */,
 			);
 			path = Utilities;
+			sourceTree = "<group>";
+		};
+		6ED1CC0173C41B2A9D3E6201 /* Sounds */ = {
+			isa = PBXGroup;
+			children = (
+				6ED1AA0B73C41B2A9D3E600B /* boom.wav */,
+				6ED1AA0A73C41B2A9D3E600A /* break.wav */,
+				6ED1AA0E73C41B2A9D3E600E /* lose.wav */,
+				6ED1AA0C73C41B2A9D3E600C /* poison.wav */,
+				6ED1AA0F73C41B2A9D3E600F /* rankup.wav */,
+				6ED1AA0873C41B2A9D3E6008 /* select.wav */,
+				6ED1AA0973C41B2A9D3E6009 /* split.wav */,
+				6ED1AA0773C41B2A9D3E6007 /* tap.wav */,
+				6ED1AA0D73C41B2A9D3E600D /* win.wav */,
+			);
+			path = Sounds;
 			sourceTree = "<group>";
 		};
 		5D39E97BAD7B40F9556D723A /* ViewModels */ = {
@@ -177,6 +228,8 @@
 				35C5736527A4DC9BFB654335 /* MenuView.swift */,
 				9A4B503A605BF5B71C3A38DF /* RuleDisplayView.swift */,
 				C72CEAD016BE717F23D4C93B /* RuleSettingsView.swift */,
+				6ED1AA0573C41B2A9D3E6005 /* SettingsView.swift */,
+				6ED1AA0473C41B2A9D3E6004 /* StatsView.swift */,
 				AF4D36F4F9C1E5F974AE395E /* Components */,
 				34BD53B58362F47B2C9B671C /* Effects */,
 			);
@@ -254,6 +307,7 @@
 			buildConfigurationList = 7EFD02B2510ED1B19FBD81A5 /* Build configuration list for PBXNativeTarget "Chopsticks" */;
 			buildPhases = (
 				F74BFB724E1F0F06256A268F /* Sources */,
+				6ED1FF0173C41B2A9D3E6301 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -367,6 +421,11 @@
 				FBD36EF2A118013B3ED28CF1 /* PlayerAreaView.swift in Sources */,
 				CA161231256615E5D0D61E8D /* RuleDisplayView.swift in Sources */,
 				C82E1E87863ADFBBACA7CDC1 /* RuleSettingsView.swift in Sources */,
+				6ED1BB0173C41B2A9D3E6101 /* GameSessionStore.swift in Sources */,
+				6ED1BB0273C41B2A9D3E6102 /* SettingsStore.swift in Sources */,
+				6ED1BB0373C41B2A9D3E6103 /* SoundManager.swift in Sources */,
+				6ED1BB0473C41B2A9D3E6104 /* StatsView.swift in Sources */,
+				6ED1BB0573C41B2A9D3E6105 /* SettingsView.swift in Sources */,
 				1E13C1C280D733E40A97A06E /* SplitControlView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -383,11 +442,32 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXResourcesBuildPhase section */
+		6ED1FF0173C41B2A9D3E6301 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6ED1BB0673C41B2A9D3E6106 /* Assets.xcassets in Resources */,
+				6ED1BB0B73C41B2A9D3E610B /* boom.wav in Resources */,
+				6ED1BB0A73C41B2A9D3E610A /* break.wav in Resources */,
+				6ED1BB0E73C41B2A9D3E610E /* lose.wav in Resources */,
+				6ED1BB0C73C41B2A9D3E610C /* poison.wav in Resources */,
+				6ED1BB0F73C41B2A9D3E610F /* rankup.wav in Resources */,
+				6ED1BB0873C41B2A9D3E6108 /* select.wav in Resources */,
+				6ED1BB0973C41B2A9D3E6109 /* split.wav in Resources */,
+				6ED1BB0773C41B2A9D3E6107 /* tap.wav in Resources */,
+				6ED1BB0D73C41B2A9D3E610D /* win.wav in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin XCBuildConfiguration section */
 		063D7207D24032B9ECDBD35B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Chopsticks.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
@@ -471,6 +551,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Chopsticks.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;

@@ -89,8 +89,13 @@ final class GameViewModel {
     }
 
     // MARK: - Init
-    init(config: GameConfig = GameConfig()) {
-        self.state = GameState(config: config)
+    init(config: GameConfig = GameConfig(), restoring saved: SavedGame? = nil) {
+        if let saved {
+            self.state = saved.state
+            self.attacksThisTurn = saved.attacksThisTurn
+        } else {
+            self.state = GameState(config: config)
+        }
     }
 
     // MARK: - Multiplayer Setup
@@ -165,6 +170,7 @@ final class GameViewModel {
     func newGame() {
         gameGeneration += 1
         didRankUp = false
+        GameSessionStore.shared.clear()
         let previousLocalId = localPlayerId
         var config = state.config
         // ランク戦の再戦は最新レベルのCPUと
@@ -210,6 +216,7 @@ final class GameViewModel {
         } else {
             selectedAttackerHandId = handId
             HapticManager.handSelect()
+            SoundManager.play(.select)
         }
     }
 
@@ -238,6 +245,7 @@ final class GameViewModel {
             if !announced {
                 battleEvent = BattleEvent(text: "もう1回!", color: .purple)
             }
+            persistSession()
             if isAITurn { triggerAITurn() }
             return
         }
@@ -379,13 +387,19 @@ final class GameViewModel {
     private func playFeedback(for result: ActionResult, isSplit: Bool) {
         if isSplit {
             HapticManager.split()
+            SoundManager.play(.split)
         } else if result.poisonTriggered {
             HapticManager.poisonKill()
+            SoundManager.play(.poison)
         } else {
             HapticManager.handTap()
+            SoundManager.play(.tap)
         }
         if result.bombTriggered {
             HapticManager.bombExplosion()
+            SoundManager.play(.boom)
+        } else if !result.deadHandIds.isEmpty && !result.poisonTriggered {
+            SoundManager.play(.breakHand)
         }
     }
 
@@ -401,9 +415,17 @@ final class GameViewModel {
             battleEvent = BattleEvent(text: "あと10ターンで判定!", color: .yellow)
         }
 
+        persistSession()
+
         if isAITurn {
             triggerAITurn()
         }
+    }
+
+    /// 進行中のゲームを自動保存する（アプリ終了・中断からの再開用）
+    private func persistSession() {
+        guard !isMultiplayer else { return }
+        GameSessionStore.shared.save(state: state, attacksThisTurn: attacksThisTurn)
     }
 
     @discardableResult
@@ -445,6 +467,7 @@ final class GameViewModel {
         } else {
             state.phase = .draw
         }
+        GameSessionStore.shared.clear()
         HapticManager.victory()
         GameStats.shared.recordDailyPlay()
         if isVsAI, let winnerId {
@@ -453,6 +476,13 @@ final class GameViewModel {
             if playerWon, state.config.aiLevel != nil {
                 didRankUp = GameStats.shared.registerRankedWin()
             }
+        }
+        // リザルトのサウンド（ランクアップ > 勝敗、引き分けは無音）
+        if didRankUp {
+            SoundManager.play(.rankup)
+        } else if let winnerId {
+            let humanLostToAI = isVsAI && winnerId == state.player2.id
+            SoundManager.play(humanLostToAI ? .lose : .win)
         }
     }
 }
