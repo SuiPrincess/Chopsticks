@@ -138,20 +138,23 @@ extension Theme {
 /// （UIスレッドからのみ変更される前提の軽量ストア）
 @Observable
 final class ThemeStore {
-    static let shared = ThemeStore()
+    static let shared = ThemeStore(defaults: .standard)
 
     private static let key = "theme.selected"
 
+    private let defaults: UserDefaults
+
     var selectedThemeID: String {
-        didSet { UserDefaults.standard.set(selectedThemeID, forKey: Self.key) }
+        didSet { defaults.set(selectedThemeID, forKey: Self.key) }
     }
 
     var current: Theme {
         Theme.all.first { $0.id == selectedThemeID } ?? .neon
     }
 
-    private init() {
-        selectedThemeID = UserDefaults.standard.string(forKey: Self.key) ?? Theme.neon.id
+    init(defaults: UserDefaults) {
+        self.defaults = defaults
+        selectedThemeID = defaults.string(forKey: Self.key) ?? Theme.neon.id
     }
 
     /// 解放済みのテーマのみ選択できる

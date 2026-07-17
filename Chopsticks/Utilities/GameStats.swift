@@ -2,11 +2,14 @@ import Foundation
 import Observation
 
 /// CPU対戦の戦績。UserDefaultsに永続化し、連勝ストリークで再戦を促す。
+/// テストから隔離スイート＋任意日付で検証できるよう、defaultsと日付を注入可能。
 @Observable
 @MainActor
 final class GameStats {
-    static let shared = GameStats()
+    static let shared = GameStats(defaults: .standard)
     static let maxRankLevel = 10
+
+    private let defaults: UserDefaults
 
     private(set) var wins: Int
     private(set) var losses: Int
@@ -37,8 +40,8 @@ final class GameStats {
         static let dailyChallengeCount = "stats.dailyChallenge.clearCount"
     }
 
-    private init() {
-        let defaults = UserDefaults.standard
+    init(defaults: UserDefaults) {
+        self.defaults = defaults
         wins = defaults.integer(forKey: Key.wins)
         losses = defaults.integer(forKey: Key.losses)
         currentStreak = defaults.integer(forKey: Key.streak)
@@ -53,18 +56,22 @@ final class GameStats {
     // MARK: - 今日の挑戦
 
     var isDailyChallengeClearedToday: Bool {
+        isDailyChallengeCleared(asOf: .now)
+    }
+
+    func isDailyChallengeCleared(asOf date: Date) -> Bool {
         guard let last = lastDailyChallengeClear else { return false }
-        return Calendar.current.isDate(last, inSameDayAs: .now)
+        return Calendar.current.isDate(last, inSameDayAs: date)
     }
 
     /// クリアを記録する。通算回数は1日1回だけ増える。
-    func markDailyChallengeCleared() {
-        if !isDailyChallengeClearedToday {
+    func markDailyChallengeCleared(on date: Date = .now) {
+        if !isDailyChallengeCleared(asOf: date) {
             dailyChallengeClearCount += 1
-            UserDefaults.standard.set(dailyChallengeClearCount, forKey: Key.dailyChallengeCount)
+            defaults.set(dailyChallengeClearCount, forKey: Key.dailyChallengeCount)
         }
-        lastDailyChallengeClear = .now
-        UserDefaults.standard.set(lastDailyChallengeClear, forKey: Key.dailyChallengeClear)
+        lastDailyChallengeClear = date
+        defaults.set(lastDailyChallengeClear, forKey: Key.dailyChallengeClear)
     }
 
     func recordGame(playerWon: Bool) {
@@ -93,9 +100,9 @@ final class GameStats {
     }
 
     /// 1日1回以上遊ぶと連続日数が伸びる。間が空いたら1にリセット。
-    func recordDailyPlay() {
+    func recordDailyPlay(on date: Date = .now) {
         let calendar = Calendar.current
-        let today = calendar.startOfDay(for: .now)
+        let today = calendar.startOfDay(for: date)
         if let last = lastPlayDay {
             let lastDay = calendar.startOfDay(for: last)
             let gap = calendar.dateComponents([.day], from: lastDay, to: today).day ?? 0
@@ -107,7 +114,7 @@ final class GameStats {
         } else {
             dailyStreak = 1
         }
-        lastPlayDay = .now
+        lastPlayDay = date
         save()
     }
 
@@ -117,12 +124,12 @@ final class GameStats {
     }
 
     func shouldRequestReview() -> Bool {
-        guard UserDefaults.standard.string(forKey: Key.reviewedVersion) != appVersion else { return false }
+        guard defaults.string(forKey: Key.reviewedVersion) != appVersion else { return false }
         return currentStreak >= 3 || rankLevel >= 3
     }
 
     func markReviewRequested() {
-        UserDefaults.standard.set(appVersion, forKey: Key.reviewedVersion)
+        defaults.set(appVersion, forKey: Key.reviewedVersion)
     }
 
     /// 全戦績を初期化する（戦績画面の「リセット」用）
@@ -136,14 +143,13 @@ final class GameStats {
         lastPlayDay = nil
         didSetNewRecord = false
         lastDailyChallengeClear = nil
-        UserDefaults.standard.removeObject(forKey: Key.dailyChallengeClear)
+        defaults.removeObject(forKey: Key.dailyChallengeClear)
         dailyChallengeClearCount = 0
-        UserDefaults.standard.removeObject(forKey: Key.dailyChallengeCount)
+        defaults.removeObject(forKey: Key.dailyChallengeCount)
         save()
     }
 
     private func save() {
-        let defaults = UserDefaults.standard
         defaults.set(wins, forKey: Key.wins)
         defaults.set(losses, forKey: Key.losses)
         defaults.set(currentStreak, forKey: Key.streak)

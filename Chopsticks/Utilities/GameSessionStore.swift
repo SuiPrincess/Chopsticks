@@ -14,14 +14,17 @@ struct SavedGame: Codable {
 @Observable
 @MainActor
 final class GameSessionStore {
-    static let shared = GameSessionStore()
+    static let shared = GameSessionStore(defaults: .standard)
+
+    private let defaults: UserDefaults
 
     private(set) var savedGame: SavedGame?
 
     private static let key = "savedGame.v1"
 
-    private init() {
-        if let data = UserDefaults.standard.data(forKey: Self.key),
+    init(defaults: UserDefaults) {
+        self.defaults = defaults
+        if let data = defaults.data(forKey: Self.key),
            let saved = try? JSONDecoder().decode(SavedGame.self, from: data) {
             savedGame = saved
         }
@@ -35,12 +38,12 @@ final class GameSessionStore {
         else { return }
         let saved = SavedGame(state: state, attacksThisTurn: attacksThisTurn, savedAt: .now)
         guard let data = try? JSONEncoder().encode(saved) else { return }
-        UserDefaults.standard.set(data, forKey: Self.key)
+        defaults.set(data, forKey: Self.key)
         savedGame = saved
     }
 
     func clear() {
-        UserDefaults.standard.removeObject(forKey: Self.key)
+        defaults.removeObject(forKey: Self.key)
         savedGame = nil
     }
 
