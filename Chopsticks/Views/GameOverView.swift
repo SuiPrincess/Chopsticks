@@ -8,6 +8,7 @@ struct GameOverView: View {
     @State private var appeared = false
     @State private var confetti: [ConfettiPiece] = []
     @State private var showReplay = false
+    @State private var showGuide = false
     @Environment(\.requestReview) private var requestReview
 
     var body: some View {
@@ -157,6 +158,18 @@ struct GameOverView: View {
                         }
                         .padding(.top, 2)
                     }
+
+                    // 負けた直後こそ上達のチャンス
+                    if humanLostToAI {
+                        Button {
+                            showGuide = true
+                        } label: {
+                            Label("攻略ガイドを見る", systemImage: "book.fill")
+                                .font(.system(size: 13, weight: .medium, design: .rounded))
+                                .foregroundStyle(.white.opacity(0.6))
+                        }
+                        .padding(.top, 2)
+                    }
                 }
                 .padding(.horizontal, 40)
             }
@@ -186,6 +199,10 @@ struct GameOverView: View {
                 ReplayView(replay: replay)
                     .presentationDetents([.large])
             }
+        }
+        .sheet(isPresented: $showGuide) {
+            StrategyGuideView()
+                .presentationDetents([.large])
         }
     }
 

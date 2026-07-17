@@ -9,6 +9,7 @@ struct MenuView: View {
     @State private var showStats = false
     @State private var showSettings = false
     @State private var showShop = false
+    @State private var showStrategyGuide = false
     @State private var storeManager = StoreManager.shared
     @State private var navigateToGame = false
     @State private var titleGlow: CGFloat = 0.3
@@ -124,6 +125,10 @@ struct MenuView: View {
             }
             .sheet(isPresented: $showShop) {
                 ShopView()
+                    .presentationDetents([.large])
+            }
+            .sheet(isPresented: $showStrategyGuide) {
+                StrategyGuideView()
                     .presentationDetents([.large])
             }
             .sheet(isPresented: $showAIDifficultyPicker, onDismiss: {
@@ -359,7 +364,7 @@ struct MenuView: View {
                 .opacity(gameCenterManager.isAuthenticated ? 1 : 0.4)
                 .disabled(!gameCenterManager.isAuthenticated)
 
-                // Rules + random rules + stats
+                // Rules + random rules
                 HStack(spacing: 12) {
                     Button {
                         showRuleSettings = true
@@ -379,6 +384,19 @@ struct MenuView: View {
                     .buttonStyle(GlassButtonStyle(color: .orange))
                     .frame(width: 64)
                     .accessibilityLabel("おまかせルール")
+                }
+
+                // Strategy guide + stats
+                HStack(spacing: 12) {
+                    Button {
+                        showStrategyGuide = true
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "book.fill")
+                            Text("攻略ガイド")
+                        }
+                    }
+                    .buttonStyle(GlassButtonStyle(color: .purple, isPrimary: false))
 
                     Button {
                         showStats = true

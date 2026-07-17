@@ -293,6 +293,51 @@ TRANSLATIONS = {
         "Your support keeps this game growing. Thank you for playing Chopsticks!",
     "購入を開始できませんでした": "Couldn't start the purchase",
     "通信状態を確認して、もう一度お試しください。": "Check your connection and try again.",
+
+    # ---- StrategyGuideView ----
+    "攻略ガイド": "Strategy Guide",
+    "攻略ガイドを見る": "View strategy guide",
+    "ルールは単純でも、読み合いは奥深い。この7つの考え方を覚えるだけで勝率は大きく変わる。":
+        "The rules are simple, but the mind games run deep. Master these seven ideas and your win rate will transform.",
+    "まず「5」を数える": "Count to 5 first",
+    "手は指が5本以上になると死ぬ。つまり「自分の指＋相手の指」が5以上になる組み合わせを見つければ倒せる。":
+        "A hand dies when it reaches 5 or more fingers. Find any pair where your fingers plus theirs total 5 or more, and you can take that hand out.",
+    "毎ターン最初に、倒せる手がないか全ての組み合わせを確認するクセをつけよう。":
+        "Make it a habit: at the start of every turn, check every combination for a possible kill.",
+    "即死圏に気づく": "Spot the kill zone",
+    "同じ計算は相手もしてくる。自分の手が相手のどれかの指と合計5以上になるなら、次のターンに倒される。":
+        "Your opponent is doing the same math. If one of your hands plus any of theirs totals 5 or more, it dies next turn.",
+    "特に指4本の手は、指1本にすら倒される最危険状態。放置しないこと。":
+        "A 4-finger hand is in maximum danger — even a single finger can finish it. Never leave it hanging.",
+    "分割で立て直す": "Rebuild with splits",
+    "分割は攻撃を1回休む代わりに、指を両手へ配り直して危険な形をリセットできる。":
+        "A split skips your attack, but lets you redistribute fingers and reset a dangerous shape.",
+    "復活ルールがあるなら、死んだ手に指を分けて手数を取り戻そう。手の数の差は、そのまま選択肢の差になる。":
+        "With the revival rule, split fingers into a dead hand to bring it back. Every extra hand means more options.",
+    "ループは「ちょうど5」だけが死": "With wrap, only exactly 5 kills",
+    "ループルールでは5を超えた分は余りに戻る（3+4=7→2）。死ぬのは合計がちょうど5のときだけ。":
+        "With the wrap rule, totals over 5 wrap around (3+4=7→2). A hand only dies on exactly 5.",
+    "大きく叩くと、相手をかえって安全な数に戻してしまうことがある。叩く前に必ず合計を計算しよう。":
+        "A big hit can cycle the enemy hand back to safety. Always compute the total before you tap.",
+    "テンポで勝つ": "Win on tempo",
+    "倒せるときは基本すぐ倒す。手が減った相手は、攻撃も防御も選択肢が半分になる。":
+        "When you can kill, usually do it now. An opponent down a hand has half the options on attack and defense.",
+    "ただし倒した直後に自分が即死圏へ入るなら一呼吸。「この手のあと相手は何をしてくる？」を1手だけ先読みするだけで勝率は大きく変わる。":
+        "But pause if the kill walks you straight into the kill zone. Just one move of lookahead — anticipating their best reply — changes everything.",
+    "特殊ルールのコツ": "Special rule tips",
+    "毒: 指1本の攻撃が即死になる相討ち技。自分の弱い手と相手の強い手を交換するのが基本。":
+        "Poison: a 1-finger attack becomes an instant kill, at the cost of your own hand. Trade your weak hand for their strong one.",
+    "爆弾: 4になった手は爆発して他の全ての手に1ダメージ。自分の手を4で止めず、相手を4にして誘爆を狙おう。":
+        "Bomb: a hand reaching 4 explodes, dealing 1 damage to every other hand. Never park on 4 — push the opponent there instead.",
+    "ミラー: 攻撃した指の数が自分の手にも加算される。大きく叩くほど自分も危険。小さく叩いて分割で整えるのが安全。":
+        "Mirror: your attack adds the same fingers to your own hand. Big hits endanger you too — tap small and tidy up with splits.",
+    "ダブルタップ: 1ターンに2回攻撃できる。1回目で相手を4に調整し、2回目で仕留めるコンボが強力。":
+        "Double Tap: two attacks per turn. Set a hand to 4 with the first hit, finish it with the second.",
+    "ランク戦の心得": "Ranked mindset",
+    "上位のCPUは数手先まで読んでくる。攻撃の前に「相手の返しの一手」まで考えるクセをつけよう。":
+        "High-level CPUs read several moves ahead. Before every attack, consider their best comeback.",
+    "行き詰まったらヒントでAIの推奨手を見よう。「なぜその手なのか」を考えると、読み筋そのものが身につく。":
+        "Stuck? Use a hint to see the AI's recommended move — then ask yourself why. That's how reading skill sticks.",
 }
 
 INFO_PLIST = {
