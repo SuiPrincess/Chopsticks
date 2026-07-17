@@ -263,6 +263,7 @@ struct GameView: View {
         !tutorialCompleted
             && viewModel.state.turnCount < 2
             && !viewModel.isAITurn
+            && !viewModel.isRemoteControlled
             && !viewModel.isGameOver
             && !viewModel.showSplitPanel
     }

@@ -128,12 +128,12 @@ final class GameViewModel {
     }
 
     func startMultiplayerGame(asHost: Bool, opponentName: String, localName: String) {
-        if asHost {
-            localPlayerId = state.player1.id
-            state.player1 = Player(id: state.player1.id, name: localName, handCount: config.handCount)
-            state.player2 = Player(id: state.player2.id, name: opponentName, handCount: config.handCount)
-            multiplayerService?.send(.gameStart(state))
-        }
+        // onAppearの再発火などで二重初期化して対局をリセットしないよう冪等にする
+        guard asHost, localPlayerId == nil else { return }
+        localPlayerId = state.player1.id
+        state.player1 = Player(id: state.player1.id, name: localName, handCount: config.handCount)
+        state.player2 = Player(id: state.player2.id, name: opponentName, handCount: config.handCount)
+        multiplayerService?.send(.gameStart(state))
     }
 
     func handleRemoteMessage(_ message: MultiplayerMessage) {
@@ -189,7 +189,12 @@ final class GameViewModel {
     func declineRematch() {
         showRematchRequest = false
         multiplayerService?.send(.rematchDeclined)
-        disconnectMultiplayer()
+        // 即座にdisconnectすると送信キューのメッセージが落ちることがあるため、
+        // 少し待ってから切断する
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(300))
+            self.disconnectMultiplayer()
+        }
     }
 
     func disconnectMultiplayer() {
