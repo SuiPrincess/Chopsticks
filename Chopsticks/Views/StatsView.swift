@@ -79,6 +79,28 @@ struct StatsView: View {
                             }
                         }
 
+                        // 今日の挑戦
+                        statCard {
+                            HStack(spacing: 12) {
+                                Image(systemName: stats.isDailyChallengeClearedToday
+                                      ? "checkmark.seal.fill"
+                                      : "target")
+                                    .font(.system(size: 22))
+                                    .foregroundStyle(stats.isDailyChallengeClearedToday ? .cyan : .white.opacity(0.5))
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text("今日の挑戦 \(DailyChallenge.title())")
+                                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                        .foregroundStyle(.white)
+                                    Text(stats.isDailyChallengeClearedToday
+                                         ? "クリア済み！また明日！"
+                                         : "まだ未クリア。日替わりルールに挑もう")
+                                        .font(.system(size: 12, design: .rounded))
+                                        .foregroundStyle(.white.opacity(0.5))
+                                }
+                                Spacer()
+                            }
+                        }
+
                         if totalGames > 0 {
                             Button {
                                 showResetConfirm = true
