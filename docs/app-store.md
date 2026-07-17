@@ -45,3 +45,10 @@ Chopsticks - 割り箸バトル
 - 課金・広告・外部通信（Game Center以外）なし
 - Game Centerリーダーボード（任意）: ID `com.suiprincess.chopsticks.rank`（ランク戦の到達レベル）を
   App Store Connectで作成すると自動で送信される。未設定でも問題なく動作する
+- Game Center実績（任意）: 以下のIDをApp Store Connectで作成すると自動で解除される。未設定でも問題なく動作する
+  - `com.suiprincess.chopsticks.firstwin` — CPU戦で初勝利
+  - `com.suiprincess.chopsticks.streak3` — 3連勝
+  - `com.suiprincess.chopsticks.streak10` — 10連勝
+  - `com.suiprincess.chopsticks.perfect` — 手を1本も失わずに勝利（PERFECT）
+  - `com.suiprincess.chopsticks.oni` — 難易度「鬼」に勝利
+  - `com.suiprincess.chopsticks.rankmax` — CPU Lv.10を撃破（全CPU制覇）

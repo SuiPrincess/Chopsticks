@@ -8,11 +8,33 @@ final class GameCenterManager {
     /// App Store Connectで設定するリーダーボードID（未設定なら送信は静かに失敗する）
     static let rankLeaderboardID = "com.suiprincess.chopsticks.rank"
 
+    /// App Store Connectで設定する実績ID（未設定なら送信は静かに失敗する）
+    enum Achievement: String {
+        case firstWin = "com.suiprincess.chopsticks.firstwin"
+        case streak3 = "com.suiprincess.chopsticks.streak3"
+        case streak10 = "com.suiprincess.chopsticks.streak10"
+        case perfectWin = "com.suiprincess.chopsticks.perfect"
+        case beatOni = "com.suiprincess.chopsticks.oni"
+        case rankMax = "com.suiprincess.chopsticks.rankmax"
+    }
+
     private(set) var isAuthenticated = false
     private(set) var localPlayerName = ""
     var authenticationError: String?
 
     private init() {}
+
+    /// 実績を解除する。未ログイン・実績未設定の場合は何もしない。
+    /// 解除済みの実績を再送してもGame Center側で無視される。
+    func unlock(_ achievement: Achievement) {
+        guard isAuthenticated else { return }
+        let report = GKAchievement(identifier: achievement.rawValue)
+        report.percentComplete = 100
+        report.showsCompletionBanner = true
+        GKAchievement.report([report]) { _ in
+            // 失敗（未設定等）は無視する
+        }
+    }
 
     /// ランク戦のレベルをリーダーボードに送信する。
     /// 未ログイン・リーダーボード未設定の場合は何もしない。

@@ -532,6 +532,22 @@ final class GameViewModel {
         GameSessionStore.shared.save(state: state, attacksThisTurn: attacksThisTurn)
     }
 
+    /// CPU戦勝利時のGame Center実績（未設定なら何も起きない）
+    private func reportAchievements() {
+        let gameCenter = GameCenterManager.shared
+        let stats = GameStats.shared
+        gameCenter.unlock(.firstWin)
+        if stats.currentStreak >= 3 { gameCenter.unlock(.streak3) }
+        if stats.currentStreak >= 10 { gameCenter.unlock(.streak10) }
+        if isPerfectWin { gameCenter.unlock(.perfectWin) }
+        if state.config.aiLevel == nil && state.config.aiDifficulty == .oni {
+            gameCenter.unlock(.beatOni)
+        }
+        if state.config.aiLevel == GameStats.maxRankLevel {
+            gameCenter.unlock(.rankMax)
+        }
+    }
+
     @discardableResult
     private func checkWinCondition() -> Bool {
         let p1Dead = state.player1.isDefeated
@@ -584,6 +600,9 @@ final class GameViewModel {
             if playerWon, state.config.aiLevel != nil {
                 didRankUp = GameStats.shared.registerRankedWin()
                 GameCenterManager.shared.submitRankLevel(GameStats.shared.rankLevel)
+            }
+            if playerWon {
+                reportAchievements()
             }
         }
         // リザルトのサウンド（ランクアップ > 勝敗、引き分けは無音）
