@@ -40,6 +40,9 @@
 		F2F590E36D69D759C4070A48 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05C3DC0AC64509D86888E8AD /* GameView.swift */; };
 		FA7C1E35C1D87D19BC04A148 /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7736242C6E7A921962DF97B9 /* GameState.swift */; };
 		FBD36EF2A118013B3ED28CF1 /* PlayerAreaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 048F3A526C6FAAAC6A3FB9A8 /* PlayerAreaView.swift */; };
+		6ED0BB0173C41B2A9D3E5F04 /* GameLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED0AA0173C41B2A9D3E5F01 /* GameLogicTests.swift */; };
+		6ED0BB0273C41B2A9D3E5F05 /* AIEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED0AA0273C41B2A9D3E5F02 /* AIEngineTests.swift */; };
+		6ED0BB0373C41B2A9D3E5F06 /* GameViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED0AA0373C41B2A9D3E5F03 /* GameViewModelTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -78,6 +81,10 @@
 		EC4DED73A4DA152397764961 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		EE45D2D66A0FEE63003021BD /* Chopsticks.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Chopsticks.entitlements; sourceTree = "<group>"; };
 		FDD409937881D7185F3B3E88 /* GameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewModel.swift; sourceTree = "<group>"; };
+		6ED0AA0173C41B2A9D3E5F01 /* GameLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameLogicTests.swift; sourceTree = "<group>"; };
+		6ED0AA0273C41B2A9D3E5F02 /* AIEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIEngineTests.swift; sourceTree = "<group>"; };
+		6ED0AA0373C41B2A9D3E5F03 /* GameViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewModelTests.swift; sourceTree = "<group>"; };
+		6ED0DD0173C41B2A9D3E5F08 /* ChopsticksTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChopsticksTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -115,6 +122,7 @@
 				305BBCDE046B498B8FB04924 /* AI */,
 				88CFC280349F16B38E9CDB04 /* App */,
 				239C1A84BB0F2923454D444F /* Chopsticks */,
+				6ED0CC0173C41B2A9D3E5F07 /* ChopsticksTests */,
 				D076A686871768DF52B1F93B /* Models */,
 				B58F0EEFC9EF74342C1A23EE /* Networking */,
 				4F1F47D27807F2D5DD08FF5B /* Utilities */,
@@ -223,8 +231,19 @@
 			isa = PBXGroup;
 			children = (
 				1C2B7B2DCC35E093A3FBE05D /* Chopsticks.app */,
+				6ED0DD0173C41B2A9D3E5F08 /* ChopsticksTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		6ED0CC0173C41B2A9D3E5F07 /* ChopsticksTests */ = {
+			isa = PBXGroup;
+			children = (
+				6ED0AA0273C41B2A9D3E5F02 /* AIEngineTests.swift */,
+				6ED0AA0173C41B2A9D3E5F01 /* GameLogicTests.swift */,
+				6ED0AA0373C41B2A9D3E5F03 /* GameViewModelTests.swift */,
+			);
+			path = ChopsticksTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -247,7 +266,43 @@
 			productReference = 1C2B7B2DCC35E093A3FBE05D /* Chopsticks.app */;
 			productType = "com.apple.product-type.application";
 		};
+		6ED0EE0173C41B2A9D3E5F09 /* ChopsticksTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6ED0AB0173C41B2A9D3E5F0B /* Build configuration list for PBXNativeTarget "ChopsticksTests" */;
+			buildPhases = (
+				6ED0FF0173C41B2A9D3E5F0A /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6ED0AF0173C41B2A9D3E5F0F /* PBXTargetDependency */,
+			);
+			name = ChopsticksTests;
+			packageProductDependencies = (
+			);
+			productName = ChopsticksTests;
+			productReference = 6ED0DD0173C41B2A9D3E5F08 /* ChopsticksTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
+
+/* Begin PBXContainerItemProxy section */
+		6ED0AE0173C41B2A9D3E5F0E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 247525AA3B9D26BAEC18ABC5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B21C67B2441A083463BD59E7;
+			remoteInfo = Chopsticks;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		6ED0AF0173C41B2A9D3E5F0F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B21C67B2441A083463BD59E7 /* Chopsticks */;
+			targetProxy = 6ED0AE0173C41B2A9D3E5F0E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXProject section */
 		247525AA3B9D26BAEC18ABC5 /* Project object */ = {
@@ -270,6 +325,7 @@
 			projectRoot = "";
 			targets = (
 				B21C67B2441A083463BD59E7 /* Chopsticks */,
+				6ED0EE0173C41B2A9D3E5F09 /* ChopsticksTests */,
 			);
 		};
 /* End PBXProject section */
@@ -312,6 +368,16 @@
 				CA161231256615E5D0D61E8D /* RuleDisplayView.swift in Sources */,
 				C82E1E87863ADFBBACA7CDC1 /* RuleSettingsView.swift in Sources */,
 				1E13C1C280D733E40A97A06E /* SplitControlView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6ED0FF0173C41B2A9D3E5F0A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6ED0BB0273C41B2A9D3E5F05 /* AIEngineTests.swift in Sources */,
+				6ED0BB0173C41B2A9D3E5F04 /* GameLogicTests.swift in Sources */,
+				6ED0BB0373C41B2A9D3E5F06 /* GameViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -491,6 +557,42 @@
 			};
 			name = Debug;
 		};
+		6ED0AC0173C41B2A9D3E5F0C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.suiprincess.chopsticks-tests";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Chopsticks.app/Chopsticks";
+			};
+			name = Debug;
+		};
+		6ED0AD0173C41B2A9D3E5F0D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.suiprincess.chopsticks-tests";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Chopsticks.app/Chopsticks";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -508,6 +610,15 @@
 			buildConfigurations = (
 				063D7207D24032B9ECDBD35B /* Debug */,
 				71BF9B5AA74695690443E704 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		6ED0AB0173C41B2A9D3E5F0B /* Build configuration list for PBXNativeTarget "ChopsticksTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6ED0AC0173C41B2A9D3E5F0C /* Debug */,
+				6ED0AD0173C41B2A9D3E5F0D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

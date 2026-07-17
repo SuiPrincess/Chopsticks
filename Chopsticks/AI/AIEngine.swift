@@ -161,7 +161,8 @@ struct AIEngine {
 
     /// 反復深化: 深さ1から順に読み、時間切れになったら最後に完了した深さの結果を使う。
     /// これにより盤面の複雑さによらず応答時間が一定に保たれる。
-    private static func chooseBestAction(
+    /// （テストから短い持ち時間で呼べるようinternal）
+    static func chooseBestAction(
         state: GameState,
         actions: [GameAction],
         attacksUsed: Int,

@@ -14,6 +14,7 @@ targets:
         excludes:
           - project.yml
           - "*.xcodeproj/**"
+          - "ChopsticksTests/**"
     settings:
       base:
         INFOPLIST_KEY_UILaunchScreen_Generation: true
@@ -28,3 +29,18 @@ targets:
         MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: 1
         CODE_SIGN_ENTITLEMENTS: Chopsticks.entitlements
+
+  ChopsticksTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - ChopsticksTests
+    dependencies:
+      - target: Chopsticks
+    settings:
+      base:
+        SWIFT_VERSION: "5.9"
+        GENERATE_INFOPLIST_FILE: true
+        PRODUCT_BUNDLE_IDENTIFIER: com.suiprincess.chopsticks-tests
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Chopsticks.app/Chopsticks"
+        BUNDLE_LOADER: "$(TEST_HOST)"
