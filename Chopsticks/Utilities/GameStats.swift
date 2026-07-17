@@ -21,6 +21,8 @@ final class GameStats {
     private(set) var didSetNewRecord = false
     /// 🎯 今日の挑戦を最後にクリアした日
     private(set) var lastDailyChallengeClear: Date?
+    /// 🎯 今日の挑戦の通算クリア回数（1日1回までカウント。報酬テーマの解放条件）
+    private(set) var dailyChallengeClearCount: Int
 
     private enum Key {
         static let wins = "stats.cpu.wins"
@@ -32,6 +34,7 @@ final class GameStats {
         static let lastPlayDay = "stats.daily.lastPlayDay"
         static let reviewedVersion = "review.requestedVersion"
         static let dailyChallengeClear = "stats.dailyChallenge.lastClear"
+        static let dailyChallengeCount = "stats.dailyChallenge.clearCount"
     }
 
     private init() {
@@ -44,6 +47,7 @@ final class GameStats {
         dailyStreak = defaults.integer(forKey: Key.dailyStreak)
         lastPlayDay = defaults.object(forKey: Key.lastPlayDay) as? Date
         lastDailyChallengeClear = defaults.object(forKey: Key.dailyChallengeClear) as? Date
+        dailyChallengeClearCount = defaults.integer(forKey: Key.dailyChallengeCount)
     }
 
     // MARK: - 今日の挑戦
@@ -53,7 +57,12 @@ final class GameStats {
         return Calendar.current.isDate(last, inSameDayAs: .now)
     }
 
+    /// クリアを記録する。通算回数は1日1回だけ増える。
     func markDailyChallengeCleared() {
+        if !isDailyChallengeClearedToday {
+            dailyChallengeClearCount += 1
+            UserDefaults.standard.set(dailyChallengeClearCount, forKey: Key.dailyChallengeCount)
+        }
         lastDailyChallengeClear = .now
         UserDefaults.standard.set(lastDailyChallengeClear, forKey: Key.dailyChallengeClear)
     }
@@ -128,6 +137,8 @@ final class GameStats {
         didSetNewRecord = false
         lastDailyChallengeClear = nil
         UserDefaults.standard.removeObject(forKey: Key.dailyChallengeClear)
+        dailyChallengeClearCount = 0
+        UserDefaults.standard.removeObject(forKey: Key.dailyChallengeCount)
         save()
     }
 

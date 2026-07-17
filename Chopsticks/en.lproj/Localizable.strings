@@ -87,6 +87,7 @@
 "ベスト連勝" = "Best streak";
 "ベスト連勝 %lld" = "Best streak %lld";
 "マトリックス" = "Matrix";
+"ミッドナイト" = "Midnight";
 "ミラー" = "Mirror";
 "ミラー: 攻撃した分が自分にも加算" = "Mirror: your attack also adds to your own hand";
 "ランク Lv.%lld" = "Rank Lv.%lld";
@@ -110,6 +111,7 @@
 "今日の挑戦" = "Daily Challenge";
 "今日の挑戦 %@" = "Daily Challenge %@";
 "今日の挑戦 — %@" = "Daily Challenge — %@";
+"今日の挑戦を%lld回クリアで解放（いま%lld回）" = "Clear the Daily Challenge %1$lld times to unlock (now: %2$lld)";
 "個人開発の応援になります" = "Supports an indie developer";
 "全てのCPUを撃破！" = "All CPUs defeated!";
 "全ての手が死んだプレイヤーの負け" = "Lose all your hands and you lose the game";
@@ -194,6 +196,7 @@
 "通信状態を確認して、もう一度お試しください。" = "Check your connection and try again.";
 "通知が許可されていません" = "Notifications not allowed";
 "通算 %lld勝 %lld敗・ベスト連勝 %lld" = "Total %1$lld W – %2$lld L · Best streak %3$lld";
+"通算クリア %lld回" = "Total clears: %lld";
 "連勝中" = "Current";
 "連続日数" = "Day streak";
 "進行中のゲームは自動保存され、メニューの「続きから」で再開できます" = "Your game is saved automatically. Resume anytime with Continue on the menu";
@@ -202,6 +205,7 @@
 "部屋を探す" = "Find Room";
 "開発者に差し入れ" = "Tip the Developer";
 "鬼" = "Oni";
+"🎁 限定テーマ「%@」を解放!" = "🎁 Exclusive theme “%@” unlocked!";
 "🎯 今日の挑戦クリア！また明日！" = "🎯 Daily Challenge cleared! See you tomorrow!";
 "👑 全CPU制覇!" = "👑 All CPUs defeated!";
 "🔥 %lld連勝中" = "🔥 %lld wins in a row";

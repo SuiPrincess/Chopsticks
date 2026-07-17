@@ -185,13 +185,21 @@ struct ShopView: View {
     @ViewBuilder
     private func themeRow(_ theme: Theme) -> some View {
         let isSelected = themeStore.selectedThemeID == theme.id
-        let isLocked = theme.isPremium && !store.isPremium
+        let challengeClears = GameStats.shared.dailyChallengeClearCount
+        let isLocked = !theme.isUnlocked(
+            isPremiumPurchased: store.isPremium,
+            challengeClears: challengeClears
+        )
 
         Button {
             if isLocked {
                 HapticManager.handTap()
             } else {
-                themeStore.select(theme, isPremiumUnlocked: store.isPremium)
+                themeStore.select(
+                    theme,
+                    isPremiumPurchased: store.isPremium,
+                    challengeClears: challengeClears
+                )
                 HapticManager.handSelect()
             }
         } label: {
@@ -207,16 +215,24 @@ struct ShopView: View {
                     RoundedRectangle(cornerRadius: 8).fill(theme.bgMid)
                 )
 
-                Text(theme.name)
-                    .font(.system(size: 15, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(theme.name)
+                        .font(.system(size: 15, weight: .medium, design: .rounded))
+                        .foregroundStyle(.white)
+                    // 報酬テーマは解放条件と進捗を表示する
+                    if case .dailyChallengeClears(let required) = theme.unlock, isLocked {
+                        Text("今日の挑戦を\(required)回クリアで解放（いま\(min(challengeClears, required))回）")
+                            .font(.system(size: 11, design: .rounded))
+                            .foregroundStyle(.cyan.opacity(0.8))
+                    }
+                }
 
                 Spacer()
 
                 if isLocked {
-                    Image(systemName: "lock.fill")
+                    Image(systemName: theme.isPremium ? "lock.fill" : "target")
                         .font(.system(size: 13))
-                        .foregroundStyle(.yellow.opacity(0.7))
+                        .foregroundStyle(theme.isPremium ? .yellow.opacity(0.7) : .cyan.opacity(0.7))
                 } else if isSelected {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundStyle(AppTheme.accent)

@@ -52,6 +52,11 @@ TRANSLATIONS = {
     "サクラ": "Sakura",
     "ゴールド": "Gold",
     "ディープシー": "Deep Sea",
+    "ミッドナイト": "Midnight",
+    "今日の挑戦を%lld回クリアで解放（いま%lld回）":
+        "Clear the Daily Challenge %1$lld times to unlock (now: %2$lld)",
+    "🎁 限定テーマ「%@」を解放!": "🎁 Exclusive theme “%@” unlocked!",
+    "通算クリア %lld回": "Total clears: %lld",
 
     # ---- GameViewModel banners / messages ----
     "接続が切れました": "Connection lost",

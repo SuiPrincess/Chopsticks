@@ -67,6 +67,13 @@ struct GameOverView: View {
                             .tracking(1)
                     }
 
+                    if let rewardTheme = viewModel.unlockedRewardTheme {
+                        Text("🎁 限定テーマ「\(rewardTheme.name)」を解放!")
+                            .font(.system(size: 15, weight: .heavy, design: .rounded))
+                            .foregroundStyle(AppTheme.goldGradient)
+                            .tracking(1)
+                    }
+
                     if viewModel.didRankUp {
                         Text("⬆️ RANK UP! 次は Lv.\(GameStats.shared.rankLevel)")
                             .font(.system(size: 16, weight: .heavy, design: .rounded))

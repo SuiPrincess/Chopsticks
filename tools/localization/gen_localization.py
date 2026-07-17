@@ -20,11 +20,11 @@ JP = re.compile(r"[぀-ヿ㐀-鿿！-｠]")
 
 INT_HINTS = ("count", "Count", "level", "Level", "streak", "Streak", "wins",
              "losses", "turn", "Turn", "+ 1", "min(", "$0", "freeHints",
-             "fingerCount", "total", "Total")
+             "fingerCount", "total", "Total", "required")
 STRING_EXPRS = {
     "text", "name", "mode", "position", "state", "config.aiDifficulty.label",
     "DailyChallenge.title()", "player.name", "appVersion",
-    "premium.displayPrice", "product.displayPrice",
+    "premium.displayPrice", "product.displayPrice", "rewardTheme.name",
 }
 
 
@@ -109,10 +109,12 @@ def main():
         lines.append(f'"{escape_strings(k)}" = "{escape_strings(TRANSLATIONS[k])}";')
     en.write_text("\n".join(lines) + "\n")
 
-    ja.write_text(
-        "/* 日本語はキー自体が日本語のため、このファイルは意図的に空。\n"
-        "   キーが見つからない場合はキー文字列がそのまま表示される。 */\n"
-    )
+    # ja: キー=値の恒等エントリを明示的に出力する。
+    # （空ファイル＋キーフォールバック仕様に依存しないための堅牢化）
+    ja_lines = ["/* 日本語: キーが日本語原文のため恒等マッピング（自動生成） */", ""]
+    for k in sorted(TRANSLATIONS):
+        ja_lines.append(f'"{escape_strings(k)}" = "{escape_strings(k)}";')
+    ja.write_text("\n".join(ja_lines) + "\n")
 
     (ROOT / "en.lproj/InfoPlist.strings").write_text(
         "\n".join(f'"{k}" = "{escape_strings(v)}";' for k, v in INFO_PLIST.items()) + "\n"

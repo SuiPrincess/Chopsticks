@@ -96,6 +96,11 @@ struct StatsView: View {
                                          : String(localized: "まだ未クリア。日替わりルールに挑もう"))
                                         .font(.system(size: 12, design: .rounded))
                                         .foregroundStyle(.white.opacity(0.5))
+                                    if stats.dailyChallengeClearCount > 0 {
+                                        Text("通算クリア \(stats.dailyChallengeClearCount)回")
+                                            .font(.system(size: 11, design: .rounded))
+                                            .foregroundStyle(.cyan.opacity(0.7))
+                                    }
                                 }
                                 Spacer()
                             }

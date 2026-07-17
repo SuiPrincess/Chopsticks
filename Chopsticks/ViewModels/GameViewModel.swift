@@ -21,6 +21,8 @@ final class GameViewModel {
     private(set) var shakeTrigger = 0
     /// この勝利でランクが上がったか（リザルト演出用）
     private(set) var didRankUp = false
+    /// この勝利で報酬テーマが解放されたか（リザルト演出用）
+    private(set) var unlockedRewardTheme: Theme?
     /// ヒント: AIが提案する最善手（該当する手が黄色く光る）
     private(set) var hintAction: GameAction?
     private var isComputingHint = false
@@ -229,6 +231,7 @@ final class GameViewModel {
     func newGame() {
         gameGeneration += 1
         didRankUp = false
+        unlockedRewardTheme = nil
         // マルチプレイのリマッチが、無関係なシングルプレイの中断セーブを
         // 消してしまわないようガードする
         if !isMultiplayer {
@@ -618,7 +621,16 @@ final class GameViewModel {
                 GameCenterManager.shared.submitRankLevel(GameStats.shared.rankLevel)
             }
             if playerWon, state.config.isDailyChallenge {
+                let clearsBefore = GameStats.shared.dailyChallengeClearCount
                 GameStats.shared.markDailyChallengeCleared()
+                let clearsAfter = GameStats.shared.dailyChallengeClearCount
+                // このクリアで解放条件をまたいだ報酬テーマがあれば演出する
+                unlockedRewardTheme = Theme.all.first { theme in
+                    if case .dailyChallengeClears(let required) = theme.unlock {
+                        return clearsBefore < required && clearsAfter >= required
+                    }
+                    return false
+                }
             }
             if playerWon {
                 reportAchievements()

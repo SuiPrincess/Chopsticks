@@ -1,11 +1,19 @@
 import SwiftUI
 import Observation
 
-/// カラーテーマ。プレミアム購入で全テーマが解放される。
+/// テーマの解放条件
+enum ThemeUnlock: Equatable {
+    case free
+    case premium
+    /// 「今日の挑戦」を通算n回クリアで解放（プレミアム不要の報酬テーマ）
+    case dailyChallengeClears(Int)
+}
+
+/// カラーテーマ。プレミアム購入または報酬条件で解放される。
 struct Theme: Identifiable, Equatable {
     let id: String
     let name: String
-    let isPremium: Bool
+    let unlock: ThemeUnlock
 
     let player1: Color
     let player2: Color
@@ -14,6 +22,19 @@ struct Theme: Identifiable, Equatable {
     let bgDark: Color
     let bgMid: Color
     let bgDeep: Color
+
+    var isPremium: Bool { unlock == .premium }
+
+    func isUnlocked(isPremiumPurchased: Bool, challengeClears: Int) -> Bool {
+        switch unlock {
+        case .free:
+            return true
+        case .premium:
+            return isPremiumPurchased
+        case .dailyChallengeClears(let required):
+            return challengeClears >= required
+        }
+    }
 }
 
 extension Theme {
@@ -21,7 +42,7 @@ extension Theme {
     static let neon = Theme(
         id: "neon",
         name: String(localized: "ネオン"),
-        isPremium: false,
+        unlock: .free,
         player1: Color(red: 0.3, green: 0.75, blue: 1.0),
         player2: Color(red: 1.0, green: 0.4, blue: 0.65),
         accent: Color(red: 0.3, green: 0.75, blue: 1.0),
@@ -34,7 +55,7 @@ extension Theme {
     static let sunset = Theme(
         id: "sunset",
         name: String(localized: "サンセット"),
-        isPremium: true,
+        unlock: .premium,
         player1: Color(red: 1.0, green: 0.6, blue: 0.2),
         player2: Color(red: 0.85, green: 0.3, blue: 0.85),
         accent: Color(red: 1.0, green: 0.55, blue: 0.25),
@@ -47,7 +68,7 @@ extension Theme {
     static let matrix = Theme(
         id: "matrix",
         name: String(localized: "マトリックス"),
-        isPremium: true,
+        unlock: .premium,
         player1: Color(red: 0.25, green: 0.95, blue: 0.45),
         player2: Color(red: 0.85, green: 1.0, blue: 0.3),
         accent: Color(red: 0.3, green: 0.95, blue: 0.5),
@@ -60,7 +81,7 @@ extension Theme {
     static let sakura = Theme(
         id: "sakura",
         name: String(localized: "サクラ"),
-        isPremium: true,
+        unlock: .premium,
         player1: Color(red: 1.0, green: 0.65, blue: 0.8),
         player2: Color(red: 0.75, green: 0.55, blue: 1.0),
         accent: Color(red: 1.0, green: 0.6, blue: 0.75),
@@ -73,7 +94,7 @@ extension Theme {
     static let luxeGold = Theme(
         id: "luxeGold",
         name: String(localized: "ゴールド"),
-        isPremium: true,
+        unlock: .premium,
         player1: Color(red: 1.0, green: 0.83, blue: 0.35),
         player2: Color(red: 0.9, green: 0.92, blue: 0.98),
         accent: Color(red: 1.0, green: 0.8, blue: 0.3),
@@ -86,7 +107,7 @@ extension Theme {
     static let deepSea = Theme(
         id: "deepSea",
         name: String(localized: "ディープシー"),
-        isPremium: true,
+        unlock: .premium,
         player1: Color(red: 0.25, green: 0.85, blue: 0.85),
         player2: Color(red: 0.4, green: 0.55, blue: 1.0),
         accent: Color(red: 0.3, green: 0.85, blue: 0.9),
@@ -96,7 +117,21 @@ extension Theme {
         bgDeep: Color(red: 0.03, green: 0.05, blue: 0.16)
     )
 
-    static let all: [Theme] = [.neon, .sunset, .matrix, .sakura, .luxeGold, .deepSea]
+    /// 🎁 報酬テーマ: 「今日の挑戦」通算7回クリアで解放（課金不要）
+    static let midnight = Theme(
+        id: "midnight",
+        name: String(localized: "ミッドナイト"),
+        unlock: .dailyChallengeClears(7),
+        player1: Color(red: 0.75, green: 0.85, blue: 1.0),
+        player2: Color(red: 0.85, green: 0.75, blue: 1.0),
+        accent: Color(red: 0.7, green: 0.8, blue: 1.0),
+        accentSecondary: Color(red: 0.55, green: 0.5, blue: 0.95),
+        bgDark: Color(red: 0.00, green: 0.00, blue: 0.02),
+        bgMid: Color(red: 0.03, green: 0.03, blue: 0.08),
+        bgDeep: Color(red: 0.05, green: 0.02, blue: 0.10)
+    )
+
+    static let all: [Theme] = [.neon, .sunset, .matrix, .sakura, .luxeGold, .deepSea, .midnight]
 }
 
 /// 選択中のテーマ。AppThemeのアクセサ経由で全Viewが参照する。
@@ -119,9 +154,12 @@ final class ThemeStore {
         selectedThemeID = UserDefaults.standard.string(forKey: Self.key) ?? Theme.neon.id
     }
 
-    /// プレミアムでないユーザーが選べるのは無料テーマのみ
-    func select(_ theme: Theme, isPremiumUnlocked: Bool) {
-        guard !theme.isPremium || isPremiumUnlocked else { return }
+    /// 解放済みのテーマのみ選択できる
+    func select(_ theme: Theme, isPremiumPurchased: Bool, challengeClears: Int) {
+        guard theme.isUnlocked(
+            isPremiumPurchased: isPremiumPurchased,
+            challengeClears: challengeClears
+        ) else { return }
         selectedThemeID = theme.id
     }
 }

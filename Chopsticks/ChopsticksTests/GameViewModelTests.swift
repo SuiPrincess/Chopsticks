@@ -126,17 +126,47 @@ final class GameViewModelTests: XCTestCase {
         XCTAssertEqual(settings.hintsRemainingToday, 0)
     }
 
-    func testThemeSelectionRespectsPremiumLock() {
+    func testThemeSelectionRespectsUnlockRules() {
         let store = ThemeStore.shared
         let original = store.selectedThemeID
         defer { store.selectedThemeID = original }
 
-        store.select(.neon, isPremiumUnlocked: false)
+        store.select(.neon, isPremiumPurchased: false, challengeClears: 0)
         XCTAssertEqual(store.selectedThemeID, Theme.neon.id)
-        store.select(.sunset, isPremiumUnlocked: false)
+        store.select(.sunset, isPremiumPurchased: false, challengeClears: 0)
         XCTAssertEqual(store.selectedThemeID, Theme.neon.id, "未購入ではプレミアムテーマを選べない")
-        store.select(.sunset, isPremiumUnlocked: true)
+        store.select(.sunset, isPremiumPurchased: true, challengeClears: 0)
         XCTAssertEqual(store.selectedThemeID, Theme.sunset.id, "プレミアムなら選べる")
+
+        store.select(.midnight, isPremiumPurchased: true, challengeClears: 6)
+        XCTAssertEqual(store.selectedThemeID, Theme.sunset.id,
+                       "報酬テーマはプレミアムでも回数不足なら選べない")
+        store.select(.midnight, isPremiumPurchased: false, challengeClears: 7)
+        XCTAssertEqual(store.selectedThemeID, Theme.midnight.id,
+                       "通算7回クリアで課金なしでも解放される")
+    }
+
+    func testDailyChallengeClearCountIncrementsOncePerDay() {
+        let defaults = UserDefaults.standard
+        let dateKey = "stats.dailyChallenge.lastClear"
+        let countKey = "stats.dailyChallenge.clearCount"
+        let savedDate = defaults.object(forKey: dateKey)
+        let savedCount = defaults.object(forKey: countKey)
+        defer {
+            defaults.set(savedDate, forKey: dateKey)
+            defaults.set(savedCount, forKey: countKey)
+        }
+        defaults.removeObject(forKey: dateKey)
+        defaults.removeObject(forKey: countKey)
+
+        // GameStatsはシングルトンで端末の既存状態を引き継ぐため、
+        // 「同日の2回目はカウントされない」という差分だけを検証する
+        let stats = GameStats.shared
+        stats.markDailyChallengeCleared()
+        let afterFirst = stats.dailyChallengeClearCount
+        XCTAssertTrue(stats.isDailyChallengeClearedToday)
+        stats.markDailyChallengeCleared()
+        XCTAssertEqual(stats.dailyChallengeClearCount, afterFirst, "同日2回目はカウントしない")
     }
 
     func testMirrorSuicideGivesOpponentWin() {
