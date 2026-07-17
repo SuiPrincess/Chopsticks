@@ -41,9 +41,10 @@ jobs:
           echo "Using simulator: $DEVICE"
           echo "device=$DEVICE" >> "$GITHUB_OUTPUT"
 
+      # tailにパイプするとエラー行が流れて見えなくなるため、全ログを保存して
+      # 失敗時はerror行を抽出して表示する
       - name: Run unit tests
         run: |
-          set -o pipefail
           xcodebuild test \
             -project Chopsticks/Chopsticks.xcodeproj \
             -scheme Chopsticks \
@@ -51,4 +52,12 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGN_IDENTITY="" \
             DEVELOPMENT_TEAM="" \
-            | tail -100
+            > xcodebuild.log 2>&1 || {
+              echo "=== errors ==="
+              grep -E " error:|BUILD FAILED|TEST FAILED|Failing tests|fatal error|Assertion" -A 3 xcodebuild.log | head -300
+              echo "=== last 80 lines ==="
+              tail -80 xcodebuild.log
+              exit 1
+            }
+          echo "=== summary (last 40 lines) ==="
+          tail -40 xcodebuild.log
