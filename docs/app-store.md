@@ -47,7 +47,7 @@ Chopsticks - 割り箸バトル
 
 | Product ID | 種類 | 内容 | 参考価格 |
 |---|---|---|---|
-| `com.suiprincess.chopsticks.premium` | 非消耗型 | 全カラーテーマ解放＋AIヒント無制限 | ¥480 |
+| `com.suiprincess.chopsticks.premium` | 非消耗型 | プレミアムテーマ解放＋AIヒント無制限 | ¥480 |
 | `com.suiprincess.chopsticks.tip.small` | 消耗型 | 投げ銭（おにぎり） | ¥160 |
 | `com.suiprincess.chopsticks.tip.large` | 消耗型 | 投げ銭（お弁当） | ¥600 |
 

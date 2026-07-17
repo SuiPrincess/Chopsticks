@@ -153,15 +153,13 @@ final class GameViewModelTests: XCTestCase {
     // MARK: - マネタイズ関連
 
     func testHintQuotaConsumesAndLimits() {
-        let defaults = UserDefaults.standard
-        defaults.removeObject(forKey: "hint.quota.date")
-        defaults.removeObject(forKey: "hint.quota.count")
-        defer {
-            defaults.removeObject(forKey: "hint.quota.date")
-            defaults.removeObject(forKey: "hint.quota.count")
-        }
+        // SettingsStore.sharedを使うと実端末の残回数を消費してしまうため、隔離スイートで検証
+        let suiteName = "com.suiprincess.chopsticks.tests.hintQuota"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defaults.removePersistentDomain(forName: suiteName)
+        defer { defaults.removePersistentDomain(forName: suiteName) }
 
-        let settings = SettingsStore.shared
+        let settings = SettingsStore(defaults: defaults)
         XCTAssertEqual(settings.hintsRemainingToday, SettingsStore.freeHintsPerDay)
         for i in 0..<SettingsStore.freeHintsPerDay {
             XCTAssertTrue(settings.consumeHint(), "\(i + 1)回目は成功")
@@ -191,26 +189,20 @@ final class GameViewModelTests: XCTestCase {
     }
 
     func testDailyChallengeClearCountIncrementsOncePerDay() {
-        let defaults = UserDefaults.standard
-        let dateKey = "stats.dailyChallenge.lastClear"
-        let countKey = "stats.dailyChallenge.clearCount"
-        let savedDate = defaults.object(forKey: dateKey)
-        let savedCount = defaults.object(forKey: countKey)
-        defer {
-            defaults.set(savedDate, forKey: dateKey)
-            defaults.set(savedCount, forKey: countKey)
-        }
-        defaults.removeObject(forKey: dateKey)
-        defaults.removeObject(forKey: countKey)
+        // GameStats.sharedを使うと実端末の戦績をメモリ上で汚染するため、隔離スイートで検証
+        let suiteName = "com.suiprincess.chopsticks.tests.dailyClear"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defaults.removePersistentDomain(forName: suiteName)
+        defer { defaults.removePersistentDomain(forName: suiteName) }
 
-        // GameStatsはシングルトンで端末の既存状態を引き継ぐため、
-        // 「同日の2回目はカウントされない」という差分だけを検証する
-        let stats = GameStats.shared
+        let stats = GameStats(defaults: defaults)
+        XCTAssertEqual(stats.dailyChallengeClearCount, 0)
+        XCTAssertFalse(stats.isDailyChallengeClearedToday)
         stats.markDailyChallengeCleared()
-        let afterFirst = stats.dailyChallengeClearCount
+        XCTAssertEqual(stats.dailyChallengeClearCount, 1)
         XCTAssertTrue(stats.isDailyChallengeClearedToday)
         stats.markDailyChallengeCleared()
-        XCTAssertEqual(stats.dailyChallengeClearCount, afterFirst, "同日2回目はカウントしない")
+        XCTAssertEqual(stats.dailyChallengeClearCount, 1, "同日2回目はカウントしない")
     }
 
     func testMirrorSuicideGivesOpponentWin() {

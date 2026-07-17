@@ -273,7 +273,7 @@ TRANSLATIONS = {
     # ---- ShopView ----
     "プレミアム": "Premium",
     "解放済み": "Unlocked",
-    "全カラーテーマを解放（5種類）": "Unlock all color themes (5)",
+    "プレミアムテーマを解放（5種類）": "Unlock all premium themes (5)",
     "AIヒントが無制限に": "Unlimited AI hints",
     "個人開発の応援になります": "Supports an indie developer",
     "いつも応援ありがとうございます！": "Thank you for your support!",

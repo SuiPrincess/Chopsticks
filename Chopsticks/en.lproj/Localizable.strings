@@ -85,6 +85,7 @@
 "プレミアムでテーマ解放＆ヒント無制限" = "Premium unlocks themes & unlimited hints";
 "プレミアムは買い切りです。価格は購入画面に表示されます。" = "Premium is a one-time purchase. The price is shown at checkout.";
 "プレミアムを見る" = "See Premium";
+"プレミアムテーマを解放（5種類）" = "Unlock all premium themes (5)";
 "ベスト連勝" = "Best streak";
 "ベスト連勝 %lld" = "Best streak %lld";
 "マトリックス" = "Matrix";
@@ -119,7 +120,6 @@
 "個人開発の応援になります" = "Supports an indie developer";
 "全てのCPUを撃破！" = "All CPUs defeated!";
 "全ての手が死んだプレイヤーの負け" = "Lose all your hands and you lose the game";
-"全カラーテーマを解放（5種類）" = "Unlock all color themes (5)";
 "再生" = "Play";
 "分割" = "Split";
 "分割 %@ が最善!" = "Split %@ is the best move!";

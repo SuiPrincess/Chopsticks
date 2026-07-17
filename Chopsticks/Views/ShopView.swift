@@ -90,7 +90,7 @@ struct ShopView: View {
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                premiumFeature("paintpalette.fill", "全カラーテーマを解放（5種類）")
+                premiumFeature("paintpalette.fill", "プレミアムテーマを解放（5種類）")
                 premiumFeature("lightbulb.fill", "AIヒントが無制限に")
                 premiumFeature("heart.fill", "個人開発の応援になります")
             }
