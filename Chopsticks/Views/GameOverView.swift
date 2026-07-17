@@ -166,8 +166,14 @@ struct GameOverView: View {
 
     private var shareText: String {
         let stats = GameStats.shared
+        if viewModel.config.isDailyChallenge {
+            return "割り箸バトル「今日の挑戦 \(DailyChallenge.title())」クリア！🎯 きみは解けた？ #Chopsticks"
+        }
         if let beatenLevel = viewModel.config.aiLevel {
             return "割り箸バトルでCPU Lv.\(beatenLevel)を撃破！現在ランクLv.\(stats.rankLevel) 🔥 #Chopsticks"
+        }
+        if viewModel.config.aiDifficulty == .oni {
+            return "割り箸バトルで「鬼」に勝った！💪 これは自慢していいやつ #Chopsticks"
         }
         if stats.currentStreak >= 2 {
             return "割り箸バトルでCPUに\(stats.currentStreak)連勝中！🔥 #Chopsticks"

@@ -1,3 +1,5 @@
+<img src="docs/banner.png" alt="Chopsticks" />
+
 # Chopsticks（割り箸）
 
 <img src="docs/icon.png" width="120" align="right" alt="アプリアイコン" />
