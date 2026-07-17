@@ -237,6 +237,7 @@ TRANSLATIONS = {
     "今日の挑戦 %@": "Daily Challenge %@",
     "クリア済み！また明日！": "Cleared! See you tomorrow!",
     "まだ未クリア。日替わりルールに挑もう": "Not cleared yet. Try today's rules!",
+    "Game Centerを見る": "Open Game Center",
     "戦績をリセット": "Reset stats",
     "戦績をリセットしますか？": "Reset all stats?",
     "リセット": "Reset",

@@ -5,6 +5,7 @@ struct StatsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var stats = GameStats.shared
     @State private var showResetConfirm = false
+    @State private var showGameCenter = false
 
     private var totalGames: Int { stats.wins + stats.losses }
     private var winRate: Int {
@@ -106,6 +107,18 @@ struct StatsView: View {
                             }
                         }
 
+                        if GameCenterManager.shared.isAuthenticated {
+                            Button {
+                                showGameCenter = true
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "gamecontroller.fill")
+                                    Text("Game Centerを見る")
+                                }
+                            }
+                            .buttonStyle(GlassButtonStyle(color: .green, isPrimary: false))
+                        }
+
                         if totalGames > 0 {
                             Button {
                                 showResetConfirm = true
@@ -127,6 +140,10 @@ struct StatsView: View {
                     Button("完了") { dismiss() }
                         .foregroundStyle(AppTheme.accent)
                 }
+            }
+            .sheet(isPresented: $showGameCenter) {
+                GameCenterDashboardView(onDismiss: { showGameCenter = false })
+                    .ignoresSafeArea()
             }
             .alert("戦績をリセットしますか？", isPresented: $showResetConfirm) {
                 Button("リセット", role: .destructive) {
