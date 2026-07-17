@@ -18,32 +18,17 @@ enum WeeklyChallenge {
         config.isOverflowWrapEnabled = Bool.random(using: &rng)
         config.handCount = Double.random(in: 0..<1, using: &rng) < 0.3 ? 3 : 2
 
-        // 特殊ルール5種からちょうど3つを有効化（決定的シャッフル）
-        // 0=分割 1=毒 2=爆弾 3=ミラー 4=ダブルタップ
-        var specials = [0, 1, 2, 3, 4]
+        // 特殊ルール4種からちょうど3つを有効化（決定的シャッフル）。
+        // 毒は含めない: 開始時は全手が指1本＝全タップが毒相討ちになり、
+        // 最適応答（鬼AI）ではパリティだけで勝敗が決まる退化ゲームになるため。
+        // 0=分割 2=爆弾 3=ミラー 4=ダブルタップ
+        var specials = [0, 2, 3, 4]
         specials.shuffle(using: &rng)
-        var chosen = Array(specials.prefix(3))
-
-        // 毒の退化対策: 開始時は全手が指1本＝全タップが毒相討ちになるため、
-        // 2本手では最適応答で「先手が2タップ自動勝利（ダブルタップあり）」か
-        // 「先手必敗」に崩壊する。毒の週は3本手＋分割を必ず同伴させる。
-        if let poisonIndex = chosen.firstIndex(of: 1) {
-            if config.handCount == 2 {
-                // 毒を外し、選ばれなかった候補（シャッフル4番目）と入れ替える
-                chosen[poisonIndex] = specials[3]
-            } else if !chosen.contains(0) {
-                // 3本手なら毒以外のどれかを分割に差し替える
-                let replaceIndex = chosen.firstIndex { $0 != 1 }!
-                chosen[replaceIndex] = 0
-            }
-        }
-
-        for special in chosen {
+        for special in specials.prefix(3) {
             switch special {
             case 0:
                 config.isSplittingEnabled = true
                 config.isDeadHandRevivalEnabled = Bool.random(using: &rng)
-            case 1: config.isPoisonEnabled = true
             case 2: config.isBombEnabled = true
             case 3: config.isMirrorEnabled = true
             default: config.isDoubleTapEnabled = true

@@ -284,16 +284,13 @@ final class GameLogicTests: XCTestCase {
         )
     }
 
-    func testDailyChallengePoisonAlwaysComesWithSplitAndThreeHands() {
-        // 毒×2本手/分割なしは開始時の全タップが毒相討ちになり自明な勝敗に
-        // 崩壊するため、生成制約で排除されていることを60日分検証する
+    func testDailyChallengeNeverIncludesPoison() {
+        // 毒は開始時の全タップが毒相討ちになり、最適応答ではパリティで勝敗が
+        // 決まる退化ゲームになるため、チャレンジ生成から除外されていること
         for dayOffset in 0..<60 {
             let date = Date(timeIntervalSince1970: 1_768_478_400 + Double(dayOffset) * 86_400)
             let config = DailyChallenge.config(for: date)
-            if config.isPoisonEnabled {
-                XCTAssertEqual(config.handCount, 3, "毒の日は3本手（日\(dayOffset)）")
-                XCTAssertTrue(config.isSplittingEnabled, "毒の日は分割つき（日\(dayOffset)）")
-            }
+            XCTAssertFalse(config.isPoisonEnabled, "今日の挑戦に毒は出ない（日\(dayOffset)）")
         }
     }
 
@@ -313,7 +310,7 @@ final class GameLogicTests: XCTestCase {
     }
 
     func testWeeklyChallengeAlwaysOniWithThreeSpecialRules() {
-        // 60週分の構造を検証: 常に鬼難易度＋特殊ルールちょうど3つ＋毒の退化なし
+        // 60週分の構造を検証: 常に鬼難易度＋特殊ルールちょうど3つ＋毒なし
         for weekOffset in 0..<60 {
             let date = Date(timeIntervalSince1970: 1_768_478_400 + Double(weekOffset) * 7 * 86_400)
             let config = WeeklyChallenge.config(for: date)
@@ -321,17 +318,12 @@ final class GameLogicTests: XCTestCase {
             XCTAssertEqual(config.gameMode, .vsAI)
             XCTAssertEqual(config.aiDifficulty, .oni, "試練は常に鬼")
             XCTAssertNil(config.aiLevel)
+            XCTAssertFalse(config.isPoisonEnabled, "試練に毒は出ない（週\(weekOffset)）")
             let specialCount = [
-                config.isSplittingEnabled, config.isPoisonEnabled, config.isBombEnabled,
+                config.isSplittingEnabled, config.isBombEnabled,
                 config.isMirrorEnabled, config.isDoubleTapEnabled,
             ].filter { $0 }.count
             XCTAssertEqual(specialCount, 3, "特殊ルールは必ず3つ（週\(weekOffset)）")
-            // 毒×2本手/分割なしは開始時の全タップが毒相討ちになり
-            // 自明な勝敗に崩壊するため、生成制約で排除されていること
-            if config.isPoisonEnabled {
-                XCTAssertEqual(config.handCount, 3, "毒の週は3本手（週\(weekOffset)）")
-                XCTAssertTrue(config.isSplittingEnabled, "毒の週は分割つき（週\(weekOffset)）")
-            }
         }
     }
 

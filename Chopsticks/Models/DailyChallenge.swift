@@ -30,33 +30,26 @@ enum DailyChallenge {
         config.aiLevel = nil
         config.isDailyChallenge = true
 
+        // 毒は入れない: 開始時は全手が指1本＝全タップが毒相討ちになり、
+        // 最適応答ではパリティだけで勝敗が決まる退化ゲームになるため
+        //（カスタムルールの2人対戦向けとしては残している）
         config.isOverflowWrapEnabled = chance(0.7)
         config.isSplittingEnabled = chance(0.5)
         config.isDeadHandRevivalEnabled = config.isSplittingEnabled && chance(0.4)
         config.handCount = chance(0.25) ? 3 : 2
-        config.isPoisonEnabled = chance(0.3)
         config.isBombEnabled = chance(0.3)
         config.isMirrorEnabled = chance(0.3)
         config.isDoubleTapEnabled = chance(0.3)
 
         // 全部OFFの日は退屈なので、どれか1つは必ず入れる
-        if !config.isSplittingEnabled && !config.isPoisonEnabled
-            && !config.isBombEnabled && !config.isMirrorEnabled
-            && !config.isDoubleTapEnabled {
-            switch Int.random(in: 0..<5, using: &rng) {
+        if !config.isSplittingEnabled && !config.isBombEnabled
+            && !config.isMirrorEnabled && !config.isDoubleTapEnabled {
+            switch Int.random(in: 0..<4, using: &rng) {
             case 0: config.isSplittingEnabled = true
-            case 1: config.isPoisonEnabled = true
-            case 2: config.isBombEnabled = true
-            case 3: config.isMirrorEnabled = true
+            case 1: config.isBombEnabled = true
+            case 2: config.isMirrorEnabled = true
             default: config.isDoubleTapEnabled = true
             }
-        }
-
-        // 毒の退化対策: 開始時は全手が指1本＝全タップが毒相討ちのため、
-        // 2本手の毒は最適応答で自明な勝敗に崩壊する。3本手＋分割を強制する。
-        if config.isPoisonEnabled {
-            config.handCount = 3
-            config.isSplittingEnabled = true
         }
         return config
     }

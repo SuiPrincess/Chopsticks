@@ -474,8 +474,9 @@ struct MenuView: View {
             }
         }
 
-        // 毒×2本手は開始時の全タップが毒相討ちになり自明な勝敗に崩壊するため、
-        // おまかせでも3本手＋分割を同伴させる（チャレンジ生成と同じ制約）
+        // 毒は開始時の全タップが毒相討ちになる強烈なルールのため、
+        // おまかせでは3本手＋分割を同伴させて選択肢を作る
+        //（チャレンジ生成は最適応答で退化するため毒自体を除外している）
         if newConfig.isPoisonEnabled {
             newConfig.handCount = 3
             newConfig.isSplittingEnabled = true
