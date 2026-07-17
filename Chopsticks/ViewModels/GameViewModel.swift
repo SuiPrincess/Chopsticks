@@ -148,6 +148,11 @@ final class GameViewModel {
         showRematchRequest = false
         multiplayerService?.send(.rematchAccepted)
         newGame()
+        // ホストが承認した場合もここでゲーム状態を配布しないと、
+        // 両端末が別々の盤面（別UUID）で始まってしまい以後の操作が全て無効になる
+        if let service = multiplayerService, service.isHost {
+            service.send(.gameStart(state))
+        }
     }
 
     func disconnectMultiplayer() {
@@ -166,8 +171,9 @@ final class GameViewModel {
         if config.aiLevel != nil {
             config.aiLevel = GameStats.shared.rankLevel
         }
-        // 2人対戦の再戦は先手を交代（CPU戦は常に人間が先手）
-        if config.gameMode == .localTwoPlayer {
+        // 2人対戦の再戦は先手を交代（CPU戦は常に人間が先手）。
+        // マルチプレイはホストの状態が正となり、gameStartで配布される。
+        if config.gameMode == .localTwoPlayer || (isMultiplayer && multiplayerService?.isHost == true) {
             player1StartsNext.toggle()
         }
         state = GameState(

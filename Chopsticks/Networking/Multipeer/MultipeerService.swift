@@ -6,10 +6,15 @@ final class MultipeerService: NSObject, MultiplayerService, ObservableObject {
     static let serviceType = "chopsticks"
 
     // MARK: - MultiplayerService
-    var onMessageReceived: ((MultiplayerMessage) -> Void)?
+    /// ハンドラ未設定の間に届いたメッセージは失われないようバッファし、設定時に流す。
+    /// （接続直後、相手が先に「ゲーム開始」を押すとgameStartがGameView表示前に届くことがある）
+    var onMessageReceived: ((MultiplayerMessage) -> Void)? {
+        didSet { flushPendingMessages() }
+    }
     var onConnectionChanged: ((Bool) -> Void)?
     private(set) var isHost: Bool
     var opponentName: String { connectedPeerName ?? "対戦相手" }
+    private var pendingMessages: [MultiplayerMessage] = []
 
     // MARK: - Published state
     @Published var discoveredPeers: [MCPeerID] = []
@@ -79,6 +84,24 @@ final class MultipeerService: NSObject, MultiplayerService, ObservableObject {
         browser?.stopBrowsingForPeers()
         session.disconnect()
     }
+
+    // MARK: - Message buffering
+    fileprivate func deliverOrBuffer(_ message: MultiplayerMessage) {
+        if let handler = onMessageReceived {
+            handler(message)
+        } else {
+            pendingMessages.append(message)
+        }
+    }
+
+    private func flushPendingMessages() {
+        guard onMessageReceived != nil, !pendingMessages.isEmpty else { return }
+        let queued = pendingMessages
+        pendingMessages = []
+        for message in queued {
+            onMessageReceived?(message)
+        }
+    }
 }
 
 // MARK: - MCSessionDelegate
@@ -107,7 +130,7 @@ extension MultipeerService: MCSessionDelegate {
     nonisolated func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
         guard let message = MultiplayerMessage.decoded(from: data) else { return }
         Task { @MainActor in
-            self.onMessageReceived?(message)
+            self.deliverOrBuffer(message)
         }
     }
 
