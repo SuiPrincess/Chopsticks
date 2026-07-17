@@ -11,7 +11,14 @@ SwiftUI製iOSゲーム（iOS 17+ / Xcode 16）。詳細はREADME.md参照。
   （MultiplayerMessage）と中断保存（GameSessionStore）の両方がこれに依存する。
   フィールド追加時はデコード互換性に注意（古い保存データはdecode失敗で単に無視される）。
 - シングルトン: GameStats（戦績）/ GameSessionStore（中断保存）/
-  SettingsStore（設定）/ SoundManager / HapticManager。すべて@MainActor。
+  SettingsStore（設定・ヒント回数）/ SoundManager / HapticManager /
+  StoreManager（StoreKit 2課金）。すべて@MainActor。
+  ThemeStoreのみ非MainActor（AppThemeのstaticアクセサから参照するため）。
+- 課金: プレミアム買い切り＝全テーマ解放＋ヒント無制限。プロダクトIDは
+  docs/app-store.md参照。ローカルテストはProducts.storekitをスキームで選択。
+  「ゲームプレイ自体を課金で制限しない」が設計原則。
+- AppThemeはcomputed varでThemeStore.shared.currentを返す。
+  新しい色を足すときはThemeの全テーマ定義に追加すること。
 - AI探索はメインアクター外（Task.detached）で実行する。AIEngineはnonisolatedな
   純粋ロジックのままにすること。
 
