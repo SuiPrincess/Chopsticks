@@ -49,185 +49,12 @@ struct MenuView: View {
             ZStack {
                 BackgroundGradientView()
 
-                VStack(spacing: 0) {
-                    Spacer()
-
-                    // Title
-                    VStack(spacing: 12) {
-                        Text("CHOPSTICKS")
-                            .font(.system(size: 36, weight: .black, design: .rounded))
-                            .foregroundStyle(
-                                LinearGradient(
-                                    colors: [AppTheme.accent, AppTheme.accentSecondary],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .shadow(color: AppTheme.accent.opacity(titleGlow), radius: 20)
-                            .shadow(color: AppTheme.accentSecondary.opacity(titleGlow * 0.5), radius: 40)
-
-                        Text("waribashi")
-                            .font(.system(size: 14, weight: .medium, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.4))
-                            .tracking(8)
+                // 「続きから」表示時など縦に収まらない小型端末ではスクロール可能にする
+                ViewThatFits(in: .vertical) {
+                    menuContent
+                    ScrollView {
+                        menuContent
                     }
-
-                    Spacer()
-
-                    // Hand decoration
-                    HStack(spacing: 40) {
-                        decorationHand(count: decorLeftCount, color: AppTheme.player1Color)
-                        decorationHand(count: decorRightCount, color: AppTheme.player2Color)
-                    }
-                    .padding(.bottom, 40)
-                    .task {
-                        // ゆっくり指の本数が変わり、対戦している雰囲気を出す
-                        while !Task.isCancelled {
-                            try? await Task.sleep(for: .seconds(2.2))
-                            withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
-                                decorLeftCount = Int.random(in: 1...4)
-                                decorRightCount = Int.random(in: 1...4)
-                            }
-                        }
-                    }
-
-                    Spacer()
-
-                    // Buttons
-                    VStack(spacing: 12) {
-                        // 中断したゲームの再開
-                        if let saved = sessionStore.savedGame,
-                           let description = sessionStore.resumeDescription {
-                            Button {
-                                resumeGame = saved
-                                navigateToGame = true
-                            } label: {
-                                VStack(spacing: 3) {
-                                    HStack(spacing: 8) {
-                                        Image(systemName: "arrow.uturn.forward.circle.fill")
-                                        Text("続きから")
-                                    }
-                                    Text(description)
-                                        .font(.system(size: 11, design: .rounded))
-                                        .foregroundStyle(.white.opacity(0.55))
-                                }
-                            }
-                            .buttonStyle(GlassButtonStyle(color: .cyan))
-                        }
-
-                        // ランク戦（メインの進行ループ・固定標準ルール）
-                        Button {
-                            rankedConfig = Self.makeRankedConfig()
-                            showRuleConfirmation = true
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "trophy.fill")
-                                Text(rankButtonLabel)
-                            }
-                        }
-                        .buttonStyle(GlassButtonStyle(color: .orange))
-
-                        // 2P Local
-                        Button {
-                            rankedConfig = nil
-                            config.gameMode = .localTwoPlayer
-                            config.aiLevel = nil
-                            showRuleConfirmation = true
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "person.2.fill")
-                                Text("2人対戦")
-                            }
-                        }
-                        .buttonStyle(GlassButtonStyle())
-
-                        // VS AI (フリー対戦)
-                        Button {
-                            rankedConfig = nil
-                            config.gameMode = .vsAI
-                            config.aiLevel = nil
-                            showAIDifficultyPicker = true
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "cpu")
-                                Text("フリー対戦")
-                            }
-                        }
-                        .buttonStyle(GlassButtonStyle(color: AppTheme.accentSecondary))
-
-                        // Nearby (Multipeer)
-                        Button {
-                            rankedConfig = nil
-                            config.gameMode = .nearby
-                            config.aiLevel = nil
-                            showNearbyMatch = true
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "antenna.radiowaves.left.and.right")
-                                Text("近くの人と対戦")
-                            }
-                        }
-                        .buttonStyle(GlassButtonStyle(color: .green))
-
-                        // Online (Game Center)
-                        Button {
-                            rankedConfig = nil
-                            config.gameMode = .online
-                            config.aiLevel = nil
-                            showGameKitMatchmaker = true
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "globe")
-                                Text("オンライン対戦")
-                            }
-                        }
-                        .buttonStyle(GlassButtonStyle(color: .orange))
-                        .opacity(gameCenterManager.isAuthenticated ? 1 : 0.4)
-                        .disabled(!gameCenterManager.isAuthenticated)
-
-                        // Rules + random rules + stats
-                        HStack(spacing: 12) {
-                            Button {
-                                showRuleSettings = true
-                            } label: {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "gearshape")
-                                    Text("ルール設定")
-                                }
-                            }
-                            .buttonStyle(GlassButtonStyle(isPrimary: false))
-
-                            Button {
-                                randomizeRules()
-                            } label: {
-                                Image(systemName: "dice.fill")
-                            }
-                            .buttonStyle(GlassButtonStyle(color: .orange))
-                            .frame(width: 64)
-                            .accessibilityLabel("おまかせルール")
-
-                            Button {
-                                showStats = true
-                            } label: {
-                                Image(systemName: "chart.bar.fill")
-                            }
-                            .buttonStyle(GlassButtonStyle(color: .cyan, isPrimary: false))
-                            .frame(width: 64)
-                            .accessibilityLabel("戦績")
-                        }
-
-                        statsIndicator
-                        activeRulesIndicator
-
-                        if !gameCenterManager.isAuthenticated {
-                            Text("Game Centerにログインするとオンライン対戦が可能")
-                                .font(.system(size: 11, design: .rounded))
-                                .foregroundStyle(.white.opacity(0.3))
-                                .multilineTextAlignment(.center)
-                        }
-                    }
-                    .padding(.horizontal, 40)
-                    .padding(.bottom, 50)
                 }
             }
             .overlay(alignment: .topTrailing) {
@@ -340,6 +167,192 @@ struct MenuView: View {
             withAnimation(Anim.glowPulse) { titleGlow = 0.8 }
             GameCenterManager.shared.authenticateLocalPlayer()
             SoundManager.prepare()
+        }
+    }
+
+    // MARK: - Menu content
+
+    private var menuContent: some View {
+        VStack(spacing: 0) {
+            Spacer()
+
+            // Title
+            VStack(spacing: 12) {
+                Text("CHOPSTICKS")
+                    .font(.system(size: 36, weight: .black, design: .rounded))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [AppTheme.accent, AppTheme.accentSecondary],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .shadow(color: AppTheme.accent.opacity(titleGlow), radius: 20)
+                    .shadow(color: AppTheme.accentSecondary.opacity(titleGlow * 0.5), radius: 40)
+
+                Text("waribashi")
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.4))
+                    .tracking(8)
+            }
+            .padding(.top, 30)
+
+            Spacer()
+
+            // Hand decoration
+            HStack(spacing: 40) {
+                decorationHand(count: decorLeftCount, color: AppTheme.player1Color)
+                decorationHand(count: decorRightCount, color: AppTheme.player2Color)
+            }
+            .padding(.bottom, 40)
+            .task {
+                // ゆっくり指の本数が変わり、対戦している雰囲気を出す
+                while !Task.isCancelled {
+                    try? await Task.sleep(for: .seconds(2.2))
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
+                        decorLeftCount = Int.random(in: 1...4)
+                        decorRightCount = Int.random(in: 1...4)
+                    }
+                }
+            }
+
+            Spacer()
+
+            // Buttons
+            VStack(spacing: 12) {
+                // 中断したゲームの再開
+                if let saved = sessionStore.savedGame,
+                   let description = sessionStore.resumeDescription {
+                    Button {
+                        resumeGame = saved
+                        navigateToGame = true
+                    } label: {
+                        VStack(spacing: 3) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "arrow.uturn.forward.circle.fill")
+                                Text("続きから")
+                            }
+                            Text(description)
+                                .font(.system(size: 11, design: .rounded))
+                                .foregroundStyle(.white.opacity(0.55))
+                        }
+                    }
+                    .buttonStyle(GlassButtonStyle(color: .cyan))
+                }
+
+                // ランク戦（メインの進行ループ・固定標準ルール）
+                Button {
+                    rankedConfig = Self.makeRankedConfig()
+                    showRuleConfirmation = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "trophy.fill")
+                        Text(rankButtonLabel)
+                    }
+                }
+                .buttonStyle(GlassButtonStyle(color: .orange))
+
+                // 2P Local
+                Button {
+                    rankedConfig = nil
+                    config.gameMode = .localTwoPlayer
+                    config.aiLevel = nil
+                    showRuleConfirmation = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "person.2.fill")
+                        Text("2人対戦")
+                    }
+                }
+                .buttonStyle(GlassButtonStyle())
+
+                // VS AI (フリー対戦)
+                Button {
+                    rankedConfig = nil
+                    config.gameMode = .vsAI
+                    config.aiLevel = nil
+                    showAIDifficultyPicker = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "cpu")
+                        Text("フリー対戦")
+                    }
+                }
+                .buttonStyle(GlassButtonStyle(color: AppTheme.accentSecondary))
+
+                // Nearby (Multipeer)
+                Button {
+                    rankedConfig = nil
+                    config.gameMode = .nearby
+                    config.aiLevel = nil
+                    showNearbyMatch = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "antenna.radiowaves.left.and.right")
+                        Text("近くの人と対戦")
+                    }
+                }
+                .buttonStyle(GlassButtonStyle(color: .green))
+
+                // Online (Game Center)
+                Button {
+                    rankedConfig = nil
+                    config.gameMode = .online
+                    config.aiLevel = nil
+                    showGameKitMatchmaker = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "globe")
+                        Text("オンライン対戦")
+                    }
+                }
+                .buttonStyle(GlassButtonStyle(color: .orange))
+                .opacity(gameCenterManager.isAuthenticated ? 1 : 0.4)
+                .disabled(!gameCenterManager.isAuthenticated)
+
+                // Rules + random rules + stats
+                HStack(spacing: 12) {
+                    Button {
+                        showRuleSettings = true
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "gearshape")
+                            Text("ルール設定")
+                        }
+                    }
+                    .buttonStyle(GlassButtonStyle(isPrimary: false))
+
+                    Button {
+                        randomizeRules()
+                    } label: {
+                        Image(systemName: "dice.fill")
+                    }
+                    .buttonStyle(GlassButtonStyle(color: .orange))
+                    .frame(width: 64)
+                    .accessibilityLabel("おまかせルール")
+
+                    Button {
+                        showStats = true
+                    } label: {
+                        Image(systemName: "chart.bar.fill")
+                    }
+                    .buttonStyle(GlassButtonStyle(color: .cyan, isPrimary: false))
+                    .frame(width: 64)
+                    .accessibilityLabel("戦績")
+                }
+
+                statsIndicator
+                activeRulesIndicator
+
+                if !gameCenterManager.isAuthenticated {
+                    Text("Game Centerにログインするとオンライン対戦が可能")
+                        .font(.system(size: 11, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.3))
+                        .multilineTextAlignment(.center)
+                }
+            }
+            .padding(.horizontal, 40)
+            .padding(.bottom, 50)
         }
     }
 
