@@ -166,6 +166,8 @@ final class GameViewModel {
         case .action(let action):
             executeRemoteAction(action)
         case .stateSync(let syncState):
+            // 注意: stateSyncはattacksThisTurnを運ばない。現状送信側は存在しないが、
+            // 将来実装するならダブルタップ途中の同期でローカル値とズレる点に留意
             self.state = syncState
             self.replayInitialState = syncState
             self.replayInitialAttacks = attacksThisTurn
@@ -657,10 +659,12 @@ final class GameViewModel {
             if playerWon {
                 let clearsBefore = GameStats.shared.dailyChallengeClearCount
                 let oniBefore = GameStats.shared.oniWins
-                if state.config.isDailyChallenge {
+                // 日/週をまたいだ中断再開・再戦では古いルールで勝っても
+                // 新しい期間のクリアにしない（現在の生成ルールと一致する場合のみ記録）
+                if state.config.isDailyChallenge, state.config == DailyChallenge.config() {
                     GameStats.shared.markDailyChallengeCleared()
                 }
-                if state.config.isWeeklyChallenge {
+                if state.config.isWeeklyChallenge, state.config == WeeklyChallenge.config() {
                     GameStats.shared.markWeeklyChallengeCleared()
                 }
                 if state.config.aiLevel == nil && state.config.aiDifficulty == .oni {

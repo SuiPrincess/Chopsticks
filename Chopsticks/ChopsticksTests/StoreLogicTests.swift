@@ -197,16 +197,17 @@ final class StoreLogicTests: XCTestCase {
     // MARK: - 今週の試練（週1回クリア記録）
 
     func testWeeklyChallengeCountsOncePerWeek() {
-        // day(0)=2026-01-15(木)。day(3)=日曜で同じISO週、day(4)=月曜で翌週
+        // day(0)=2026-01-15(木)ごろ。週境界の日曜/月曜は端末タイムゾーンで
+        // 判定が揺れるため避け、週の中央±2日と翌週の中央で検証する
         let stats = GameStats(defaults: defaults)
         XCTAssertFalse(stats.isWeeklyChallengeCleared(asOf: day(0)))
         stats.markWeeklyChallengeCleared(on: day(0))
         XCTAssertEqual(stats.weeklyChallengeClearCount, 1)
-        XCTAssertTrue(stats.isWeeklyChallengeCleared(asOf: day(3)), "同じ週の日曜はクリア済み扱い")
-        stats.markWeeklyChallengeCleared(on: day(2))
+        XCTAssertTrue(stats.isWeeklyChallengeCleared(asOf: day(2)), "同じ週の後日はクリア済み扱い")
+        stats.markWeeklyChallengeCleared(on: day(1))
         XCTAssertEqual(stats.weeklyChallengeClearCount, 1, "同じ週の2回目はカウントしない")
-        XCTAssertFalse(stats.isWeeklyChallengeCleared(asOf: day(4)), "翌週の月曜は未クリアに戻る")
-        stats.markWeeklyChallengeCleared(on: day(4))
+        XCTAssertFalse(stats.isWeeklyChallengeCleared(asOf: day(5)), "翌週は未クリアに戻る")
+        stats.markWeeklyChallengeCleared(on: day(5))
         XCTAssertEqual(stats.weeklyChallengeClearCount, 2, "翌週のクリアはカウントされる")
         XCTAssertEqual(GameStats(defaults: defaults).weeklyChallengeClearCount, 2, "永続化される")
     }

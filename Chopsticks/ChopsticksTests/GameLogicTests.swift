@@ -284,25 +284,38 @@ final class GameLogicTests: XCTestCase {
         )
     }
 
+    func testDailyChallengePoisonAlwaysComesWithSplitAndThreeHands() {
+        // 毒×2本手/分割なしは開始時の全タップが毒相討ちになり自明な勝敗に
+        // 崩壊するため、生成制約で排除されていることを60日分検証する
+        for dayOffset in 0..<60 {
+            let date = Date(timeIntervalSince1970: 1_768_478_400 + Double(dayOffset) * 86_400)
+            let config = DailyChallenge.config(for: date)
+            if config.isPoisonEnabled {
+                XCTAssertEqual(config.handCount, 3, "毒の日は3本手（日\(dayOffset)）")
+                XCTAssertTrue(config.isSplittingEnabled, "毒の日は分割つき（日\(dayOffset)）")
+            }
+        }
+    }
+
     // MARK: - 今週の試練
 
     func testWeeklyChallengeConfigIsDeterministicPerWeek() {
-        // 2026-01-12(月)〜01-18(日)は同じISO週
-        let monday = Date(timeIntervalSince1970: 1_768_219_200)    // 2026-01-12 12:00 UTC
-        let sunday = Date(timeIntervalSince1970: 1_768_737_600)    // 2026-01-18 12:00 UTC
-        let nextMonday = Date(timeIntervalSince1970: 1_768_824_000) // 2026-01-19 12:00 UTC
+        // 端末タイムゾーン（UTC±13h）でも週判定が揺れないよう、週の中央の日付を使う
+        let tuesday = Date(timeIntervalSince1970: 1_768_305_600)      // 2026-01-13(火) 12:00 UTC
+        let thursday = Date(timeIntervalSince1970: 1_768_478_400)     // 2026-01-15(木) 12:00 UTC
+        let nextThursday = Date(timeIntervalSince1970: 1_769_083_200) // 2026-01-22(木) 12:00 UTC
 
-        XCTAssertEqual(WeeklyChallenge.config(for: monday), WeeklyChallenge.config(for: sunday),
+        XCTAssertEqual(WeeklyChallenge.config(for: tuesday), WeeklyChallenge.config(for: thursday),
                        "同じ週は必ず同じルール")
-        XCTAssertNotEqual(WeeklyChallenge.isoWeek(for: monday).week,
-                          WeeklyChallenge.isoWeek(for: nextMonday).week,
-                          "月曜をまたぐと週が変わる")
+        XCTAssertNotEqual(WeeklyChallenge.isoWeek(for: thursday).week,
+                          WeeklyChallenge.isoWeek(for: nextThursday).week,
+                          "週をまたぐと週番号が変わる")
     }
 
     func testWeeklyChallengeAlwaysOniWithThreeSpecialRules() {
-        // 20週分の構造を検証: 常に鬼難易度＋特殊ルールちょうど3つ
-        for weekOffset in 0..<20 {
-            let date = Date(timeIntervalSince1970: 1_768_219_200 + Double(weekOffset) * 7 * 86_400)
+        // 60週分の構造を検証: 常に鬼難易度＋特殊ルールちょうど3つ＋毒の退化なし
+        for weekOffset in 0..<60 {
+            let date = Date(timeIntervalSince1970: 1_768_478_400 + Double(weekOffset) * 7 * 86_400)
             let config = WeeklyChallenge.config(for: date)
             XCTAssertTrue(config.isWeeklyChallenge)
             XCTAssertEqual(config.gameMode, .vsAI)
@@ -313,6 +326,12 @@ final class GameLogicTests: XCTestCase {
                 config.isMirrorEnabled, config.isDoubleTapEnabled,
             ].filter { $0 }.count
             XCTAssertEqual(specialCount, 3, "特殊ルールは必ず3つ（週\(weekOffset)）")
+            // 毒×2本手/分割なしは開始時の全タップが毒相討ちになり
+            // 自明な勝敗に崩壊するため、生成制約で排除されていること
+            if config.isPoisonEnabled {
+                XCTAssertEqual(config.handCount, 3, "毒の週は3本手（週\(weekOffset)）")
+                XCTAssertTrue(config.isSplittingEnabled, "毒の週は分割つき（週\(weekOffset)）")
+            }
         }
     }
 

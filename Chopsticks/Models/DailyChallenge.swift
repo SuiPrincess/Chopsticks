@@ -51,6 +51,13 @@ enum DailyChallenge {
             default: config.isDoubleTapEnabled = true
             }
         }
+
+        // 毒の退化対策: 開始時は全手が指1本＝全タップが毒相討ちのため、
+        // 2本手の毒は最適応答で自明な勝敗に崩壊する。3本手＋分割を強制する。
+        if config.isPoisonEnabled {
+            config.handCount = 3
+            config.isSplittingEnabled = true
+        }
         return config
     }
 

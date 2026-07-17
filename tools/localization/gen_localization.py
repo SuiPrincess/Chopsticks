@@ -24,7 +24,7 @@ INT_HINTS = ("count", "Count", "level", "Level", "streak", "Streak", "wins",
 STRING_EXPRS = {
     "text", "name", "mode", "position", "state", "config.aiDifficulty.label",
     "DailyChallenge.title()", "WeeklyChallenge.title()", "player.name", "appVersion",
-    "premium.displayPrice", "product.displayPrice", "rewardTheme.name",
+    "premium.displayPrice", "product.displayPrice", "rewardTheme.name", "opponent",
 }
 
 

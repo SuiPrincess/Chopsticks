@@ -18,6 +18,7 @@ TRANSLATIONS = {
     "CPU Lv.%lld": "CPU Lv.%lld",
     "CPU（%@）": "CPU (%@)",
     "対戦相手": "Opponent",
+    "対戦相手: %@": "Opponent: %@",
     "プレイヤー": "Player",
 
     # ---- NearbyMatchView ----

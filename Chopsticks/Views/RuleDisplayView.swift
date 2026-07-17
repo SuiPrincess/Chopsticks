@@ -76,7 +76,14 @@ struct RuleDisplayView: View {
 
     // MARK: - Basic rules
     private var basicRuleItems: [RuleItem] {
-        var items = [
+        var items = [RuleItem]()
+        // CPU戦は対戦相手（鬼・ランクLv等）を最初に示す
+        if config.gameMode == .vsAI {
+            let opponent = config.aiLevel.map { String(localized: "CPU Lv.\($0)") }
+                ?? String(localized: "CPU（\(config.aiDifficulty.label)）")
+            items.append(RuleItem(icon: "cpu", text: "対戦相手: \(opponent)"))
+        }
+        items += [
             RuleItem(icon: "hand.raised.fill", text: "各プレイヤーは\(config.handCount)本の手、指1本ずつでスタート"),
             RuleItem(icon: "hand.point.up.left.fill", text: "自分の手を選んでから、相手の手をタップして攻撃"),
             RuleItem(icon: "plus", text: "叩かれた手に、攻撃側の指の本数が加算される"),

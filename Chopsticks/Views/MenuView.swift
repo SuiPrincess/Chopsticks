@@ -474,6 +474,13 @@ struct MenuView: View {
             }
         }
 
+        // 毒×2本手は開始時の全タップが毒相討ちになり自明な勝敗に崩壊するため、
+        // おまかせでも3本手＋分割を同伴させる（チャレンジ生成と同じ制約）
+        if newConfig.isPoisonEnabled {
+            newConfig.handCount = 3
+            newConfig.isSplittingEnabled = true
+        }
+
         withAnimation(.spring(response: 0.3)) { config = newConfig }
         HapticManager.split()
     }

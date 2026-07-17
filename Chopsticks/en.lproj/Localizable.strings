@@ -166,6 +166,7 @@
 "大きく叩くと、相手をかえって安全な数に戻してしまうことがある。叩く前に必ず合計を計算しよう。" = "A big hit can cycle the enemy hand back to safety. Always compute the total before you tap.";
 "完了" = "Done";
 "対戦相手" = "Opponent";
+"対戦相手: %@" = "Opponent: %@";
 "対戦相手を待っています" = "Waiting for an opponent";
 "左" = "left";
 "引き分け" = "It's a draw";

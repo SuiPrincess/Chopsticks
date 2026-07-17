@@ -9,6 +9,7 @@ struct GameOverView: View {
     @State private var confetti: [ConfettiPiece] = []
     @State private var showReplay = false
     @State private var showGuide = false
+    @State private var pendingRematchAlert = false
     @Environment(\.requestReview) private var requestReview
 
     var body: some View {
@@ -201,23 +202,34 @@ struct GameOverView: View {
                 onDismiss()
             }
         }
-        .sheet(isPresented: $showReplay) {
+        .sheet(isPresented: $showReplay, onDismiss: presentPendingRematchAlert) {
             if let replay = viewModel.lastReplay {
                 ReplayView(replay: replay)
                     .presentationDetents([.large])
             }
         }
-        .sheet(isPresented: $showGuide) {
+        .sheet(isPresented: $showGuide, onDismiss: presentPendingRematchAlert) {
             StrategyGuideView()
                 .presentationDetents([.large])
         }
-        // リプレイ/ガイドのsheetの下ではalertが出ないため、
-        // リマッチ要求が来たらsheetを閉じて即座に表示する
+        // リプレイ/ガイドのsheetの下ではalertが出ない。sheetのdismissと同時に
+        // presentすると遷移が無視されることがあるため（MenuViewと同じ回避策）、
+        // 一旦閉じてonDismissでalertを出し直す
         .onChange(of: viewModel.showRematchRequest) { _, showing in
-            if showing {
+            if showing && (showReplay || showGuide) {
+                viewModel.showRematchRequest = false
+                pendingRematchAlert = true
                 showReplay = false
                 showGuide = false
             }
+        }
+    }
+
+    /// sheetを閉じ終えてからリマッチ要求alertを出し直す
+    private func presentPendingRematchAlert() {
+        if pendingRematchAlert {
+            pendingRematchAlert = false
+            viewModel.showRematchRequest = true
         }
     }
 
