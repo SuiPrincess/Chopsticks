@@ -40,7 +40,7 @@ struct StrategyGuideView: View {
                             paragraph("復活ルールがあるなら、死んだ手に指を分けて手数を取り戻そう。手の数の差は、そのまま選択肢の差になる。")
                         }
 
-                        guideCard("ループは「ちょうど5」だけが死", icon: "arrow.trianglehead.2.clockwise", tint: .green) {
+                        guideCard("ループは「ちょうど5」だけが死", icon: "arrow.triangle.2.circlepath", tint: .green) {
                             paragraph("ループルールでは5を超えた分は余りに戻る（3+4=7→2）。死ぬのは合計がちょうど5のときだけ。")
                             AttackDiagram(attacker: 4, target: 3, result: 2, caption: "4 + 3 = 7 → 2")
                             paragraph("大きく叩くと、相手をかえって安全な数に戻してしまうことがある。叩く前に必ず合計を計算しよう。")

@@ -109,7 +109,11 @@ final class GameViewModelTests: XCTestCase {
     // MARK: - サドンデス（ターン上限）
 
     func testSuddenDeathDrawAfterTurnLimit() {
-        let viewModel = makeLocalGame { $0.isSplittingEnabled = true }
+        // (2,0)→(1,1)は死んだ手への配分＝復活のため、復活ルールも有効にする
+        let viewModel = makeLocalGame {
+            $0.isSplittingEnabled = true
+            $0.isDeadHandRevivalEnabled = true
+        }
         // (1,1)↔(2,0)の分割を交互に繰り返して60ターン膠着させる
         var toWide = true
         var iterations = 0
@@ -148,6 +152,36 @@ final class GameViewModelTests: XCTestCase {
         XCTAssertEqual(snapshots.first, replay.initialState)
         XCTAssertEqual(snapshots.last, viewModel.state,
                        "リプレイの最終盤面は実対局と完全一致する")
+    }
+
+    func testReplayResetsOnNewGame() {
+        let viewModel = makeLocalGame()
+        performTap(viewModel, attacker: 0, target: 0)
+        performTap(viewModel, attacker: 0, target: 0)
+        performTap(viewModel, attacker: 0, target: 0)
+        performTap(viewModel, attacker: 1, target: 0)
+        performTap(viewModel, attacker: 0, target: 1)
+        XCTAssertTrue(viewModel.isGameOver)
+
+        viewModel.newGame()
+        XCTAssertNil(viewModel.lastReplay, "新しいゲームの開始でリプレイはリセット")
+
+        // 2局目（再戦はP2先手だが、相対的な手順は対称なので同じ形で決着する）
+        performTap(viewModel, attacker: 0, target: 0)
+        performTap(viewModel, attacker: 0, target: 0)
+        performTap(viewModel, attacker: 0, target: 0)
+        performTap(viewModel, attacker: 1, target: 0)
+        performTap(viewModel, attacker: 0, target: 1)
+        XCTAssertTrue(viewModel.isGameOver)
+
+        guard let replay = viewModel.lastReplay else {
+            return XCTFail("2局目の決着でリプレイが記録される")
+        }
+        XCTAssertEqual(replay.actions.count, 5)
+        let snapshots = ReplaySimulator.snapshots(for: replay)
+        XCTAssertEqual(snapshots.first, replay.initialState)
+        XCTAssertEqual(snapshots.last, viewModel.state,
+                       "2局目のリプレイは2局目の盤面から再生される（1局目の盤面が残らない）")
     }
 
     // MARK: - マネタイズ関連

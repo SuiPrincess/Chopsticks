@@ -86,6 +86,7 @@ struct ReplayView: View {
             }
         }
         .preferredColorScheme(.dark)
+        .environment(\.isReplayPlayback, true)
     }
 
     // MARK: - Controls

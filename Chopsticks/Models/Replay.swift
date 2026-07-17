@@ -11,6 +11,30 @@ struct Replay: Codable, Equatable {
     var initialState: GameState
     var actions: [GameAction]
     var savedAt: Date
+    /// 記録開始時点の同一ターン内攻撃回数。ダブルタップの1回目の直後に
+    /// 中断→再開したゲームでは1になり、再生時のターン進行を実対局と一致させる。
+    var initialAttacksThisTurn: Int
+
+    init(initialState: GameState, actions: [GameAction], savedAt: Date, initialAttacksThisTurn: Int = 0) {
+        self.initialState = initialState
+        self.actions = actions
+        self.savedAt = savedAt
+        self.initialAttacksThisTurn = initialAttacksThisTurn
+    }
+
+    // MARK: - Codable
+    // フィールド追加で旧データが壊れないようdecodeIfPresent（GameConfigと同じパターン）
+    private enum CodingKeys: String, CodingKey {
+        case initialState, actions, savedAt, initialAttacksThisTurn
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        initialState = try container.decode(GameState.self, forKey: .initialState)
+        actions = try container.decode([GameAction].self, forKey: .actions)
+        savedAt = try container.decode(Date.self, forKey: .savedAt)
+        initialAttacksThisTurn = try container.decodeIfPresent(Int.self, forKey: .initialAttacksThisTurn) ?? 0
+    }
 }
 
 /// リプレイの盤面列を再構築する。ターン進行（ダブルタップ継続・決着・
@@ -22,7 +46,7 @@ enum ReplaySimulator {
     static func snapshots(for replay: Replay) -> [GameState] {
         var states = [replay.initialState]
         var state = replay.initialState
-        var attacksThisTurn = 0
+        var attacksThisTurn = replay.initialAttacksThisTurn
 
         for action in replay.actions {
             var wasTap = false

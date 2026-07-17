@@ -27,6 +27,8 @@ final class GameViewModel {
     private(set) var lastReplay: Replay?
     private var actionLog: [GameAction] = []
     private var replayInitialState: GameState
+    /// リプレイ記録開始時点のattacksThisTurn（ダブルタップ途中の再開でも再生を一致させる）
+    private var replayInitialAttacks = 0
     /// ヒント: AIが提案する最善手（該当する手が黄色く光る）
     private(set) var hintAction: GameAction?
     private var isComputingHint = false
@@ -117,6 +119,7 @@ final class GameViewModel {
         }
         // 復元ゲームのリプレイは再開地点から記録する
         self.replayInitialState = self.state
+        self.replayInitialAttacks = self.attacksThisTurn
     }
 
     // MARK: - Multiplayer Setup
@@ -144,6 +147,7 @@ final class GameViewModel {
         state.player1 = Player(id: state.player1.id, name: localName, handCount: config.handCount)
         state.player2 = Player(id: state.player2.id, name: opponentName, handCount: config.handCount)
         replayInitialState = state
+        replayInitialAttacks = 0
         actionLog = []
         multiplayerService?.send(.gameStart(state))
     }
@@ -151,16 +155,20 @@ final class GameViewModel {
     func handleRemoteMessage(_ message: MultiplayerMessage) {
         switch message {
         case .gameStart(let gameState):
-            // ゲストがゲーム状態を受信
+            // ゲストがゲーム状態を受信。前ゲームがダブルタップの2撃目で決着していると
+            // attacksThisTurnが1のまま残り、ホスト（newGameで0リセット）とズレるため必ず戻す
             self.state = gameState
             self.localPlayerId = gameState.player2.id
+            self.attacksThisTurn = 0
             self.replayInitialState = gameState
+            self.replayInitialAttacks = 0
             self.actionLog = []
         case .action(let action):
             executeRemoteAction(action)
         case .stateSync(let syncState):
             self.state = syncState
             self.replayInitialState = syncState
+            self.replayInitialAttacks = attacksThisTurn
             self.actionLog = []
         case .rematchRequest:
             showRematchRequest = true
@@ -285,6 +293,10 @@ final class GameViewModel {
                 localPlayerId = previousLocalId
             }
         }
+
+        // リプレイの記録開始位置を新しい盤面に合わせる（プレイヤー名再設定の後）
+        replayInitialState = state
+        replayInitialAttacks = 0
     }
 
     func selectAttackerHand(_ handId: UUID) {
@@ -625,7 +637,12 @@ final class GameViewModel {
         if !isMultiplayer {
             GameSessionStore.shared.clear()
         }
-        lastReplay = Replay(initialState: replayInitialState, actions: actionLog, savedAt: .now)
+        lastReplay = Replay(
+            initialState: replayInitialState,
+            actions: actionLog,
+            savedAt: .now,
+            initialAttacksThisTurn: replayInitialAttacks
+        )
         if winnerId != nil {
             HapticManager.victory()
         }

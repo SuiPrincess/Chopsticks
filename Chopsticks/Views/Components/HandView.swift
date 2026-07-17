@@ -1,5 +1,18 @@
 import SwiftUI
 
+/// リプレイ再生中フラグ。スクラブのたびに死亡ハプティクスが発火しないよう、
+/// 再生ビュー配下では実機の振動を抑制する（視覚エフェクトは残す）。
+private struct ReplayPlaybackKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    var isReplayPlayback: Bool {
+        get { self[ReplayPlaybackKey.self] }
+        set { self[ReplayPlaybackKey.self] = newValue }
+    }
+}
+
 struct HandView: View {
     let hand: Hand
     let accentColor: Color
@@ -18,6 +31,7 @@ struct HandView: View {
 
     @State private var showDeath = false
     @State private var previousAlive = true
+    @Environment(\.isReplayPlayback) private var isReplayPlayback
 
     private var cardWidth: CGFloat { (compact ? 80 : 105) * sizeScale }
     private var cardHeight: CGFloat { (compact ? 110 : 140) * sizeScale }
@@ -103,7 +117,9 @@ struct HandView: View {
         .onChange(of: hand.isAlive) { _, alive in
             if previousAlive && !alive {
                 showDeath = true
-                HapticManager.handDeath()
+                if !isReplayPlayback {
+                    HapticManager.handDeath()
+                }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     showDeath = false
                 }

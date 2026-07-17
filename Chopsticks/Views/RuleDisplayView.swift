@@ -93,7 +93,7 @@ struct RuleDisplayView: View {
     private var deathRuleItems: [RuleItem] {
         if config.isOverflowWrapEnabled {
             return [
-                RuleItem(icon: "arrow.trianglehead.2.clockwise", text: "5を超えたら余りからカウント (例: 3+4=7→2)"),
+                RuleItem(icon: "arrow.triangle.2.circlepath", text: "5を超えたら余りからカウント (例: 3+4=7→2)"),
                 RuleItem(icon: "flame.fill", text: "ちょうど5になったら死亡"),
             ]
         } else {
