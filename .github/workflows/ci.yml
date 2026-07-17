@@ -28,8 +28,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select Xcode 16
-        run: sudo xcode-select -s /Applications/Xcode_16.2.app || sudo xcode-select -s /Applications/Xcode_16.1.app || sudo xcode-select -s /Applications/Xcode_16.0.app || true
+      # ランナー標準のXcodeを使う（Xcode_16.2を強制するとiOSシミュレータの
+      # プラットフォームランタイムが未インストールでdestination解決に失敗する）
+      - name: Show Xcode version
+        run: xcode-select -p && xcodebuild -version
 
       - name: Pick a simulator
         id: sim
