@@ -236,7 +236,7 @@ struct GameOverView: View {
     private var shareText: String {
         let stats = GameStats.shared
         if viewModel.config.isWeeklyChallenge {
-            return String(localized: "割り箸バトル「今週の試練 \(WeeklyChallenge.title())」クリア！⚔️ 鬼＋特殊ルール3種を攻略 #Chopsticks")
+            return String(localized: "割り箸バトル「今週の試練 \(WeeklyChallenge.title())」クリア！⚔️ 今週の鬼を攻略した #Chopsticks")
         }
         if viewModel.config.isDailyChallenge {
             return String(localized: "割り箸バトル「今日の挑戦 \(DailyChallenge.title())」クリア！🎯 きみは解けた？ #Chopsticks")

@@ -309,8 +309,10 @@ final class GameLogicTests: XCTestCase {
                           "週をまたぐと週番号が変わる")
     }
 
-    func testWeeklyChallengeAlwaysOniWithThreeSpecialRules() {
-        // 60週分の構造を検証: 常に鬼難易度＋特殊ルールちょうど3つ＋毒なし
+    func testWeeklyChallengeStructure() {
+        // 60週分の構造を検証: 常に鬼難易度、毒/ミラーなし（キュレーション済み構成のみ）、
+        // 週替わりのバリエーションがあること
+        var seenConfigs = Set<String>()
         for weekOffset in 0..<60 {
             let date = Date(timeIntervalSince1970: 1_768_478_400 + Double(weekOffset) * 7 * 86_400)
             let config = WeeklyChallenge.config(for: date)
@@ -318,13 +320,20 @@ final class GameLogicTests: XCTestCase {
             XCTAssertEqual(config.gameMode, .vsAI)
             XCTAssertEqual(config.aiDifficulty, .oni, "試練は常に鬼")
             XCTAssertNil(config.aiLevel)
+            // 毒はパリティ退化、ミラーは全構成が先手負け/自明勝ちになるため
+            // 採用リストに存在しない（docs/ai-notes.mdの厳密解分析）
             XCTAssertFalse(config.isPoisonEnabled, "試練に毒は出ない（週\(weekOffset)）")
+            XCTAssertFalse(config.isMirrorEnabled, "試練にミラーは出ない（週\(weekOffset)）")
             let specialCount = [
-                config.isSplittingEnabled, config.isBombEnabled,
-                config.isMirrorEnabled, config.isDoubleTapEnabled,
+                config.isSplittingEnabled, config.isBombEnabled, config.isDoubleTapEnabled,
             ].filter { $0 }.count
-            XCTAssertEqual(specialCount, 3, "特殊ルールは必ず3つ（週\(weekOffset)）")
+            XCTAssertGreaterThanOrEqual(specialCount, 1, "特殊ルールが最低1つ入る（週\(weekOffset)）")
+            seenConfigs.insert(
+                "\(config.isOverflowWrapEnabled)-\(config.handCount)-\(config.isSplittingEnabled)"
+                + "-\(config.isDeadHandRevivalEnabled)-\(config.isBombEnabled)-\(config.isDoubleTapEnabled)"
+            )
         }
+        XCTAssertGreaterThanOrEqual(seenConfigs.count, 5, "60週で十分なバリエーションが出る")
     }
 
     func testMultiplayerMessageCodableRoundTrip() throws {

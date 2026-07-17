@@ -4,36 +4,54 @@ import Foundation
 /// 「今日の挑戦」より高難度のガチ勢向けチャレンジ。
 enum WeeklyChallenge {
 
-    /// その週のルールセット。ISO週番号をシードに決定的に生成されるため、
-    /// 全ユーザーが同じルールで挑戦する。難易度は常に「鬼」、特殊ルールは必ず3つ。
+    /// 週替わりで採用するルール構成。厳密ソルバーで
+    /// 「先手（人間）に必勝戦略が存在し、最適応答でも9手以上かかる」ことを
+    /// 確認済みの構成だけを載せている。後手必勝の構成は鬼AI相手に
+    /// 「絶対に勝てない週」になり、数手で終わる構成は自明なチーズになるため除外。
+    /// 毒はパリティ退化、ミラーは全構成が不成立で全面除外。
+    /// 分析はdocs/ai-notes.md参照。
+    private struct Trial {
+        var wrap: Bool
+        var handCount: Int
+        var splitting = false
+        var revival = false
+        var bomb = false
+        var doubleTap = false
+    }
+
+    private static let trials: [Trial] = [
+        Trial(wrap: true, handCount: 3, splitting: true, revival: true, bomb: true, doubleTap: true),
+        Trial(wrap: false, handCount: 3, splitting: true, revival: true, bomb: true, doubleTap: true),
+        Trial(wrap: true, handCount: 2, splitting: true, revival: true, bomb: true),
+        Trial(wrap: false, handCount: 2, splitting: true, revival: true, bomb: true),
+        Trial(wrap: true, handCount: 3, splitting: true, doubleTap: true),
+        Trial(wrap: true, handCount: 3, splitting: true, revival: true, doubleTap: true),
+        Trial(wrap: false, handCount: 3, splitting: true, doubleTap: true),
+        Trial(wrap: false, handCount: 3, splitting: true, revival: true, doubleTap: true),
+        Trial(wrap: true, handCount: 2, doubleTap: true),
+        Trial(wrap: false, handCount: 3, doubleTap: true),
+        Trial(wrap: true, handCount: 3, splitting: true, revival: true),
+        Trial(wrap: false, handCount: 3, splitting: true),
+        Trial(wrap: false, handCount: 3, splitting: true, revival: true),
+    ]
+
+    /// その週のルールセット。ISO週番号をシードに決定的に選ばれるため、
+    /// 全ユーザーが同じルールで挑戦する。難易度は常に「鬼」。
     static func config(for date: Date = .now) -> GameConfig {
         var rng = SplitMix64(state: seed(for: date))
+        let trial = trials[Int(rng.next() % UInt64(trials.count))]
 
         var config = GameConfig()
         config.gameMode = .vsAI
         config.aiDifficulty = .oni
         config.aiLevel = nil
         config.isWeeklyChallenge = true
-
-        config.isOverflowWrapEnabled = Bool.random(using: &rng)
-        config.handCount = Double.random(in: 0..<1, using: &rng) < 0.3 ? 3 : 2
-
-        // 特殊ルール4種からちょうど3つを有効化（決定的シャッフル）。
-        // 毒は含めない: 開始時は全手が指1本＝全タップが毒相討ちになり、
-        // 最適応答（鬼AI）ではパリティだけで勝敗が決まる退化ゲームになるため。
-        // 0=分割 2=爆弾 3=ミラー 4=ダブルタップ
-        var specials = [0, 2, 3, 4]
-        specials.shuffle(using: &rng)
-        for special in specials.prefix(3) {
-            switch special {
-            case 0:
-                config.isSplittingEnabled = true
-                config.isDeadHandRevivalEnabled = Bool.random(using: &rng)
-            case 2: config.isBombEnabled = true
-            case 3: config.isMirrorEnabled = true
-            default: config.isDoubleTapEnabled = true
-            }
-        }
+        config.isOverflowWrapEnabled = trial.wrap
+        config.handCount = trial.handCount
+        config.isSplittingEnabled = trial.splitting
+        config.isDeadHandRevivalEnabled = trial.revival
+        config.isBombEnabled = trial.bomb
+        config.isDoubleTapEnabled = trial.doubleTap
         return config
     }
 

@@ -40,8 +40,8 @@ TRANSLATIONS = {
     "今週の試練 — %@": "Weekly Trial — %@",
     "第%lld週": "Week %lld",
     "⚔️ 今週の試練クリア！鬼に勝った！": "⚔️ Weekly Trial cleared! You beat the Oni!",
-    "割り箸バトル「今週の試練 %@」クリア！⚔️ 鬼＋特殊ルール3種を攻略 #Chopsticks":
-        "Cleared the Chopsticks Weekly Trial (%@)! ⚔️ Oni + 3 special rules #Chopsticks",
+    "割り箸バトル「今週の試練 %@」クリア！⚔️ 今週の鬼を攻略した #Chopsticks":
+        "Cleared the Chopsticks Weekly Trial (%@)! ⚔️ This week's Oni is down #Chopsticks",
     "⚔️ 試練クリア %lld回": "⚔️ Trials cleared ×%lld",
 
     # ---- GameSessionStore (resume) ----

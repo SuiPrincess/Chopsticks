@@ -306,7 +306,7 @@ struct MenuView: View {
                 }
                 .buttonStyle(GlassButtonStyle(color: .cyan))
 
-                // ⚔️ 今週の試練（週替わり・鬼＋特殊ルール3種・週1回クリア記録）
+                // ⚔️ 今週の試練（週替わり・鬼＋厳選特殊ルール・週1回クリア記録）
                 Button {
                     rankedConfig = WeeklyChallenge.config()
                     showRuleConfirmation = true

@@ -146,7 +146,7 @@
 "切断して戻る" = "Disconnect & Leave";
 "前の手" = "Previous move";
 "割り箸バトル「今日の挑戦 %@」クリア！🎯 きみは解けた？ #Chopsticks" = "Cleared the Chopsticks Daily Challenge (%@)! 🎯 Can you? #Chopsticks";
-"割り箸バトル「今週の試練 %@」クリア！⚔️ 鬼＋特殊ルール3種を攻略 #Chopsticks" = "Cleared the Chopsticks Weekly Trial (%@)! ⚔️ Oni + 3 special rules #Chopsticks";
+"割り箸バトル「今週の試練 %@」クリア！⚔️ 今週の鬼を攻略した #Chopsticks" = "Cleared the Chopsticks Weekly Trial (%@)! ⚔️ This week's Oni is down #Chopsticks";
 "割り箸バトルでCPU Lv.%lldを撃破！現在ランクLv.%lld 🔥 #Chopsticks" = "Beat CPU Lv.%1$lld in Chopsticks! Now ranked Lv.%2$lld 🔥 #Chopsticks";
 "割り箸バトルでCPUに%lld連勝中！🔥 #Chopsticks" = "%lld wins in a row against the CPU in Chopsticks! 🔥 #Chopsticks";
 "割り箸バトルでCPUに勝利！✌️ #Chopsticks" = "Beat the CPU in Chopsticks! ✌️ #Chopsticks";
