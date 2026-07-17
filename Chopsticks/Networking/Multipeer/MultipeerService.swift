@@ -14,6 +14,7 @@ final class MultipeerService: NSObject, MultiplayerService, ObservableObject {
     var onConnectionChanged: ((Bool) -> Void)?
     private(set) var isHost: Bool
     var opponentName: String { connectedPeerName ?? "対戦相手" }
+    var localPlayerName: String { myPeerId.displayName }
     private var pendingMessages: [MultiplayerMessage] = []
 
     // MARK: - Published state

@@ -12,6 +12,9 @@ final class GameKitService: NSObject, MultiplayerService {
     private(set) var isHost: Bool = false
     private(set) var isConnected: Bool = false
     var opponentName: String { remoteName ?? "対戦相手" }
+    var localPlayerName: String {
+        GKLocalPlayer.local.isAuthenticated ? GKLocalPlayer.local.displayName : "プレイヤー"
+    }
 
     // MARK: - Private
     private var match: GKMatch?

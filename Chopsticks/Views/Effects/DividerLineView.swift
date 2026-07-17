@@ -1,7 +1,10 @@
 import SwiftUI
 
 struct DividerLineView: View {
-    let isPlayer1Turn: Bool
+    /// 手番のプレイヤーが画面下側に表示されているか（矢印の向き）
+    let pointsToBottom: Bool
+    /// 手番プレイヤーのカラー
+    let accentColor: Color
 
     var body: some View {
         ZStack {
@@ -31,15 +34,11 @@ struct DividerLineView: View {
                 Image(systemName: "arrowtriangle.down.fill")
                     .font(.system(size: 12, weight: .bold))
                     .foregroundStyle(accentColor)
-                    .rotationEffect(.degrees(isPlayer1Turn ? 0 : 180))
+                    .rotationEffect(.degrees(pointsToBottom ? 0 : 180))
             }
             .shadow(color: accentColor.opacity(0.5), radius: 8)
         }
         .frame(height: 44)
-        .animation(Anim.turnSwitch, value: isPlayer1Turn)
-    }
-
-    private var accentColor: Color {
-        isPlayer1Turn ? AppTheme.player1Color : AppTheme.player2Color
+        .animation(Anim.turnSwitch, value: pointsToBottom)
     }
 }

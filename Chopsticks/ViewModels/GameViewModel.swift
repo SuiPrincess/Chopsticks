@@ -93,6 +93,12 @@ final class GameViewModel {
         isMultiplayer && !isLocalTurn
     }
 
+    /// マルチプレイのゲスト（=player2）視点か。
+    /// trueなら画面の手前（下側）に自分＝player2を表示する。
+    var isGuestPerspective: Bool {
+        isMultiplayer && localPlayerId == state.player2.id
+    }
+
     // MARK: - Init
     init(config: GameConfig = GameConfig(), restoring saved: SavedGame? = nil) {
         if let saved {
@@ -121,9 +127,10 @@ final class GameViewModel {
         }
     }
 
-    func startMultiplayerGame(asHost: Bool, opponentName: String) {
+    func startMultiplayerGame(asHost: Bool, opponentName: String, localName: String) {
         if asHost {
             localPlayerId = state.player1.id
+            state.player1 = Player(id: state.player1.id, name: localName, handCount: config.handCount)
             state.player2 = Player(id: state.player2.id, name: opponentName, handCount: config.handCount)
             multiplayerService?.send(.gameStart(state))
         }
@@ -241,6 +248,7 @@ final class GameViewModel {
         if isMultiplayer, let service = multiplayerService {
             if service.isHost {
                 localPlayerId = state.player1.id
+                state.player1 = Player(id: state.player1.id, name: service.localPlayerName, handCount: config.handCount)
                 state.player2 = Player(id: state.player2.id, name: service.opponentName, handCount: config.handCount)
             } else {
                 localPlayerId = previousLocalId
@@ -388,8 +396,9 @@ final class GameViewModel {
 
             self.hintAction = action
             HapticManager.handSelect()
-            if case .split = action {
-                self.battleEvent = BattleEvent(text: "分割が最善!", color: .yellow)
+            if case .split(let distribution) = action {
+                let text = distribution.map(String.init).joined(separator: "-")
+                self.battleEvent = BattleEvent(text: "分割 \(text) が最善!", color: .yellow)
             }
         }
     }

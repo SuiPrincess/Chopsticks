@@ -25,19 +25,37 @@ struct GameView: View {
         !viewModel.isVsAI && !viewModel.isMultiplayer
     }
 
+    /// 画面下（手前）に表示するプレイヤー。
+    /// マルチプレイのゲストは自分＝player2を手前に表示する。
+    private var bottomPlayer: Player {
+        viewModel.isGuestPerspective ? viewModel.state.player2 : viewModel.state.player1
+    }
+
+    private var topPlayer: Player {
+        viewModel.isGuestPerspective ? viewModel.state.player1 : viewModel.state.player2
+    }
+
+    private func playerColor(for player: Player) -> Color {
+        player.id == viewModel.state.player1.id ? AppTheme.player1Color : AppTheme.player2Color
+    }
+
+    private func isCurrentTurn(_ player: Player) -> Bool {
+        viewModel.state.currentPlayerId == player.id
+    }
+
     var body: some View {
         ZStack {
             BackgroundGradientView()
 
             VStack(spacing: 0) {
-                // Player 2 (top)
+                // 相手側（上）
                 PlayerAreaView(
-                    player: viewModel.state.player2,
-                    isCurrentTurn: !viewModel.isPlayer1Turn,
-                    playerColor: AppTheme.player2Color,
+                    player: topPlayer,
+                    isCurrentTurn: isCurrentTurn(topPlayer),
+                    playerColor: playerColor(for: topPlayer),
                     selectedAttackerHandId: viewModel.selectedAttackerHandId,
                     isSplittingEnabled: viewModel.config.isSplittingEnabled && !viewModel.isRemoteControlled,
-                    isAttackPhase: viewModel.isPlayer1Turn && viewModel.selectedAttackerHandId != nil,
+                    isAttackPhase: !isCurrentTurn(topPlayer) && viewModel.selectedAttackerHandId != nil,
                     isPoisonEnabled: viewModel.config.isPoisonEnabled,
                     isAI: viewModel.isVsAI,
                     isAIThinking: viewModel.isAIThinking,
@@ -49,7 +67,12 @@ struct GameView: View {
 
                 // Center bar
                 ZStack {
-                    DividerLineView(isPlayer1Turn: viewModel.isPlayer1Turn)
+                    DividerLineView(
+                        pointsToBottom: isCurrentTurn(bottomPlayer),
+                        accentColor: playerColor(
+                            for: isCurrentTurn(bottomPlayer) ? bottomPlayer : topPlayer
+                        )
+                    )
 
                     HStack(spacing: 8) {
                         Button {
@@ -112,14 +135,14 @@ struct GameView: View {
                 }
                 .frame(height: 44)
 
-                // Player 1 (bottom)
+                // 自分側（下・手前）
                 PlayerAreaView(
-                    player: viewModel.state.player1,
-                    isCurrentTurn: viewModel.isPlayer1Turn,
-                    playerColor: AppTheme.player1Color,
+                    player: bottomPlayer,
+                    isCurrentTurn: isCurrentTurn(bottomPlayer),
+                    playerColor: playerColor(for: bottomPlayer),
                     selectedAttackerHandId: viewModel.selectedAttackerHandId,
                     isSplittingEnabled: viewModel.config.isSplittingEnabled && !viewModel.isRemoteControlled,
-                    isAttackPhase: !viewModel.isPlayer1Turn && viewModel.selectedAttackerHandId != nil,
+                    isAttackPhase: !isCurrentTurn(bottomPlayer) && viewModel.selectedAttackerHandId != nil,
                     isPoisonEnabled: viewModel.config.isPoisonEnabled,
                     hintedHandIds: hintedHandIds,
                     onHandTapped: { viewModel.handleHandTap($0) },
@@ -208,7 +231,8 @@ struct GameView: View {
                 viewModel.setupMultiplayer(service: service)
                 viewModel.startMultiplayerGame(
                     asHost: service.isHost,
-                    opponentName: service.opponentName
+                    opponentName: service.opponentName,
+                    localName: service.localPlayerName
                 )
             }
             // 復元したゲームがCPUの手番で中断されていた場合に再開する
