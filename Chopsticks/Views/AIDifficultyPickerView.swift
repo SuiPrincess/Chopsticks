@@ -22,6 +22,7 @@ struct AIDifficultyPickerView: View {
                 VStack(spacing: 12) {
                     difficultyButton(.easy, icon: "tortoise.fill", description: "ランダムに行動する")
                     difficultyButton(.hard, icon: "bolt.fill", description: "最善手を選ぶ")
+                    difficultyButton(.oni, icon: "flame.fill", description: "最深読み。勝てたら自慢していい")
                 }
                 .padding(.horizontal, 24)
 

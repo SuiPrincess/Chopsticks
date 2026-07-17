@@ -10,11 +10,13 @@ enum GameMode: String, Equatable, Codable {
 enum AIDifficulty: String, CaseIterable, Equatable, Codable {
     case easy
     case hard
+    case oni
 
     var label: String {
         switch self {
         case .easy: "かんたん"
         case .hard: "つよい"
+        case .oni: "鬼"
         }
     }
 }

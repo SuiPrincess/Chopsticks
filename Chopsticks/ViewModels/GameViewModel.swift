@@ -303,27 +303,39 @@ final class GameViewModel {
         isAIThinking = true
 
         let generation = gameGeneration
+        let snapshot = state
+        let level = config.aiLevel
+        let difficulty = config.aiDifficulty
+        let attacksUsed = attacksThisTurn
 
         Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(600))
+            // 探索はメインスレッドを塞がないようバックグラウンドで実行し、
+            // 「考えている」演出のため最低600msは待つ
+            let clock = ContinuousClock()
+            let started = clock.now
+            let action = await Task.detached(priority: .userInitiated) { () -> GameAction? in
+                if let level {
+                    return AIEngine.chooseAction(
+                        state: snapshot,
+                        level: level,
+                        attacksUsedThisTurn: attacksUsed
+                    )
+                }
+                return AIEngine.chooseAction(
+                    state: snapshot,
+                    difficulty: difficulty,
+                    attacksUsedThisTurn: attacksUsed
+                )
+            }.value
+            let elapsed = clock.now - started
+            if elapsed < .milliseconds(600) {
+                try? await Task.sleep(for: .milliseconds(600) - elapsed)
+            }
+
             guard generation == self.gameGeneration else { return }
             self.isAIThinking = false
             guard self.isAITurn, case .playing = self.state.phase else { return }
 
-            let action: GameAction?
-            if let level = self.config.aiLevel {
-                action = AIEngine.chooseAction(
-                    state: self.state,
-                    level: level,
-                    attacksUsedThisTurn: self.attacksThisTurn
-                )
-            } else {
-                action = AIEngine.chooseAction(
-                    state: self.state,
-                    difficulty: self.config.aiDifficulty,
-                    attacksUsedThisTurn: self.attacksThisTurn
-                )
-            }
             guard let action else {
                 // 行動がなければ手番を返す（通常起こらない）
                 self.attacksThisTurn = 0
