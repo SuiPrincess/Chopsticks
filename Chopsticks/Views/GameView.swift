@@ -36,7 +36,7 @@ struct GameView: View {
                     isCurrentTurn: !viewModel.isPlayer1Turn,
                     playerColor: AppTheme.player2Color,
                     selectedAttackerHandId: viewModel.selectedAttackerHandId,
-                    isSplittingEnabled: viewModel.config.isSplittingEnabled,
+                    isSplittingEnabled: viewModel.config.isSplittingEnabled && !viewModel.isRemoteControlled,
                     isAttackPhase: viewModel.isPlayer1Turn && viewModel.selectedAttackerHandId != nil,
                     isPoisonEnabled: viewModel.config.isPoisonEnabled,
                     isAI: viewModel.isVsAI,
@@ -118,7 +118,7 @@ struct GameView: View {
                     isCurrentTurn: viewModel.isPlayer1Turn,
                     playerColor: AppTheme.player1Color,
                     selectedAttackerHandId: viewModel.selectedAttackerHandId,
-                    isSplittingEnabled: viewModel.config.isSplittingEnabled,
+                    isSplittingEnabled: viewModel.config.isSplittingEnabled && !viewModel.isRemoteControlled,
                     isAttackPhase: !viewModel.isPlayer1Turn && viewModel.selectedAttackerHandId != nil,
                     isPoisonEnabled: viewModel.config.isPoisonEnabled,
                     hintedHandIds: hintedHandIds,
@@ -137,15 +137,15 @@ struct GameView: View {
             // 初プレイのコーチマーク（最初の2手番だけ）
             if showsTutorialHint {
                 TutorialHintView(text: tutorialHintText)
-                    .rotationEffect(.degrees(!viewModel.isVsAI && !viewModel.isPlayer1Turn ? 180 : 0))
-                    .offset(y: !viewModel.isVsAI && !viewModel.isPlayer1Turn ? -90 : 90)
+                    .rotationEffect(.degrees(shouldRotatePlayer2 && !viewModel.isPlayer1Turn ? 180 : 0))
+                    .offset(y: shouldRotatePlayer2 && !viewModel.isPlayer1Turn ? -90 : 90)
             }
 
             if viewModel.showSplitPanel {
                 let color = viewModel.isPlayer1Turn ? AppTheme.player1Color : AppTheme.player2Color
                 SplitControlView(viewModel: viewModel, playerColor: color)
-                    // 対面プレイではPlayer 2側に向ける
-                    .rotationEffect(.degrees(!viewModel.isVsAI && !viewModel.isPlayer1Turn ? 180 : 0))
+                    // 1台での対面プレイのみPlayer 2側に向ける（マルチプレイでは回転しない）
+                    .rotationEffect(.degrees(shouldRotatePlayer2 && !viewModel.isPlayer1Turn ? 180 : 0))
             }
 
             if viewModel.isGameOver {
@@ -186,6 +186,9 @@ struct GameView: View {
         }
         .alert("ゲームをやめますか？", isPresented: $showQuitConfirm) {
             Button("やめる", role: .destructive) {
+                // 思考中のAIタスクを無効化してから退出する
+                //（退出後に敗北が記録される・セーブが消えるのを防ぐ）
+                viewModel.abandonGame()
                 if viewModel.isMultiplayer {
                     viewModel.disconnectMultiplayer()
                 }
@@ -193,11 +196,11 @@ struct GameView: View {
             }
             Button("続ける", role: .cancel) {}
         } message: {
-            if !viewModel.isMultiplayer && !viewModel.isGameOver {
+            if viewModel.hasSavableProgress {
                 Text("進行中のゲームは自動保存され、メニューの「続きから」で再開できます")
             }
         }
-        .alert("接続が切れました", isPresented: $viewModel.showDisconnectAlert) {
+        .alert(viewModel.disconnectMessage, isPresented: $viewModel.showDisconnectAlert) {
             Button("OK") { dismiss() }
         }
         .onAppear {

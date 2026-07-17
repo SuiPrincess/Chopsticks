@@ -8,6 +8,7 @@ enum MultiplayerMessage: Codable {
     case stateSync(GameState)
     case rematchRequest
     case rematchAccepted
+    case rematchDeclined
     case disconnect
 
     // MARK: - Codable
@@ -36,6 +37,8 @@ enum MultiplayerMessage: Codable {
             try container.encode("rematchRequest", forKey: .type)
         case .rematchAccepted:
             try container.encode("rematchAccepted", forKey: .type)
+        case .rematchDeclined:
+            try container.encode("rematchDeclined", forKey: .type)
         case .disconnect:
             try container.encode("disconnect", forKey: .type)
         }
@@ -59,6 +62,8 @@ enum MultiplayerMessage: Codable {
             self = .rematchRequest
         case "rematchAccepted":
             self = .rematchAccepted
+        case "rematchDeclined":
+            self = .rematchDeclined
         case "disconnect":
             self = .disconnect
         default:

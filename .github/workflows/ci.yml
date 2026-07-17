@@ -20,6 +20,7 @@ jobs:
         id: sim
         run: |
           DEVICE=$(xcrun simctl list devices available | grep -oE 'iPhone [0-9][^(]*' | head -1 | sed 's/ *$//')
+          DEVICE="${DEVICE:-iPhone 16}"
           echo "Using simulator: $DEVICE"
           echo "device=$DEVICE" >> "$GITHUB_OUTPUT"
 

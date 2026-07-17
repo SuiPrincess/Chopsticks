@@ -4,6 +4,18 @@ import XCTest
 @MainActor
 final class GameViewModelTests: XCTestCase {
 
+    // テストはTEST_HOST（アプリ本体）のUserDefaultsを共有するため、
+    // 中断セーブを毎回クリアしてテスト間の干渉と実データ汚染を抑える
+    override func setUp() {
+        super.setUp()
+        GameSessionStore.shared.clear()
+    }
+
+    override func tearDown() {
+        GameSessionStore.shared.clear()
+        super.tearDown()
+    }
+
     private func makeLocalGame(configure: ((inout GameConfig) -> Void)? = nil) -> GameViewModel {
         var config = GameConfig()
         config.gameMode = .localTwoPlayer

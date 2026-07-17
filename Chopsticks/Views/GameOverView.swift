@@ -151,8 +151,7 @@ struct GameOverView: View {
         )) {
             Button("OK") { viewModel.acceptRematch() }
             Button("いいえ", role: .cancel) {
-                viewModel.showRematchRequest = false
-                viewModel.disconnectMultiplayer()
+                viewModel.declineRematch()
                 onDismiss()
             }
         }

@@ -104,6 +104,10 @@ struct StatsView: View {
             .alert("戦績をリセットしますか？", isPresented: $showResetConfirm) {
                 Button("リセット", role: .destructive) {
                     GameStats.shared.reset()
+                    // 中断中のランク戦セーブはリセット前のレベルを持っているため破棄する
+                    if GameSessionStore.shared.savedGame?.state.config.aiLevel != nil {
+                        GameSessionStore.shared.clear()
+                    }
                 }
                 Button("キャンセル", role: .cancel) {}
             } message: {

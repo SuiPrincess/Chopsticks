@@ -157,7 +157,9 @@ struct MenuView: View {
 
                         // Nearby (Multipeer)
                         Button {
+                            rankedConfig = nil
                             config.gameMode = .nearby
+                            config.aiLevel = nil
                             showNearbyMatch = true
                         } label: {
                             HStack(spacing: 8) {
@@ -169,7 +171,9 @@ struct MenuView: View {
 
                         // Online (Game Center)
                         Button {
+                            rankedConfig = nil
                             config.gameMode = .online
+                            config.aiLevel = nil
                             showGameKitMatchmaker = true
                         } label: {
                             HStack(spacing: 8) {
@@ -287,6 +291,15 @@ struct MenuView: View {
                 if pendingGameStart {
                     pendingGameStart = false
                     navigateToGame = true
+                } else {
+                    // ルール確認をキャンセルした場合の後始末。
+                    // 接続済みのマルチプレイサービスを放置すると、
+                    // 次に始める無関係なゲームに付着してしまう
+                    if let service = multiplayerService {
+                        service.disconnect()
+                        multiplayerService = nil
+                    }
+                    rankedConfig = nil
                 }
             }) {
                 RuleDisplayView(

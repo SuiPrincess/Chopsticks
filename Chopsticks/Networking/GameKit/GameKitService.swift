@@ -10,6 +10,7 @@ final class GameKitService: NSObject, MultiplayerService {
     }
     var onConnectionChanged: ((Bool) -> Void)?
     private(set) var isHost: Bool = false
+    private(set) var isConnected: Bool = false
     var opponentName: String { remoteName ?? "対戦相手" }
 
     // MARK: - Private
@@ -44,6 +45,7 @@ final class GameKitService: NSObject, MultiplayerService {
         isHost = allIds.first == localId
 
         remoteName = match.players.first?.displayName
+        isConnected = true
         onConnectionChanged?(true)
     }
 
@@ -54,6 +56,7 @@ final class GameKitService: NSObject, MultiplayerService {
             try match.sendData(toAllPlayers: data, with: .reliable)
         } catch {
             // 送信失敗 — 接続切れの可能性
+            isConnected = false
             onConnectionChanged?(false)
         }
     }
@@ -63,6 +66,7 @@ final class GameKitService: NSObject, MultiplayerService {
         match?.delegate = nil
         match?.disconnect()
         match = nil
+        isConnected = false
     }
 }
 
@@ -79,6 +83,7 @@ extension GameKitService: GKMatchDelegate {
         Task { @MainActor in
             switch state {
             case .disconnected:
+                self.isConnected = false
                 self.onConnectionChanged?(false)
             default:
                 break
@@ -88,6 +93,7 @@ extension GameKitService: GKMatchDelegate {
 
     nonisolated func match(_ match: GKMatch, didFailWithError error: Error?) {
         Task { @MainActor in
+            self.isConnected = false
             self.onConnectionChanged?(false)
         }
     }

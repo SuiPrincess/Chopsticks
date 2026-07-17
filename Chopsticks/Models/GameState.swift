@@ -61,7 +61,7 @@ struct GameState: Equatable, Codable {
         let p2Name: String
         switch config.gameMode {
         case .vsAI:
-            p2Name = config.aiLevel.map { "CPU Lv.\($0)" } ?? "CPU"
+            p2Name = config.aiLevel.map { "CPU Lv.\($0)" } ?? "CPU（\(config.aiDifficulty.label)）"
         case .online, .nearby:
             p2Name = "対戦相手"
         case .localTwoPlayer:

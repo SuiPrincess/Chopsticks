@@ -21,7 +21,7 @@ targets:
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
         INFOPLIST_KEY_UIStatusBarHidden: true
         INFOPLIST_KEY_NSLocalNetworkUsageDescription: "近くのプレイヤーと対戦するために使用します"
-        INFOPLIST_KEY_NSBonjourServices: "_chopsticks._tcp"
+        INFOPLIST_KEY_NSBonjourServices: "_chopsticks._tcp _chopsticks._udp"
         INFOPLIST_KEY_GCSupportsGameCenterMVC: true
         SWIFT_VERSION: "5.9"
         GENERATE_INFOPLIST_FILE: true

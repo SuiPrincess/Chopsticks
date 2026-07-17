@@ -36,6 +36,8 @@ final class GameViewModel {
     var multiplayerService: (any MultiplayerService)?
     var localPlayerId: UUID?
     var showDisconnectAlert: Bool = false
+    /// 切断アラートの見出し（リマッチ拒否は「相手が退出しました」になる）
+    var disconnectMessage: String = "接続が切れました"
     var showRematchRequest: Bool = false
     var isWaitingForRematch: Bool = false
     private var isExecutingRemoteAction: Bool = false
@@ -112,6 +114,11 @@ final class GameViewModel {
                 self?.showDisconnectAlert = true
             }
         }
+        // 接続〜この画面表示までの間に切断されていた場合、
+        // イベントは既に流れてしまっているのでここで検知する
+        if !service.isConnected {
+            showDisconnectAlert = true
+        }
     }
 
     func startMultiplayerGame(asHost: Bool, opponentName: String) {
@@ -135,11 +142,19 @@ final class GameViewModel {
         case .rematchRequest:
             showRematchRequest = true
         case .rematchAccepted:
+            // 自分が要求した場合のみ処理する。同時リマッチで双方が承認すると
+            // .rematchAcceptedが交差するが、承認側はnewGame()済み
+            //（isWaitingForRematch=false）なので二重に開始しない
+            guard isWaitingForRematch else { break }
             isWaitingForRematch = false
             newGame()
             if let service = multiplayerService, service.isHost {
                 service.send(.gameStart(state))
             }
+        case .rematchDeclined:
+            isWaitingForRematch = false
+            disconnectMessage = "相手が退出しました"
+            showDisconnectAlert = true
         case .disconnect:
             showDisconnectAlert = true
         case .configProposal, .configAccepted:
@@ -163,17 +178,41 @@ final class GameViewModel {
         }
     }
 
+    /// リマッチ要求を断って退出する（相手には「相手が退出しました」と伝わる）
+    func declineRematch() {
+        showRematchRequest = false
+        multiplayerService?.send(.rematchDeclined)
+        disconnectMultiplayer()
+    }
+
     func disconnectMultiplayer() {
         multiplayerService?.disconnect()
         multiplayerService = nil
         localPlayerId = nil
     }
 
+    /// ゲームを途中で放棄する。進行中のAI思考タスクの結果を無効化し、
+    /// 退出後に敗北が記録されたりセーブが消えたりするのを防ぐ。
+    func abandonGame() {
+        gameGeneration += 1
+        isAIThinking = false
+    }
+
+    /// 「やめる」時に自動保存が残るか（保存条件と一致させる）
+    var hasSavableProgress: Bool {
+        guard case .playing = state.phase else { return false }
+        return !isMultiplayer && (state.turnCount > 0 || attacksThisTurn > 0)
+    }
+
     // MARK: - Actions
     func newGame() {
         gameGeneration += 1
         didRankUp = false
-        GameSessionStore.shared.clear()
+        // マルチプレイのリマッチが、無関係なシングルプレイの中断セーブを
+        // 消してしまわないようガードする
+        if !isMultiplayer {
+            GameSessionStore.shared.clear()
+        }
         let previousLocalId = localPlayerId
         var config = state.config
         // ランク戦の再戦は最新レベルのCPUと
@@ -261,6 +300,9 @@ final class GameViewModel {
 
     func performSplit(newDistribution: [Int]) {
         guard case .playing = state.phase else { return }
+        // 相手の手番中にこちらから相手の分割を実行できてはいけない
+        //（リモートから受信した正規のアクションは通す）
+        guard !isRemoteControlled || isExecutingRemoteAction else { return }
         hintAction = nil
         guard config.isSplittingEnabled else { return }
         guard currentPlayer.isValidSplit(
@@ -515,8 +557,12 @@ final class GameViewModel {
         } else {
             state.phase = .draw
         }
-        GameSessionStore.shared.clear()
-        HapticManager.victory()
+        if !isMultiplayer {
+            GameSessionStore.shared.clear()
+        }
+        if winnerId != nil {
+            HapticManager.victory()
+        }
         GameStats.shared.recordDailyPlay()
         if isVsAI, let winnerId {
             let playerWon = winnerId == state.player1.id
@@ -533,8 +579,8 @@ final class GameViewModel {
             let localLost: Bool
             if isVsAI {
                 localLost = winnerId == state.player2.id
-            } else if isMultiplayer {
-                localLost = winnerId != localPlayerId
+            } else if isMultiplayer, let localId = localPlayerId {
+                localLost = winnerId != localId
             } else {
                 // 1台の2人対戦は必ず誰かが勝つので勝利音
                 localLost = false
