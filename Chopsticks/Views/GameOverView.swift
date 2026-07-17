@@ -30,7 +30,7 @@ struct GameOverView: View {
                     Image(systemName: "equal.circle.fill")
                         .font(.system(size: 56))
                         .foregroundStyle(.white.opacity(0.4))
-                } else if humanLostToAI {
+                } else if localPlayerLost {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 56))
                         .foregroundStyle(.white.opacity(0.3))
@@ -53,7 +53,7 @@ struct GameOverView: View {
                             : AnyShapeStyle(Color.white.opacity(0.5)))
                         .tracking(isWinTitle ? 6 : 1)
 
-                    if viewModel.isPerfectWin && !humanLostToAI {
+                    if viewModel.isPerfectWin && !localPlayerLost {
                         Text("💯 PERFECT!")
                             .font(.system(size: 15, weight: .heavy, design: .rounded))
                             .foregroundStyle(AppTheme.goldGradient)
@@ -184,24 +184,40 @@ struct GameOverView: View {
         viewModel.isVsAI && viewModel.winner?.id == viewModel.state.player2.id
     }
 
+    /// この端末のプレイヤーが負けたか（CPU戦とマルチプレイ。1台2人対戦は常にfalse）
+    private var localPlayerLost: Bool {
+        if humanLostToAI { return true }
+        if viewModel.isMultiplayer,
+           let localId = viewModel.localPlayerId,
+           let winner = viewModel.winner {
+            return winner.id != localId
+        }
+        return false
+    }
+
     private var isRankedMatch: Bool {
         viewModel.config.aiLevel != nil
     }
 
     private var isDraw: Bool { viewModel.isDraw }
 
-    /// 勝者を祝う表示にするか（引き分け・CPU戦敗北は落ち着いた表示）
-    private var isWinTitle: Bool { !isDraw && !humanLostToAI }
+    /// 勝者を祝う表示にするか（引き分け・この端末の敗北は落ち着いた表示）
+    private var isWinTitle: Bool { !isDraw && !localPlayerLost }
 
     private var titleText: String {
         if isDraw { return "DRAW" }
-        if humanLostToAI { return "LOSE..." }
+        if localPlayerLost { return "LOSE..." }
         return viewModel.winnerName ?? ""
     }
 
     private var subtitleText: String {
         if isDraw { return "引き分け" }
-        if humanLostToAI { return "もう一回挑戦しよう" }
+        if localPlayerLost {
+            if viewModel.isMultiplayer, let name = viewModel.winnerName {
+                return "\(name)の勝ち"
+            }
+            return "もう一回挑戦しよう"
+        }
         return "WIN!"
     }
 
