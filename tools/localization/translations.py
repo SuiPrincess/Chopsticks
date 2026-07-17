@@ -48,6 +48,7 @@ TRANSLATIONS = {
     # ---- Themes ----
     "オニ": "Oni",
     "難易度「鬼」に勝利で解放": "Beat the Oni difficulty to unlock",
+    "🔥 鬼撃破 %lld回": "🔥 Oni defeated ×%lld",
     "ネオン": "Neon",
     "サンセット": "Sunset",
     "マトリックス": "Matrix",

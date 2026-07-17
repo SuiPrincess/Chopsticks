@@ -204,6 +204,14 @@ struct GameOverView: View {
             StrategyGuideView()
                 .presentationDetents([.large])
         }
+        // リプレイ/ガイドのsheetの下ではalertが出ないため、
+        // リマッチ要求が来たらsheetを閉じて即座に表示する
+        .onChange(of: viewModel.showRematchRequest) { _, showing in
+            if showing {
+                showReplay = false
+                showGuide = false
+            }
+        }
     }
 
     private var shareText: String {

@@ -65,6 +65,11 @@ struct StatsView: View {
                                     bigNumber("\(stats.losses)", label: "敗北", color: AppTheme.player2Color)
                                     bigNumber(totalGames > 0 ? "\(winRate)%" : "—", label: "勝率", color: .white)
                                 }
+                                if stats.oniWins > 0 {
+                                    Text("🔥 鬼撃破 \(stats.oniWins)回")
+                                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                        .foregroundStyle(.orange.opacity(0.85))
+                                }
                             }
                         }
 
