@@ -106,6 +106,39 @@ final class GameViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.state, endState, "決着後の操作は無効")
     }
 
+    // MARK: - マネタイズ関連
+
+    func testHintQuotaConsumesAndLimits() {
+        let defaults = UserDefaults.standard
+        defaults.removeObject(forKey: "hint.quota.date")
+        defaults.removeObject(forKey: "hint.quota.count")
+        defer {
+            defaults.removeObject(forKey: "hint.quota.date")
+            defaults.removeObject(forKey: "hint.quota.count")
+        }
+
+        let settings = SettingsStore.shared
+        XCTAssertEqual(settings.hintsRemainingToday, SettingsStore.freeHintsPerDay)
+        for i in 0..<SettingsStore.freeHintsPerDay {
+            XCTAssertTrue(settings.consumeHint(), "\(i + 1)回目は成功")
+        }
+        XCTAssertFalse(settings.consumeHint(), "上限を超えたら失敗")
+        XCTAssertEqual(settings.hintsRemainingToday, 0)
+    }
+
+    func testThemeSelectionRespectsPremiumLock() {
+        let store = ThemeStore.shared
+        let original = store.selectedThemeID
+        defer { store.selectedThemeID = original }
+
+        store.select(.neon, isPremiumUnlocked: false)
+        XCTAssertEqual(store.selectedThemeID, Theme.neon.id)
+        store.select(.sunset, isPremiumUnlocked: false)
+        XCTAssertEqual(store.selectedThemeID, Theme.neon.id, "未購入ではプレミアムテーマを選べない")
+        store.select(.sunset, isPremiumUnlocked: true)
+        XCTAssertEqual(store.selectedThemeID, Theme.sunset.id, "プレミアムなら選べる")
+    }
+
     func testMirrorSuicideGivesOpponentWin() {
         var config = GameConfig()
         config.gameMode = .localTwoPlayer

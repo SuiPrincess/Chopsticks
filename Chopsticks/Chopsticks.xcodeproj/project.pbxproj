@@ -44,6 +44,10 @@
 		6ED0BB0273C41B2A9D3E5F05 /* AIEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED0AA0273C41B2A9D3E5F02 /* AIEngineTests.swift */; };
 		6ED0BB0373C41B2A9D3E5F06 /* GameViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED0AA0373C41B2A9D3E5F03 /* GameViewModelTests.swift */; };
 		6ED2BB0173C41B2A9D3E7101 /* MultiplayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED2AA0173C41B2A9D3E7001 /* MultiplayerTests.swift */; };
+		6ED4BB0173C41B2A9D3E8101 /* ThemeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED4AA0173C41B2A9D3E8001 /* ThemeStore.swift */; };
+		6ED4BB0273C41B2A9D3E8102 /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED4AA0273C41B2A9D3E8002 /* StoreManager.swift */; };
+		6ED4BB0373C41B2A9D3E8103 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED4AA0373C41B2A9D3E8003 /* NotificationManager.swift */; };
+		6ED4BB0473C41B2A9D3E8104 /* ShopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED4AA0473C41B2A9D3E8004 /* ShopView.swift */; };
 		6ED1BB0173C41B2A9D3E6101 /* GameSessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED1AA0173C41B2A9D3E6001 /* GameSessionStore.swift */; };
 		6ED1BB0273C41B2A9D3E6102 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED1AA0273C41B2A9D3E6002 /* SettingsStore.swift */; };
 		6ED1BB0373C41B2A9D3E6103 /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED1AA0373C41B2A9D3E6003 /* SoundManager.swift */; };
@@ -101,6 +105,11 @@
 		6ED0AA0273C41B2A9D3E5F02 /* AIEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIEngineTests.swift; sourceTree = "<group>"; };
 		6ED0AA0373C41B2A9D3E5F03 /* GameViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewModelTests.swift; sourceTree = "<group>"; };
 		6ED2AA0173C41B2A9D3E7001 /* MultiplayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiplayerTests.swift; sourceTree = "<group>"; };
+		6ED4AA0173C41B2A9D3E8001 /* ThemeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeStore.swift; sourceTree = "<group>"; };
+		6ED4AA0273C41B2A9D3E8002 /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
+		6ED4AA0373C41B2A9D3E8003 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		6ED4AA0473C41B2A9D3E8004 /* ShopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopView.swift; sourceTree = "<group>"; };
+		6ED4AA0573C41B2A9D3E8005 /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Products.storekit; sourceTree = "<group>"; };
 		6ED0DD0173C41B2A9D3E5F08 /* ChopsticksTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChopsticksTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6ED1AA0173C41B2A9D3E6001 /* GameSessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSessionStore.swift; sourceTree = "<group>"; };
 		6ED1AA0273C41B2A9D3E6002 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
@@ -125,6 +134,7 @@
 			children = (
 				6ED1AA0673C41B2A9D3E6006 /* Assets.xcassets */,
 				EE45D2D66A0FEE63003021BD /* Chopsticks.entitlements */,
+				6ED4AA0573C41B2A9D3E8005 /* Products.storekit */,
 			);
 			name = Chopsticks;
 			path = .;
@@ -174,8 +184,11 @@
 				6ED1AA0173C41B2A9D3E6001 /* GameSessionStore.swift */,
 				B7E1A9D34C2F5B6E8A0D1C42 /* GameStats.swift */,
 				954E87CDC807FE7CE0335ADF /* HapticManager.swift */,
+				6ED4AA0373C41B2A9D3E8003 /* NotificationManager.swift */,
 				6ED1AA0273C41B2A9D3E6002 /* SettingsStore.swift */,
 				6ED1AA0373C41B2A9D3E6003 /* SoundManager.swift */,
+				6ED4AA0273C41B2A9D3E8002 /* StoreManager.swift */,
+				6ED4AA0173C41B2A9D3E8001 /* ThemeStore.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -231,6 +244,7 @@
 				9A4B503A605BF5B71C3A38DF /* RuleDisplayView.swift */,
 				C72CEAD016BE717F23D4C93B /* RuleSettingsView.swift */,
 				6ED1AA0573C41B2A9D3E6005 /* SettingsView.swift */,
+				6ED4AA0473C41B2A9D3E8004 /* ShopView.swift */,
 				6ED1AA0473C41B2A9D3E6004 /* StatsView.swift */,
 				AF4D36F4F9C1E5F974AE395E /* Components */,
 				34BD53B58362F47B2C9B671C /* Effects */,
@@ -429,6 +443,10 @@
 				6ED1BB0373C41B2A9D3E6103 /* SoundManager.swift in Sources */,
 				6ED1BB0473C41B2A9D3E6104 /* StatsView.swift in Sources */,
 				6ED1BB0573C41B2A9D3E6105 /* SettingsView.swift in Sources */,
+				6ED4BB0173C41B2A9D3E8101 /* ThemeStore.swift in Sources */,
+				6ED4BB0273C41B2A9D3E8102 /* StoreManager.swift in Sources */,
+				6ED4BB0373C41B2A9D3E8103 /* NotificationManager.swift in Sources */,
+				6ED4BB0473C41B2A9D3E8104 /* ShopView.swift in Sources */,
 				1E13C1C280D733E40A97A06E /* SplitControlView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

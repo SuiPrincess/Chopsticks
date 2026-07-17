@@ -15,6 +15,7 @@ targets:
           - project.yml
           - "*.xcodeproj/**"
           - "ChopsticksTests/**"
+          - "*.storekit"
     settings:
       base:
         INFOPLIST_KEY_UILaunchScreen_Generation: true

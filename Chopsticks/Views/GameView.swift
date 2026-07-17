@@ -3,6 +3,7 @@ import SwiftUI
 struct GameView: View {
     @State private var viewModel: GameViewModel
     @State private var showQuitConfirm = false
+    @State private var showShop = false
     @State private var shakePhase: CGFloat = 0
     @State private var bannerEvent: BattleEvent?
     @AppStorage("tutorial.completed") private var tutorialCompleted = false
@@ -225,6 +226,16 @@ struct GameView: View {
         }
         .alert(viewModel.disconnectMessage, isPresented: $viewModel.showDisconnectAlert) {
             Button("OK") { dismiss() }
+        }
+        .alert("今日のヒントを使い切りました", isPresented: $viewModel.hintLimitReached) {
+            Button("プレミアムを見る") { showShop = true }
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("無料版はヒント1日\(SettingsStore.freeHintsPerDay)回まで。プレミアムなら無制限で使えます。")
+        }
+        .sheet(isPresented: $showShop) {
+            ShopView()
+                .presentationDetents([.large])
         }
         .onAppear {
             if let service = multiplayerService {

@@ -39,10 +39,29 @@ Chopsticks - 割り箸バトル
 ## カテゴリ
 ゲーム > ボード / 戦略
 
+## 収益化（App Store Connectでの設定が必要）
+
+アプリ内課金（StoreKit 2）。以下のプロダクトをASCで作成する。
+ローカルテストは `Chopsticks/Products.storekit` をXcodeのスキーム設定
+（Run > Options > StoreKit Configuration）で選択すればASC設定なしで動作確認できる。
+
+| Product ID | 種類 | 内容 | 参考価格 |
+|---|---|---|---|
+| `com.suiprincess.chopsticks.premium` | 非消耗型 | 全カラーテーマ解放＋AIヒント無制限 | ¥480 |
+| `com.suiprincess.chopsticks.tip.small` | 消耗型 | 投げ銭（おにぎり） | ¥160 |
+| `com.suiprincess.chopsticks.tip.large` | 消耗型 | 投げ銭（お弁当） | ¥600 |
+
+収益設計:
+- 無料でフル対戦可能（ゲームプレイは一切課金で制限しない＝レビューを守る）
+- ヒントのみ1日3回制限 → プレミアムで無制限（自然な誘導）
+- プレミアムテーマ5種（サンセット/マトリックス/サクラ/ゴールド/ディープシー）
+- デイリーリマインダー通知（オプトイン）＋連続プレイ日数でリテンション
+
 ## 備考（審査メモ）
 - オンライン対戦はGame Center必須
 - 近接対戦はローカルネットワーク権限を使用（NSLocalNetworkUsageDescription設定済み）
-- 課金・広告・外部通信（Game Center以外）なし
+- 広告なし。課金はStoreKit 2のIAPのみ（上記）。復元ボタンあり
+- 通知はオプトイン（設定画面のトグルで許可リクエスト）
 - Game Centerリーダーボード（任意）: ID `com.suiprincess.chopsticks.rank`（ランク戦の到達レベル）を
   App Store Connectで作成すると自動で送信される。未設定でも問題なく動作する
 - Game Center実績（任意）: 以下のIDをApp Store Connectで作成すると自動で解除される。未設定でも問題なく動作する

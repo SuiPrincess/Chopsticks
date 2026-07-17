@@ -8,6 +8,8 @@ struct MenuView: View {
     @State private var showAIDifficultyPicker = false
     @State private var showStats = false
     @State private var showSettings = false
+    @State private var showShop = false
+    @State private var storeManager = StoreManager.shared
     @State private var navigateToGame = false
     @State private var titleGlow: CGFloat = 0.3
 
@@ -58,20 +60,41 @@ struct MenuView: View {
                 }
             }
             .overlay(alignment: .topTrailing) {
-                Button {
-                    showSettings = true
-                } label: {
-                    Image(systemName: "gearshape.fill")
-                        .font(.system(size: 15))
-                        .foregroundStyle(.white.opacity(0.45))
-                        .frame(width: 38, height: 38)
-                        .background(
-                            Circle()
-                                .fill(.ultraThinMaterial)
-                                .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 0.5))
-                        )
+                HStack(spacing: 10) {
+                    Button {
+                        showShop = true
+                    } label: {
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 15))
+                            .foregroundStyle(
+                                storeManager.isPremium
+                                    ? AnyShapeStyle(AppTheme.goldGradient)
+                                    : AnyShapeStyle(Color.yellow.opacity(0.75))
+                            )
+                            .frame(width: 38, height: 38)
+                            .background(
+                                Circle()
+                                    .fill(.ultraThinMaterial)
+                                    .overlay(Circle().stroke(Color.yellow.opacity(0.25), lineWidth: 0.5))
+                            )
+                    }
+                    .accessibilityLabel("ショップ")
+
+                    Button {
+                        showSettings = true
+                    } label: {
+                        Image(systemName: "gearshape.fill")
+                            .font(.system(size: 15))
+                            .foregroundStyle(.white.opacity(0.45))
+                            .frame(width: 38, height: 38)
+                            .background(
+                                Circle()
+                                    .fill(.ultraThinMaterial)
+                                    .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 0.5))
+                            )
+                    }
+                    .accessibilityLabel("設定")
                 }
-                .accessibilityLabel("設定")
                 .padding(.trailing, 20)
                 .padding(.top, 8)
             }
@@ -97,7 +120,11 @@ struct MenuView: View {
             }
             .sheet(isPresented: $showSettings) {
                 SettingsView()
-                    .presentationDetents([.medium])
+                    .presentationDetents([.medium, .large])
+            }
+            .sheet(isPresented: $showShop) {
+                ShopView()
+                    .presentationDetents([.large])
             }
             .sheet(isPresented: $showAIDifficultyPicker, onDismiss: {
                 if pendingRuleConfirmation {

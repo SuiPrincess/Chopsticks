@@ -1,0 +1,78 @@
+{
+  "identifier" : "6ED3A0016ED3A0016ED3A001",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "480",
+      "familyShareable" : false,
+      "internalID" : "6ED3B0016ED3B0016ED3B001",
+      "localizations" : [
+        {
+          "description" : "全カラーテーマ解放＋AIヒント無制限",
+          "displayName" : "プレミアム",
+          "locale" : "ja_JP"
+        },
+        {
+          "description" : "Unlock all themes + unlimited AI hints",
+          "displayName" : "Premium",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.suiprincess.chopsticks.premium",
+      "referenceName" : "Premium",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "160",
+      "familyShareable" : false,
+      "internalID" : "6ED3B0026ED3B0026ED3B002",
+      "localizations" : [
+        {
+          "description" : "開発者におにぎりを差し入れ",
+          "displayName" : "おにぎり",
+          "locale" : "ja_JP"
+        },
+        {
+          "description" : "Buy the developer a rice ball",
+          "displayName" : "Rice Ball Tip",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.suiprincess.chopsticks.tip.small",
+      "referenceName" : "Tip Small",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "600",
+      "familyShareable" : false,
+      "internalID" : "6ED3B0036ED3B0036ED3B003",
+      "localizations" : [
+        {
+          "description" : "開発者にお弁当を差し入れ",
+          "displayName" : "お弁当",
+          "locale" : "ja_JP"
+        },
+        {
+          "description" : "Buy the developer a bento box",
+          "displayName" : "Bento Tip",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.suiprincess.chopsticks.tip.large",
+      "referenceName" : "Tip Large",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

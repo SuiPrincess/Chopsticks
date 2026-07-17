@@ -1,28 +1,32 @@
 import SwiftUI
 
+/// アプリ全体のカラーパレット。実体はThemeStoreの選択テーマで、
+/// テーマを切り替えると全Viewに反映される。
 enum AppTheme {
     // Player colors
-    static let player1Color = Color(red: 0.3, green: 0.75, blue: 1.0)
-    static let player2Color = Color(red: 1.0, green: 0.4, blue: 0.65)
+    static var player1Color: Color { ThemeStore.shared.current.player1 }
+    static var player2Color: Color { ThemeStore.shared.current.player2 }
 
     // Accent
-    static let accent = Color(red: 0.3, green: 0.75, blue: 1.0)
-    static let accentSecondary = Color(red: 0.6, green: 0.4, blue: 1.0)
+    static var accent: Color { ThemeStore.shared.current.accent }
+    static var accentSecondary: Color { ThemeStore.shared.current.accentSecondary }
 
     // Background
-    static let bgDark = Color(red: 0.02, green: 0.02, blue: 0.08)
-    static let bgMid = Color(red: 0.05, green: 0.05, blue: 0.15)
-    static let bgDeep = Color(red: 0.08, green: 0.02, blue: 0.12)
+    static var bgDark: Color { ThemeStore.shared.current.bgDark }
+    static var bgMid: Color { ThemeStore.shared.current.bgMid }
+    static var bgDeep: Color { ThemeStore.shared.current.bgDeep }
 
     // Glass
     static let glassBorder = Color.white.opacity(0.15)
 
     // Gradients
-    static let accentGradient = LinearGradient(
-        colors: [accent, accentSecondary],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
+    static var accentGradient: LinearGradient {
+        LinearGradient(
+            colors: [accent, accentSecondary],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
 
     static let goldGradient = LinearGradient(
         colors: [.yellow, .orange],

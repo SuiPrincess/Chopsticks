@@ -24,6 +24,8 @@ final class GameViewModel {
     /// ヒント: AIが提案する最善手（該当する手が黄色く光る）
     private(set) var hintAction: GameAction?
     private var isComputingHint = false
+    /// 無料枠のヒントを使い切った（GameViewがショップ導線付きアラートを出す）
+    var hintLimitReached = false
     var showSplitPanel: Bool = false
     var showRules: Bool = false
 
@@ -381,6 +383,13 @@ final class GameViewModel {
         guard isVsAI, !isAITurn, case .playing = state.phase,
               hintAction == nil, !isComputingHint
         else { return }
+        // 無料ユーザーは1日の回数制限あり（プレミアムは無制限）
+        if !StoreManager.shared.isPremium {
+            guard SettingsStore.shared.consumeHint() else {
+                hintLimitReached = true
+                return
+            }
+        }
         isComputingHint = true
 
         let snapshot = state
