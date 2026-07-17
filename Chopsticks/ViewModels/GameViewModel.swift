@@ -21,6 +21,9 @@ final class GameViewModel {
     private(set) var shakeTrigger = 0
     /// この勝利でランクが上がったか（リザルト演出用）
     private(set) var didRankUp = false
+    /// ヒント: AIが提案する最善手（該当する手が黄色く光る）
+    private(set) var hintAction: GameAction?
+    private var isComputingHint = false
     var showSplitPanel: Bool = false
     var showRules: Bool = false
 
@@ -191,6 +194,7 @@ final class GameViewModel {
         showSplitPanel = false
         isAIThinking = false
         battleEvent = nil
+        hintAction = nil
         isWaitingForRematch = false
         showRematchRequest = false
 
@@ -222,6 +226,7 @@ final class GameViewModel {
 
     func tapOpponentHand(_ targetHandId: UUID) {
         guard case .playing = state.phase else { return }
+        hintAction = nil
         guard let attackerHandId = selectedAttackerHandId else { return }
         guard let attackerHand = currentPlayer.hand(for: attackerHandId), attackerHand.isAlive else { return }
         guard let targetHand = opponentPlayer.hand(for: targetHandId), targetHand.isAlive else { return }
@@ -256,6 +261,7 @@ final class GameViewModel {
 
     func performSplit(newDistribution: [Int]) {
         guard case .playing = state.phase else { return }
+        hintAction = nil
         guard config.isSplittingEnabled else { return }
         guard currentPlayer.isValidSplit(
             newDistribution: newDistribution,
@@ -303,6 +309,47 @@ final class GameViewModel {
             performSplit(newDistribution: distribution)
         }
         isExecutingRemoteAction = false
+    }
+
+    // MARK: - Hint
+
+    /// AI（つよい相当）に最善手を聞き、該当する手を光らせる。
+    /// CPU戦の自分の手番でのみ有効。
+    func requestHint() {
+        guard isVsAI, !isAITurn, case .playing = state.phase,
+              hintAction == nil, !isComputingHint
+        else { return }
+        isComputingHint = true
+
+        let snapshot = state
+        let attacksUsed = attacksThisTurn
+        let generation = gameGeneration
+        let turnCount = state.turnCount
+
+        Task { @MainActor in
+            let action = await Task.detached(priority: .userInitiated) {
+                AIEngine.chooseAction(
+                    state: snapshot,
+                    difficulty: .hard,
+                    attacksUsedThisTurn: attacksUsed
+                )
+            }.value
+            self.isComputingHint = false
+            // 計算中に盤面が動いていたら破棄
+            guard generation == self.gameGeneration,
+                  self.state.turnCount == turnCount,
+                  self.attacksThisTurn == attacksUsed,
+                  case .playing = self.state.phase,
+                  !self.isAITurn,
+                  let action
+            else { return }
+
+            self.hintAction = action
+            HapticManager.handSelect()
+            if case .split = action {
+                self.battleEvent = BattleEvent(text: "分割が最善!", color: .yellow)
+            }
+        }
     }
 
     // MARK: - AI
@@ -405,6 +452,7 @@ final class GameViewModel {
 
     private func advanceTurn() {
         state.switchTurn()
+        hintAction = nil
         HapticManager.turnSwitch()
 
         if state.turnCount >= Self.turnLimit {

@@ -10,6 +10,7 @@ struct PlayerAreaView: View {
     let isPoisonEnabled: Bool
     let isAI: Bool
     let isAIThinking: Bool
+    let hintedHandIds: Set<UUID>
     let onHandTapped: (UUID) -> Void
     let onSplitTapped: () -> Void
 
@@ -23,6 +24,7 @@ struct PlayerAreaView: View {
         isPoisonEnabled: Bool = false,
         isAI: Bool = false,
         isAIThinking: Bool = false,
+        hintedHandIds: Set<UUID> = [],
         onHandTapped: @escaping (UUID) -> Void,
         onSplitTapped: @escaping () -> Void
     ) {
@@ -35,6 +37,7 @@ struct PlayerAreaView: View {
         self.isPoisonEnabled = isPoisonEnabled
         self.isAI = isAI
         self.isAIThinking = isAIThinking
+        self.hintedHandIds = hintedHandIds
         self.onHandTapped = onHandTapped
         self.onSplitTapped = onSplitTapped
     }
@@ -64,7 +67,7 @@ struct PlayerAreaView: View {
 
             // Hands
             HStack(spacing: isCompact ? 16 : 32) {
-                ForEach(player.hands) { hand in
+                ForEach(Array(player.hands.enumerated()), id: \.element.id) { index, hand in
                     HandView(
                         hand: hand,
                         accentColor: playerColor,
@@ -72,7 +75,9 @@ struct PlayerAreaView: View {
                         isInteractable: handInteractable(hand),
                         onTap: { onHandTapped(hand.id) },
                         compact: isCompact,
-                        showsPoisonBadge: isPoisonEnabled && hand.fingerCount == 1
+                        showsPoisonBadge: isPoisonEnabled && hand.fingerCount == 1,
+                        isHinted: hintedHandIds.contains(hand.id),
+                        accessibilityText: handAccessibilityText(hand, index: index)
                     )
                 }
             }
@@ -110,5 +115,11 @@ struct PlayerAreaView: View {
         if isCurrentTurn && !isAttackPhase { return true }
         if isAttackPhase { return true }
         return false
+    }
+
+    private func handAccessibilityText(_ hand: Hand, index: Int) -> String {
+        let position = player.hands.count == 2 ? (index == 0 ? "左" : "右") : "\(index + 1)番目"
+        let state = hand.isAlive ? "指\(hand.fingerCount)本" : "死亡"
+        return "\(player.name)の\(position)の手、\(state)"
     }
 }

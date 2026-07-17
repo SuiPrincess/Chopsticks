@@ -7,6 +7,7 @@ struct GameView: View {
     @State private var bannerEvent: BattleEvent?
     @AppStorage("tutorial.completed") private var tutorialCompleted = false
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var multiplayerService: (any MultiplayerService)?
 
@@ -40,6 +41,7 @@ struct GameView: View {
                     isPoisonEnabled: viewModel.config.isPoisonEnabled,
                     isAI: viewModel.isVsAI,
                     isAIThinking: viewModel.isAIThinking,
+                    hintedHandIds: hintedHandIds,
                     onHandTapped: { viewModel.handleHandTap($0) },
                     onSplitTapped: { viewModel.showSplitPanel = true }
                 )
@@ -49,24 +51,32 @@ struct GameView: View {
                 ZStack {
                     DividerLineView(isPlayer1Turn: viewModel.isPlayer1Turn)
 
-                    HStack {
+                    HStack(spacing: 8) {
                         Button {
                             showQuitConfirm = true
                         } label: {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundStyle(.white.opacity(0.5))
-                                .frame(width: 30, height: 30)
-                                .background(
-                                    Circle()
-                                        .fill(.ultraThinMaterial)
-                                        .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 0.5))
+                            centerBarIcon("xmark")
+                        }
+                        .accessibilityLabel("ゲームをやめる")
+
+                        // ヒント（CPU戦の自分の手番のみ）
+                        if viewModel.isVsAI {
+                            Button {
+                                viewModel.requestHint()
+                            } label: {
+                                centerBarIcon(
+                                    "lightbulb",
+                                    tint: viewModel.hintAction != nil ? .yellow : nil
                                 )
+                            }
+                            .disabled(viewModel.isAITurn || viewModel.isGameOver)
+                            .opacity(viewModel.isAITurn ? 0.3 : 1)
+                            .accessibilityLabel("ヒントを表示")
                         }
 
                         Spacer()
 
-                        // マルチプレイ時: 待機インジケーター
+                        // マルチプレイ時: 待機インジケーター / それ以外: ターン数
                         if viewModel.isMultiplayer && viewModel.isRemoteControlled {
                             HStack(spacing: 4) {
                                 ProgressView()
@@ -76,6 +86,17 @@ struct GameView: View {
                                     .font(.system(size: 10, design: .rounded))
                                     .foregroundStyle(.white.opacity(0.4))
                             }
+                        } else if !viewModel.isGameOver {
+                            Text("ターン \(min(viewModel.state.turnCount + 1, GameViewModel.turnLimit))/\(GameViewModel.turnLimit)")
+                                .font(.system(size: 10, weight: .medium, design: .rounded))
+                                .monospacedDigit()
+                                .foregroundStyle(
+                                    viewModel.state.turnCount >= GameViewModel.turnLimit - 10
+                                        ? .yellow.opacity(0.9)
+                                        : .white.opacity(0.35)
+                                )
+                                // 中央のターン矢印サークルの直下に置く
+                                .offset(y: 25)
                         }
 
                         Spacer()
@@ -83,16 +104,9 @@ struct GameView: View {
                         Button {
                             viewModel.showRules = true
                         } label: {
-                            Image(systemName: "book")
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundStyle(.white.opacity(0.5))
-                                .frame(width: 30, height: 30)
-                                .background(
-                                    Circle()
-                                        .fill(.ultraThinMaterial)
-                                        .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 0.5))
-                                )
+                            centerBarIcon("book")
                         }
+                        .accessibilityLabel("ルールを表示")
                     }
                     .padding(.horizontal, 16)
                 }
@@ -107,6 +121,7 @@ struct GameView: View {
                     isSplittingEnabled: viewModel.config.isSplittingEnabled,
                     isAttackPhase: !viewModel.isPlayer1Turn && viewModel.selectedAttackerHandId != nil,
                     isPoisonEnabled: viewModel.config.isPoisonEnabled,
+                    hintedHandIds: hintedHandIds,
                     onHandTapped: { viewModel.handleHandTap($0) },
                     onSplitTapped: { viewModel.showSplitPanel = true }
                 )
@@ -147,6 +162,7 @@ struct GameView: View {
             if count >= 2 { tutorialCompleted = true }
         }
         .onChange(of: viewModel.shakeTrigger) { _, _ in
+            guard !reduceMotion else { return }
             withAnimation(.linear(duration: 0.4)) { shakePhase += 1 }
         }
         .onChange(of: viewModel.battleEvent) { _, event in
@@ -195,6 +211,25 @@ struct GameView: View {
             // 復元したゲームがCPUの手番で中断されていた場合に再開する
             viewModel.triggerAITurn()
         }
+    }
+
+    /// ヒントで光らせる手（タップ提案の攻撃側＋対象）
+    private var hintedHandIds: Set<UUID> {
+        guard case .tap(let attackerId, let targetId)? = viewModel.hintAction else { return [] }
+        return [attackerId, targetId]
+    }
+
+    @ViewBuilder
+    private func centerBarIcon(_ systemName: String, tint: Color? = nil) -> some View {
+        Image(systemName: systemName)
+            .font(.system(size: 11, weight: .bold))
+            .foregroundStyle(tint ?? .white.opacity(0.5))
+            .frame(width: 30, height: 30)
+            .background(
+                Circle()
+                    .fill(.ultraThinMaterial)
+                    .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 0.5))
+            )
     }
 
     private var showsTutorialHint: Bool {

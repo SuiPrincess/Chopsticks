@@ -9,6 +9,10 @@ struct HandView: View {
     var compact: Bool = false
     /// 毒ルール有効時、この手の攻撃が毒（相討ち即死）になることを示す
     var showsPoisonBadge: Bool = false
+    /// ヒント対象の手（黄色く光る）
+    var isHinted: Bool = false
+    /// VoiceOver用の説明（例: "Player 1の手、指2本"）
+    var accessibilityText: String = ""
 
     @State private var showDeath = false
     @State private var previousAlive = true
@@ -24,6 +28,7 @@ struct HandView: View {
 
     private var strokeColor: Color {
         if isSelected { return accentColor.opacity(0.8) }
+        if isHinted { return .yellow.opacity(0.7) }
         if isInDanger { return .red.opacity(0.6) }
         return AppTheme.glassBorder
     }
@@ -40,7 +45,8 @@ struct HandView: View {
                         )
                 )
                 .glowPulse(isActive: isSelected, color: accentColor)
-                .glowPulse(isActive: isInDanger && !isSelected, color: .red)
+                .glowPulse(isActive: isHinted && !isSelected, color: .yellow)
+                .glowPulse(isActive: isInDanger && !isSelected && !isHinted, color: .red)
 
             if hand.isAlive {
                 VStack(spacing: compact ? 6 : 10) {
@@ -84,6 +90,12 @@ struct HandView: View {
         .onTapGesture {
             if isInteractable { onTap() }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityText.isEmpty
+            ? (hand.isAlive ? "手、指\(hand.fingerCount)本" : "手、死亡")
+            : accessibilityText)
+        .accessibilityAddTraits(isInteractable ? .isButton : [])
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
         .onChange(of: hand.isAlive) { _, alive in
             if previousAlive && !alive {
                 showDeath = true

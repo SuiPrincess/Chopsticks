@@ -186,6 +186,7 @@ struct MenuView: View {
                             }
                             .buttonStyle(GlassButtonStyle(color: .orange))
                             .frame(width: 64)
+                            .accessibilityLabel("おまかせルール")
 
                             Button {
                                 showStats = true
@@ -194,6 +195,7 @@ struct MenuView: View {
                             }
                             .buttonStyle(GlassButtonStyle(color: .cyan, isPrimary: false))
                             .frame(width: 64)
+                            .accessibilityLabel("戦績")
                         }
 
                         statsIndicator
