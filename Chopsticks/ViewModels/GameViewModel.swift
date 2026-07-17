@@ -111,15 +111,15 @@ final class GameViewModel {
 
     // MARK: - Init
     init(config: GameConfig = GameConfig(), restoring saved: SavedGame? = nil) {
-        if let saved {
-            self.state = saved.state
-            self.attacksThisTurn = saved.attacksThisTurn
-        } else {
-            self.state = GameState(config: config)
-        }
+        // @Observableのプロパティは全初期化完了までselfから読めないため、
+        // ローカル値を組み立ててから各プロパティに代入する
+        let initialState = saved?.state ?? GameState(config: config)
+        let initialAttacks = saved?.attacksThisTurn ?? 0
+        self.state = initialState
+        self.attacksThisTurn = initialAttacks
         // 復元ゲームのリプレイは再開地点から記録する
-        self.replayInitialState = self.state
-        self.replayInitialAttacks = self.attacksThisTurn
+        self.replayInitialState = initialState
+        self.replayInitialAttacks = initialAttacks
     }
 
     // MARK: - Multiplayer Setup
