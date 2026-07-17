@@ -20,7 +20,7 @@ JP = re.compile(r"[぀-ヿ㐀-鿿！-｠]")
 
 INT_HINTS = ("count", "Count", "level", "Level", "streak", "Streak", "wins",
              "losses", "turn", "Turn", "+ 1", "min(", "$0", "freeHints",
-             "fingerCount", "total", "Total", "required")
+             "fingerCount", "total", "Total", "required", "index")
 STRING_EXPRS = {
     "text", "name", "mode", "position", "state", "config.aiDifficulty.label",
     "DailyChallenge.title()", "player.name", "appVersion",

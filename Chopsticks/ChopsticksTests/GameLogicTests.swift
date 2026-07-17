@@ -240,6 +240,33 @@ final class GameLogicTests: XCTestCase {
         XCTAssertFalse(config.isDailyChallenge, "欠落キーはデフォルト値")
     }
 
+    // MARK: - リプレイシミュレータ
+
+    func testReplaySimulatorHandlesDoubleTapTurnFlow() {
+        var config = GameConfig()
+        config.isDoubleTapEnabled = true
+        let initial = GameState(config: config)
+        let firstPlayerId = initial.currentPlayerId
+        let attacker = initial.currentPlayer.hands[0]
+        let target0 = initial.opponentPlayer.hands[0]
+        let target1 = initial.opponentPlayer.hands[1]
+
+        let replay = Replay(
+            initialState: initial,
+            actions: [
+                .tap(attackerHandId: attacker.id, targetHandId: target0.id),
+                .tap(attackerHandId: attacker.id, targetHandId: target1.id),
+            ],
+            savedAt: .now
+        )
+        let snapshots = ReplaySimulator.snapshots(for: replay)
+        XCTAssertEqual(snapshots.count, 3)
+        XCTAssertEqual(snapshots[1].currentPlayerId, firstPlayerId,
+                       "ダブルタップ1回目の後は手番継続")
+        XCTAssertNotEqual(snapshots[2].currentPlayerId, firstPlayerId,
+                          "2回目の攻撃で手番交代")
+    }
+
     // MARK: - 今日の挑戦
 
     func testDailyChallengeConfigIsDeterministicPerDay() {

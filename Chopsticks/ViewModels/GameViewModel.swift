@@ -23,6 +23,10 @@ final class GameViewModel {
     private(set) var didRankUp = false
     /// この勝利で報酬テーマが解放されたか（リザルト演出用）
     private(set) var unlockedRewardTheme: Theme?
+    /// 直前のゲームのリプレイ（リザルトの「リプレイを見る」用）
+    private(set) var lastReplay: Replay?
+    private var actionLog: [GameAction] = []
+    private var replayInitialState: GameState
     /// ヒント: AIが提案する最善手（該当する手が黄色く光る）
     private(set) var hintAction: GameAction?
     private var isComputingHint = false
@@ -47,7 +51,7 @@ final class GameViewModel {
     private var isExecutingRemoteAction: Bool = false
 
     /// このターン数に達したらサドンデス判定（千日手・膠着対策）
-    static let turnLimit = 60
+    static let turnLimit = GameRules.turnLimit
 
     // MARK: - Computed
     var currentPlayer: Player { state.currentPlayer }
@@ -111,6 +115,8 @@ final class GameViewModel {
         } else {
             self.state = GameState(config: config)
         }
+        // 復元ゲームのリプレイは再開地点から記録する
+        self.replayInitialState = self.state
     }
 
     // MARK: - Multiplayer Setup
@@ -137,6 +143,8 @@ final class GameViewModel {
         localPlayerId = state.player1.id
         state.player1 = Player(id: state.player1.id, name: localName, handCount: config.handCount)
         state.player2 = Player(id: state.player2.id, name: opponentName, handCount: config.handCount)
+        replayInitialState = state
+        actionLog = []
         multiplayerService?.send(.gameStart(state))
     }
 
@@ -146,10 +154,14 @@ final class GameViewModel {
             // ゲストがゲーム状態を受信
             self.state = gameState
             self.localPlayerId = gameState.player2.id
+            self.replayInitialState = gameState
+            self.actionLog = []
         case .action(let action):
             executeRemoteAction(action)
         case .stateSync(let syncState):
             self.state = syncState
+            self.replayInitialState = syncState
+            self.actionLog = []
         case .rematchRequest:
             showRematchRequest = true
         case .rematchAccepted:
@@ -232,6 +244,8 @@ final class GameViewModel {
         gameGeneration += 1
         didRankUp = false
         unlockedRewardTheme = nil
+        lastReplay = nil
+        actionLog = []
         // マルチプレイのリマッチが、無関係なシングルプレイの中断セーブを
         // 消してしまわないようガードする
         if !isMultiplayer {
@@ -301,6 +315,7 @@ final class GameViewModel {
         }
 
         let result = state.apply(.tap(attackerHandId: attackerHandId, targetHandId: targetHandId))
+        actionLog.append(.tap(attackerHandId: attackerHandId, targetHandId: targetHandId))
         playFeedback(for: result, isSplit: false)
         let announced = announce(result)
 
@@ -341,6 +356,7 @@ final class GameViewModel {
         }
 
         let result = state.apply(.split(newDistribution: newDistribution))
+        actionLog.append(.split(newDistribution: newDistribution))
         playFeedback(for: result, isSplit: true)
         announce(result)
 
@@ -609,6 +625,7 @@ final class GameViewModel {
         if !isMultiplayer {
             GameSessionStore.shared.clear()
         }
+        lastReplay = Replay(initialState: replayInitialState, actions: actionLog, savedAt: .now)
         if winnerId != nil {
             HapticManager.victory()
         }

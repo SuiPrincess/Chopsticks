@@ -7,6 +7,7 @@ struct GameOverView: View {
 
     @State private var appeared = false
     @State private var confetti: [ConfettiPiece] = []
+    @State private var showReplay = false
     @Environment(\.requestReview) private var requestReview
 
     var body: some View {
@@ -145,6 +146,17 @@ struct GameOverView: View {
                             .padding(.top, 4)
                         }
                     }
+
+                    if viewModel.lastReplay != nil {
+                        Button {
+                            showReplay = true
+                        } label: {
+                            Label("リプレイを見る", systemImage: "memories")
+                                .font(.system(size: 13, weight: .medium, design: .rounded))
+                                .foregroundStyle(.white.opacity(0.6))
+                        }
+                        .padding(.top, 2)
+                    }
                 }
                 .padding(.horizontal, 40)
             }
@@ -167,6 +179,12 @@ struct GameOverView: View {
             Button("いいえ", role: .cancel) {
                 viewModel.declineRematch()
                 onDismiss()
+            }
+        }
+        .sheet(isPresented: $showReplay) {
+            if let replay = viewModel.lastReplay {
+                ReplayView(replay: replay)
+                    .presentationDetents([.large])
             }
         }
     }

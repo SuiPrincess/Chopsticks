@@ -106,6 +106,29 @@ final class GameViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.state, endState, "決着後の操作は無効")
     }
 
+    // MARK: - リプレイ
+
+    func testReplayMatchesActualGameFlow() {
+        let viewModel = makeLocalGame()
+        performTap(viewModel, attacker: 0, target: 0)
+        performTap(viewModel, attacker: 0, target: 0)
+        performTap(viewModel, attacker: 0, target: 0)
+        performTap(viewModel, attacker: 1, target: 0)
+        performTap(viewModel, attacker: 0, target: 1) // 決着（P1勝ち）
+        XCTAssertTrue(viewModel.isGameOver)
+
+        guard let replay = viewModel.lastReplay else {
+            return XCTFail("決着時にリプレイが記録される")
+        }
+        XCTAssertEqual(replay.actions.count, 5)
+
+        let snapshots = ReplaySimulator.snapshots(for: replay)
+        XCTAssertEqual(snapshots.count, 6, "初期盤面+5手")
+        XCTAssertEqual(snapshots.first, replay.initialState)
+        XCTAssertEqual(snapshots.last, viewModel.state,
+                       "リプレイの最終盤面は実対局と完全一致する")
+    }
+
     // MARK: - マネタイズ関連
 
     func testHintQuotaConsumesAndLimits() {

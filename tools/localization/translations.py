@@ -258,6 +258,17 @@ TRANSLATIONS = {
     "通知が許可されていません": "Notifications not allowed",
     "設定アプリ > Chopsticks > 通知 から許可してください": "Allow them in Settings > Chopsticks > Notifications",
 
+    # ---- ReplayView ----
+    "リプレイ": "Replay",
+    "リプレイを見る": "Watch replay",
+    "手 %lld/%lld": "Move %lld/%lld",
+    "最初へ": "Jump to start",
+    "前の手": "Previous move",
+    "再生": "Play",
+    "一時停止": "Pause",
+    "次の手": "Next move",
+    "最後へ": "Jump to end",
+
     # ---- ShopView ----
     "プレミアム": "Premium",
     "解放済み": "Unlocked",

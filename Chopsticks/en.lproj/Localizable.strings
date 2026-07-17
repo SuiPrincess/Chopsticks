@@ -97,6 +97,8 @@
 "ランク戦 — Lv.%lldに挑戦" = "Ranked — Challenge Lv.%lld";
 "ランダムに行動する" = "Plays randomly";
 "リセット" = "Reset";
+"リプレイ" = "Replay";
+"リプレイを見る" = "Watch replay";
 "リベンジ!" = "Revenge!";
 "リマッチ" = "Rematch";
 "リマッチしますか？" = "Rematch?";
@@ -106,6 +108,7 @@
 "ルールを表示" = "Show rules";
 "ルール確認" = "Rules Check";
 "ルール設定" = "Rules";
+"一時停止" = "Pause";
 "今日のヒントを使い切りました" = "You're out of hints for today";
 "今日の割り箸バトル 🥢" = "Today's Chopsticks battle 🥢";
 "今日の挑戦" = "Daily Challenge";
@@ -116,11 +119,13 @@
 "全てのCPUを撃破！" = "All CPUs defeated!";
 "全ての手が死んだプレイヤーの負け" = "Lose all your hands and you lose the game";
 "全カラーテーマを解放（5種類）" = "Unlock all color themes (5)";
+"再生" = "Play";
 "分割" = "Split";
 "分割 %@ が最善!" = "Split %@ is the best move!";
 "分割: 攻撃の代わりに両手の指を再分配できる" = "Split: redistribute fingers between hands instead of attacking";
 "分割で死亡した手を復活させられる" = "Revive dead hands via a split";
 "切断して戻る" = "Disconnect & Leave";
+"前の手" = "Previous move";
 "割り箸バトル「今日の挑戦 %@」クリア！🎯 きみは解けた？ #Chopsticks" = "Cleared the Chopsticks Daily Challenge (%@)! 🎯 Can you? #Chopsticks";
 "割り箸バトルでCPU Lv.%lldを撃破！現在ランクLv.%lld 🔥 #Chopsticks" = "Beat CPU Lv.%1$lld in Chopsticks! Now ranked Lv.%2$lld 🔥 #Chopsticks";
 "割り箸バトルでCPUに%lld連勝中！🔥 #Chopsticks" = "%lld wins in a row against the CPU in Chopsticks! 🔥 #Chopsticks";
@@ -148,6 +153,7 @@
 "戦績をリセット" = "Reset stats";
 "戦績をリセットしますか？" = "Reset all stats?";
 "戻る" = "Back";
+"手 %lld/%lld" = "Move %lld/%lld";
 "手、指%lld本" = "hand, %lld fingers";
 "手、死亡" = "hand, out";
 "手がちょうど4になると爆発、全他の手に1ダメージ" = "A hand at exactly 4 explodes, dealing 1 to every other hand";
@@ -161,9 +167,12 @@
 "攻撃の代わりに両手の指を再分配できる" = "Redistribute fingers instead of attacking";
 "攻撃後、自分の手にも同じ数が加算される" = "After attacking, the same amount is added to your hand";
 "敗北" = "Losses";
+"最初へ" = "Jump to start";
 "最善手を選ぶ" = "Picks the best move";
+"最後へ" = "Jump to end";
 "最深読み。勝てたら自慢していい" = "Deepest search. Brag if you beat it";
 "次のゲーム開始時に操作ガイドを表示" = "Shows the guide at the start of your next game";
+"次の手" = "Next move";
 "次はCPU Lv.%lldに挑戦" = "Next: challenge CPU Lv.%lld";
 "次へ" = "Next";
 "死亡" = "out";
