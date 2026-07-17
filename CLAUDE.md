@@ -48,3 +48,7 @@ SwiftUI製iOSゲーム（iOS 17+ / Xcode 16）。詳細はREADME.md参照。
   新しい実装を追加する場合も同じ挙動にすること
 - 効果音はSounds/*.wav（scratchpadのPythonスクリプトで合成生成したもの）。
   差し替える場合は同名で上書きすればpbxproj変更は不要
+- GameConfigはカスタムinit(from:)でdecodeIfPresent。フィールド追加時も
+  同じパターンで書くこと（旧保存データ・バージョン混在マルチプレイ互換のため）
+- Products.storekitはproject.ymlのexcludesに入っているため、xcodegen再生成後は
+  Xcodeナビゲータから消える（ビルドには無関係。必要なら手で再追加）

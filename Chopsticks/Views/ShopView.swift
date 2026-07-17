@@ -53,6 +53,14 @@ struct ShopView: View {
             } message: {
                 Text("いただいた応援は開発の励みになります。これからもChopsticksをよろしくお願いします！")
             }
+            .alert("購入を開始できませんでした", isPresented: Binding(
+                get: { store.showPurchaseError },
+                set: { store.showPurchaseError = $0 }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("通信状態を確認して、もう一度お試しください。")
+            }
         }
         .preferredColorScheme(.dark)
         .task {

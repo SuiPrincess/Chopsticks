@@ -25,6 +25,8 @@ final class StoreManager {
     private(set) var isPremium: Bool
     /// 投げ銭のお礼表示用
     var showTipThanks = false
+    /// 購入処理がエラーで開始できなかった（ネットワーク等）
+    var showPurchaseError = false
 
     private static let premiumKey = "store.premiumUnlocked"
     private var transactionListener: Task<Void, Never>?
@@ -83,7 +85,10 @@ final class StoreManager {
         defer { purchaseInProgress = false }
 
         let purchaseResult = try? await product.purchase()
-        guard let result = purchaseResult else { return }
+        guard let result = purchaseResult else {
+            showPurchaseError = true
+            return
+        }
         switch result {
         case .success(let verification):
             guard case .verified(let transaction) = verification else { return }

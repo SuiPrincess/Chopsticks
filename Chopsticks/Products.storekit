@@ -1,78 +1,74 @@
 {
-  "identifier" : "6ED3A0016ED3A0016ED3A001",
-  "nonRenewingSubscriptions" : [
-
-  ],
-  "products" : [
+  "identifier": "80A330A4-2E60-489D-89B0-01BC5A213D62",
+  "nonRenewingSubscriptions": [],
+  "products": [
     {
-      "displayPrice" : "480",
-      "familyShareable" : false,
-      "internalID" : "6ED3B0016ED3B0016ED3B001",
-      "localizations" : [
+      "displayPrice": "480",
+      "familyShareable": false,
+      "internalID": "1C7B548A-3A18-4304-B79B-7828ECACCEB9",
+      "localizations": [
         {
-          "description" : "全カラーテーマ解放＋AIヒント無制限",
-          "displayName" : "プレミアム",
-          "locale" : "ja_JP"
+          "description": "全カラーテーマ解放＋AIヒント無制限",
+          "displayName": "プレミアム",
+          "locale": "ja_JP"
         },
         {
-          "description" : "Unlock all themes + unlimited AI hints",
-          "displayName" : "Premium",
-          "locale" : "en_US"
+          "description": "Unlock all themes + unlimited AI hints",
+          "displayName": "Premium",
+          "locale": "en_US"
         }
       ],
-      "productID" : "com.suiprincess.chopsticks.premium",
-      "referenceName" : "Premium",
-      "type" : "NonConsumable"
+      "productID": "com.suiprincess.chopsticks.premium",
+      "referenceName": "Premium",
+      "type": "NonConsumable"
     },
     {
-      "displayPrice" : "160",
-      "familyShareable" : false,
-      "internalID" : "6ED3B0026ED3B0026ED3B002",
-      "localizations" : [
+      "displayPrice": "160",
+      "familyShareable": false,
+      "internalID": "692E63ED-BB47-4659-B172-E19296628BB0",
+      "localizations": [
         {
-          "description" : "開発者におにぎりを差し入れ",
-          "displayName" : "おにぎり",
-          "locale" : "ja_JP"
+          "description": "開発者におにぎりを差し入れ",
+          "displayName": "おにぎり",
+          "locale": "ja_JP"
         },
         {
-          "description" : "Buy the developer a rice ball",
-          "displayName" : "Rice Ball Tip",
-          "locale" : "en_US"
+          "description": "Buy the developer a rice ball",
+          "displayName": "Rice Ball Tip",
+          "locale": "en_US"
         }
       ],
-      "productID" : "com.suiprincess.chopsticks.tip.small",
-      "referenceName" : "Tip Small",
-      "type" : "Consumable"
+      "productID": "com.suiprincess.chopsticks.tip.small",
+      "referenceName": "Tip Small",
+      "type": "Consumable"
     },
     {
-      "displayPrice" : "600",
-      "familyShareable" : false,
-      "internalID" : "6ED3B0036ED3B0036ED3B003",
-      "localizations" : [
+      "displayPrice": "600",
+      "familyShareable": false,
+      "internalID": "9CA17A48-E771-405A-9B11-44246E809487",
+      "localizations": [
         {
-          "description" : "開発者にお弁当を差し入れ",
-          "displayName" : "お弁当",
-          "locale" : "ja_JP"
+          "description": "開発者にお弁当を差し入れ",
+          "displayName": "お弁当",
+          "locale": "ja_JP"
         },
         {
-          "description" : "Buy the developer a bento box",
-          "displayName" : "Bento Tip",
-          "locale" : "en_US"
+          "description": "Buy the developer a bento box",
+          "displayName": "Bento Tip",
+          "locale": "en_US"
         }
       ],
-      "productID" : "com.suiprincess.chopsticks.tip.large",
-      "referenceName" : "Tip Large",
-      "type" : "Consumable"
+      "productID": "com.suiprincess.chopsticks.tip.large",
+      "referenceName": "Tip Large",
+      "type": "Consumable"
     }
   ],
-  "settings" : {
-    "_failTransactionsEnabled" : false
+  "settings": {
+    "_failTransactionsEnabled": false
   },
-  "subscriptionGroups" : [
-
-  ],
-  "version" : {
-    "major" : 3,
-    "minor" : 0
+  "subscriptionGroups": [],
+  "version": {
+    "major": 3,
+    "minor": 0
   }
 }

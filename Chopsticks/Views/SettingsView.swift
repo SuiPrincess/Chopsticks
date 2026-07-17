@@ -128,12 +128,14 @@ struct SettingsView: View {
         .preferredColorScheme(.dark)
     }
 
-    /// リマインダートグル: ONにする時は通知許可を取ってから反映する
+    /// リマインダートグル: ONにする時は通知許可を取ってから確定する。
+    /// 許可ダイアログ中もトグルが跳ね返らないよう楽観的にONにし、拒否なら戻す。
     private var reminderBinding: Binding<Bool> {
         Binding(
             get: { settings.isDailyReminderEnabled },
             set: { enabled in
                 if enabled {
+                    SettingsStore.shared.isDailyReminderEnabled = true
                     Task { @MainActor in
                         let granted = await NotificationManager.enableDailyReminder()
                         SettingsStore.shared.isDailyReminderEnabled = granted

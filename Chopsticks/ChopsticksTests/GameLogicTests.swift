@@ -223,6 +223,23 @@ final class GameLogicTests: XCTestCase {
         XCTAssertEqual(decoded, state)
     }
 
+    func testGameConfigDecodesLegacyJSONWithoutNewFields() throws {
+        // isDailyChallenge導入前のJSON（旧バージョンの保存データ/通信相手）が読めること
+        let legacy = """
+        {"isSplittingEnabled":true,"isOverflowWrapEnabled":true,\
+        "isDeadHandRevivalEnabled":false,"handCount":2,"gameMode":"vsAI",\
+        "aiDifficulty":"hard","isPoisonEnabled":true,"isBombEnabled":false,\
+        "isMirrorEnabled":false,"isDoubleTapEnabled":false}
+        """
+        let config = try JSONDecoder().decode(GameConfig.self, from: Data(legacy.utf8))
+        XCTAssertTrue(config.isSplittingEnabled)
+        XCTAssertTrue(config.isPoisonEnabled)
+        XCTAssertEqual(config.gameMode, .vsAI)
+        XCTAssertEqual(config.aiDifficulty, .hard)
+        XCTAssertNil(config.aiLevel)
+        XCTAssertFalse(config.isDailyChallenge, "欠落キーはデフォルト値")
+    }
+
     // MARK: - 今日の挑戦
 
     func testDailyChallengeConfigIsDeterministicPerDay() {

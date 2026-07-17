@@ -45,4 +45,32 @@ struct GameConfig: Equatable, Codable {
     var isMultiplayer: Bool {
         gameMode == .online || gameMode == .nearby
     }
+
+    init() {}
+
+    // MARK: - Codable
+    // フィールド追加でキーが欠けていてもデフォルト値で読めるようにする。
+    // 旧バージョンの中断保存や、バージョン混在のマルチプレイ
+    // （旧クライアントからのgameStart等）がdecode失敗で壊れないための互換層。
+    private enum CodingKeys: String, CodingKey {
+        case isSplittingEnabled, isOverflowWrapEnabled, isDeadHandRevivalEnabled, handCount
+        case gameMode, aiDifficulty, aiLevel, isDailyChallenge
+        case isPoisonEnabled, isBombEnabled, isMirrorEnabled, isDoubleTapEnabled
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        isSplittingEnabled = try container.decodeIfPresent(Bool.self, forKey: .isSplittingEnabled) ?? false
+        isOverflowWrapEnabled = try container.decodeIfPresent(Bool.self, forKey: .isOverflowWrapEnabled) ?? true
+        isDeadHandRevivalEnabled = try container.decodeIfPresent(Bool.self, forKey: .isDeadHandRevivalEnabled) ?? false
+        handCount = try container.decodeIfPresent(Int.self, forKey: .handCount) ?? 2
+        gameMode = try container.decodeIfPresent(GameMode.self, forKey: .gameMode) ?? .localTwoPlayer
+        aiDifficulty = try container.decodeIfPresent(AIDifficulty.self, forKey: .aiDifficulty) ?? .easy
+        aiLevel = try container.decodeIfPresent(Int.self, forKey: .aiLevel)
+        isDailyChallenge = try container.decodeIfPresent(Bool.self, forKey: .isDailyChallenge) ?? false
+        isPoisonEnabled = try container.decodeIfPresent(Bool.self, forKey: .isPoisonEnabled) ?? false
+        isBombEnabled = try container.decodeIfPresent(Bool.self, forKey: .isBombEnabled) ?? false
+        isMirrorEnabled = try container.decodeIfPresent(Bool.self, forKey: .isMirrorEnabled) ?? false
+        isDoubleTapEnabled = try container.decodeIfPresent(Bool.self, forKey: .isDoubleTapEnabled) ?? false
+    }
 }

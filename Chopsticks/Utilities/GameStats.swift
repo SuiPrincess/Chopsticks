@@ -126,6 +126,8 @@ final class GameStats {
         dailyStreak = 0
         lastPlayDay = nil
         didSetNewRecord = false
+        lastDailyChallengeClear = nil
+        UserDefaults.standard.removeObject(forKey: Key.dailyChallengeClear)
         save()
     }
 
