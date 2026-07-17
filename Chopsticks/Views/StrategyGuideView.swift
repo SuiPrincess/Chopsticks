@@ -195,6 +195,9 @@ private struct AttackDiagram: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 10)
         .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.04)))
+        // VoiceOverには数式キャプションだけを読み上げる（カプセル図は装飾）
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: caption))
     }
 }
 
@@ -220,6 +223,8 @@ private struct SplitDiagram: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 10)
         .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.04)))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: caption))
     }
 
     private func handPair(_ counts: [Int]) -> some View {
