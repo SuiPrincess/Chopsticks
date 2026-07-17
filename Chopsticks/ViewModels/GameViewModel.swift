@@ -185,19 +185,26 @@ final class GameViewModel {
         }
     }
 
+    /// リマッチ拒否メッセージの送信を待っている間、即時切断を抑止するフラグ
+    private var isDecliningRematch = false
+
     /// リマッチ要求を断って退出する（相手には「相手が退出しました」と伝わる）
     func declineRematch() {
         showRematchRequest = false
         multiplayerService?.send(.rematchDeclined)
         // 即座にdisconnectすると送信キューのメッセージが落ちることがあるため、
-        // 少し待ってから切断する
+        // 少し待ってから切断する。この間の画面遷移由来のdisconnectは抑止する。
+        isDecliningRematch = true
         Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(300))
+            self.isDecliningRematch = false
             self.disconnectMultiplayer()
         }
     }
 
     func disconnectMultiplayer() {
+        // declineRematch()の遅延切断に任せる（送信キューのフラッシュ待ち）
+        guard !isDecliningRematch else { return }
         multiplayerService?.disconnect()
         multiplayerService = nil
         localPlayerId = nil
