@@ -523,6 +523,7 @@ final class GameViewModel {
             GameStats.shared.recordGame(playerWon: playerWon)
             if playerWon, state.config.aiLevel != nil {
                 didRankUp = GameStats.shared.registerRankedWin()
+                GameCenterManager.shared.submitRankLevel(GameStats.shared.rankLevel)
             }
         }
         // リザルトのサウンド（ランクアップ > 勝敗、引き分けは無音）

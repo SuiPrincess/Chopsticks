@@ -65,6 +65,16 @@ struct GameOverView: View {
                             .font(.system(size: 16, weight: .heavy, design: .rounded))
                             .foregroundStyle(.orange)
                             .tracking(1)
+                    } else if isRankedMatch && isWinTitle
+                                && GameStats.shared.rankLevel >= GameStats.maxRankLevel {
+                        Text("👑 全CPU制覇!")
+                            .font(.system(size: 16, weight: .heavy, design: .rounded))
+                            .foregroundStyle(AppTheme.goldGradient)
+                            .tracking(1)
+                    } else if isRankedMatch && humanLostToAI {
+                        Text("Lv.\(GameStats.shared.rankLevel) はキープ。もう一度!")
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.5))
                     }
                 }
 
@@ -173,6 +183,10 @@ struct GameOverView: View {
 
     private var humanLostToAI: Bool {
         viewModel.isVsAI && viewModel.winner?.id == viewModel.state.player2.id
+    }
+
+    private var isRankedMatch: Bool {
+        viewModel.config.aiLevel != nil
     }
 
     private var isDraw: Bool { viewModel.isDraw }
