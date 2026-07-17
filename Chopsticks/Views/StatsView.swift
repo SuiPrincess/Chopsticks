@@ -107,6 +107,11 @@ struct StatsView: View {
                                             .font(.system(size: 11, design: .rounded))
                                             .foregroundStyle(.cyan.opacity(0.7))
                                     }
+                                    if stats.weeklyChallengeClearCount > 0 {
+                                        Text("⚔️ 試練クリア \(stats.weeklyChallengeClearCount)回")
+                                            .font(.system(size: 11, design: .rounded))
+                                            .foregroundStyle(.purple.opacity(0.85))
+                                    }
                                 }
                                 Spacer()
                             }

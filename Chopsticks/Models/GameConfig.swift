@@ -35,6 +35,8 @@ struct GameConfig: Equatable, Codable {
     var aiLevel: Int? = nil
     /// 🎯 今日の挑戦（日替わりルール・1日1回クリア記録）
     var isDailyChallenge: Bool = false
+    /// ⚔️ 今週の試練（週替わりルール・鬼難易度・週1回クリア記録）
+    var isWeeklyChallenge: Bool = false
 
     // エキセントリックルール
     var isPoisonEnabled: Bool = false
@@ -54,7 +56,7 @@ struct GameConfig: Equatable, Codable {
     // （旧クライアントからのgameStart等）がdecode失敗で壊れないための互換層。
     private enum CodingKeys: String, CodingKey {
         case isSplittingEnabled, isOverflowWrapEnabled, isDeadHandRevivalEnabled, handCount
-        case gameMode, aiDifficulty, aiLevel, isDailyChallenge
+        case gameMode, aiDifficulty, aiLevel, isDailyChallenge, isWeeklyChallenge
         case isPoisonEnabled, isBombEnabled, isMirrorEnabled, isDoubleTapEnabled
     }
 
@@ -68,6 +70,7 @@ struct GameConfig: Equatable, Codable {
         aiDifficulty = try container.decodeIfPresent(AIDifficulty.self, forKey: .aiDifficulty) ?? .easy
         aiLevel = try container.decodeIfPresent(Int.self, forKey: .aiLevel)
         isDailyChallenge = try container.decodeIfPresent(Bool.self, forKey: .isDailyChallenge) ?? false
+        isWeeklyChallenge = try container.decodeIfPresent(Bool.self, forKey: .isWeeklyChallenge) ?? false
         isPoisonEnabled = try container.decodeIfPresent(Bool.self, forKey: .isPoisonEnabled) ?? false
         isBombEnabled = try container.decodeIfPresent(Bool.self, forKey: .isBombEnabled) ?? false
         isMirrorEnabled = try container.decodeIfPresent(Bool.self, forKey: .isMirrorEnabled) ?? false

@@ -194,6 +194,23 @@ final class StoreLogicTests: XCTestCase {
         XCTAssertEqual(GameStats(defaults: defaults).oniWins, 0, "リセットで消える")
     }
 
+    // MARK: - 今週の試練（週1回クリア記録）
+
+    func testWeeklyChallengeCountsOncePerWeek() {
+        // day(0)=2026-01-15(木)。day(3)=日曜で同じISO週、day(4)=月曜で翌週
+        let stats = GameStats(defaults: defaults)
+        XCTAssertFalse(stats.isWeeklyChallengeCleared(asOf: day(0)))
+        stats.markWeeklyChallengeCleared(on: day(0))
+        XCTAssertEqual(stats.weeklyChallengeClearCount, 1)
+        XCTAssertTrue(stats.isWeeklyChallengeCleared(asOf: day(3)), "同じ週の日曜はクリア済み扱い")
+        stats.markWeeklyChallengeCleared(on: day(2))
+        XCTAssertEqual(stats.weeklyChallengeClearCount, 1, "同じ週の2回目はカウントしない")
+        XCTAssertFalse(stats.isWeeklyChallengeCleared(asOf: day(4)), "翌週の月曜は未クリアに戻る")
+        stats.markWeeklyChallengeCleared(on: day(4))
+        XCTAssertEqual(stats.weeklyChallengeClearCount, 2, "翌週のクリアはカウントされる")
+        XCTAssertEqual(GameStats(defaults: defaults).weeklyChallengeClearCount, 2, "永続化される")
+    }
+
     // MARK: - ThemeStore
 
     func testThemeStorePersistsSelection() {

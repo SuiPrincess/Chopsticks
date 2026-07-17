@@ -660,6 +660,9 @@ final class GameViewModel {
                 if state.config.isDailyChallenge {
                     GameStats.shared.markDailyChallengeCleared()
                 }
+                if state.config.isWeeklyChallenge {
+                    GameStats.shared.markWeeklyChallengeCleared()
+                }
                 if state.config.aiLevel == nil && state.config.aiDifficulty == .oni {
                     GameStats.shared.recordOniWin()
                 }

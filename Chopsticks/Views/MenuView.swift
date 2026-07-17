@@ -306,6 +306,28 @@ struct MenuView: View {
                 }
                 .buttonStyle(GlassButtonStyle(color: .cyan))
 
+                // ⚔️ 今週の試練（週替わり・鬼＋特殊ルール3種・週1回クリア記録）
+                Button {
+                    rankedConfig = WeeklyChallenge.config()
+                    showRuleConfirmation = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: GameStats.shared.isWeeklyChallengeClearedThisWeek
+                              ? "checkmark.seal.fill"
+                              : "medal.fill")
+                        Text("今週の試練 — \(WeeklyChallenge.title())")
+                        if GameStats.shared.isWeeklyChallengeClearedThisWeek {
+                            Text("クリア済")
+                                .font(.system(size: 10, weight: .semibold, design: .rounded))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Capsule().fill(Color.purple))
+                        }
+                    }
+                }
+                .buttonStyle(GlassButtonStyle(color: .purple))
+
                 // 2P Local
                 Button {
                     rankedConfig = nil

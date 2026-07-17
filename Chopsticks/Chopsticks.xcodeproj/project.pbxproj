@@ -51,6 +51,7 @@
 		6ED4BB0373C41B2A9D3E8103 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED4AA0373C41B2A9D3E8003 /* NotificationManager.swift */; };
 		6ED4BB0473C41B2A9D3E8104 /* ShopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED4AA0473C41B2A9D3E8004 /* ShopView.swift */; };
 		6ED5BB0173C41B2A9D3E9101 /* DailyChallenge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED5AA0173C41B2A9D3E9001 /* DailyChallenge.swift */; };
+		6EDDBB0173C41B2A9D3ED106 /* WeeklyChallenge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EDDAA0173C41B2A9D3ED006 /* WeeklyChallenge.swift */; };
 		6ED8BB0173C41B2A9D3EC101 /* Replay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED8AA0173C41B2A9D3EC001 /* Replay.swift */; };
 		6ED8BB0273C41B2A9D3EC102 /* ReplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED8AA0273C41B2A9D3EC002 /* ReplayView.swift */; };
 		6ED9BB0173C41B2A9D3ED101 /* GameCenterDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED9AA0173C41B2A9D3ED001 /* GameCenterDashboardView.swift */; };
@@ -122,6 +123,7 @@
 		6ED4AA0473C41B2A9D3E8004 /* ShopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopView.swift; sourceTree = "<group>"; };
 		6ED4AA0573C41B2A9D3E8005 /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Products.storekit; sourceTree = "<group>"; };
 		6ED5AA0173C41B2A9D3E9001 /* DailyChallenge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyChallenge.swift; sourceTree = "<group>"; };
+		6EDDAA0173C41B2A9D3ED006 /* WeeklyChallenge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyChallenge.swift; sourceTree = "<group>"; };
 		6ED8AA0173C41B2A9D3EC001 /* Replay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Replay.swift; sourceTree = "<group>"; };
 		6ED8AA0273C41B2A9D3EC002 /* ReplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplayView.swift; sourceTree = "<group>"; };
 		6ED9AA0173C41B2A9D3ED001 /* GameCenterDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCenterDashboardView.swift; sourceTree = "<group>"; };
@@ -313,6 +315,7 @@
 			isa = PBXGroup;
 			children = (
 				6ED5AA0173C41B2A9D3E9001 /* DailyChallenge.swift */,
+				6EDDAA0173C41B2A9D3ED006 /* WeeklyChallenge.swift */,
 				26EEA6D6743883AB1B72EFA0 /* GameAction.swift */,
 				6ED8AA0173C41B2A9D3EC001 /* Replay.swift */,
 				D92E57D8E0E966DB05502F35 /* GameConfig.swift */,
@@ -499,6 +502,7 @@
 				6ED4BB0373C41B2A9D3E8103 /* NotificationManager.swift in Sources */,
 				6ED4BB0473C41B2A9D3E8104 /* ShopView.swift in Sources */,
 				6ED5BB0173C41B2A9D3E9101 /* DailyChallenge.swift in Sources */,
+				6EDDBB0173C41B2A9D3ED106 /* WeeklyChallenge.swift in Sources */,
 				6ED8BB0173C41B2A9D3EC101 /* Replay.swift in Sources */,
 				6ED8BB0273C41B2A9D3EC102 /* ReplayView.swift in Sources */,
 				6ED9BB0173C41B2A9D3ED101 /* GameCenterDashboardView.swift in Sources */,

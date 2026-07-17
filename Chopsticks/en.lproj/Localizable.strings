@@ -36,6 +36,8 @@
 "Player 2" = "Player 2";
 "① 自分の手をタップしてえらぶ" = "① Tap one of your hands to select it";
 "② 相手の手をタップしてこうげき！" = "② Tap an opponent's hand to attack!";
+"⚔️ 今週の試練クリア！鬼に勝った！" = "⚔️ Weekly Trial cleared! You beat the Oni!";
+"⚔️ 試練クリア %lld回" = "⚔️ Trials cleared ×%lld";
 "✨ 自己ベスト更新!" = "✨ New personal best!";
 "⬆️ RANK UP! 次は Lv.%lld" = "⬆️ RANK UP! Next: Lv.%lld";
 "あと10ターンで判定!" = "10 turns until judgment!";
@@ -128,6 +130,8 @@
 "今日の挑戦 %@" = "Daily Challenge %@";
 "今日の挑戦 — %@" = "Daily Challenge — %@";
 "今日の挑戦を%lld回クリアで解放（いま%lld回）" = "Clear the Daily Challenge %1$lld times to unlock (now: %2$lld)";
+"今週の試練" = "Weekly Trial";
+"今週の試練 — %@" = "Weekly Trial — %@";
 "個人開発の応援になります" = "Supports an indie developer";
 "倒せるときは基本すぐ倒す。手が減った相手は、攻撃も防御も選択肢が半分になる。" = "When you can kill, usually do it now. An opponent down a hand has half the options on attack and defense.";
 "全てのCPUを撃破！" = "All CPUs defeated!";
@@ -142,6 +146,7 @@
 "切断して戻る" = "Disconnect & Leave";
 "前の手" = "Previous move";
 "割り箸バトル「今日の挑戦 %@」クリア！🎯 きみは解けた？ #Chopsticks" = "Cleared the Chopsticks Daily Challenge (%@)! 🎯 Can you? #Chopsticks";
+"割り箸バトル「今週の試練 %@」クリア！⚔️ 鬼＋特殊ルール3種を攻略 #Chopsticks" = "Cleared the Chopsticks Weekly Trial (%@)! ⚔️ Oni + 3 special rules #Chopsticks";
 "割り箸バトルでCPU Lv.%lldを撃破！現在ランクLv.%lld 🔥 #Chopsticks" = "Beat CPU Lv.%1$lld in Chopsticks! Now ranked Lv.%2$lld 🔥 #Chopsticks";
 "割り箸バトルでCPUに%lld連勝中！🔥 #Chopsticks" = "%lld wins in a row against the CPU in Chopsticks! 🔥 #Chopsticks";
 "割り箸バトルでCPUに勝利！✌️ #Chopsticks" = "Beat the CPU in Chopsticks! ✌️ #Chopsticks";
@@ -215,6 +220,7 @@
 "現在利用できません" = "Currently unavailable";
 "相手が退出しました" = "Your opponent left";
 "相手のターン" = "Opponent's turn";
+"第%lld週" = "Week %lld";
 "結果を自慢する" = "Share your win";
 "続きから" = "Continue";
 "続ける" = "Keep playing";

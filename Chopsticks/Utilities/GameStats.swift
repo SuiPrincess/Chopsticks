@@ -28,6 +28,10 @@ final class GameStats {
     private(set) var dailyChallengeClearCount: Int
     /// 🔥 難易度「鬼」への通算勝利数（報酬テーマの解放条件）
     private(set) var oniWins: Int
+    /// ⚔️ 今週の試練を最後にクリアした日
+    private(set) var lastWeeklyChallengeClear: Date?
+    /// ⚔️ 今週の試練の通算クリア回数（週1回までカウント）
+    private(set) var weeklyChallengeClearCount: Int
 
     private enum Key {
         static let wins = "stats.cpu.wins"
@@ -41,6 +45,8 @@ final class GameStats {
         static let dailyChallengeClear = "stats.dailyChallenge.lastClear"
         static let dailyChallengeCount = "stats.dailyChallenge.clearCount"
         static let oniWins = "stats.oniWins"
+        static let weeklyChallengeClear = "stats.weeklyChallenge.lastClear"
+        static let weeklyChallengeCount = "stats.weeklyChallenge.clearCount"
     }
 
     init(defaults: UserDefaults) {
@@ -55,6 +61,31 @@ final class GameStats {
         lastDailyChallengeClear = defaults.object(forKey: Key.dailyChallengeClear) as? Date
         dailyChallengeClearCount = defaults.integer(forKey: Key.dailyChallengeCount)
         oniWins = defaults.integer(forKey: Key.oniWins)
+        lastWeeklyChallengeClear = defaults.object(forKey: Key.weeklyChallengeClear) as? Date
+        weeklyChallengeClearCount = defaults.integer(forKey: Key.weeklyChallengeCount)
+    }
+
+    // MARK: - 今週の試練
+
+    var isWeeklyChallengeClearedThisWeek: Bool {
+        isWeeklyChallengeCleared(asOf: .now)
+    }
+
+    func isWeeklyChallengeCleared(asOf date: Date) -> Bool {
+        guard let last = lastWeeklyChallengeClear else { return false }
+        let lastWeek = WeeklyChallenge.isoWeek(for: last)
+        let currentWeek = WeeklyChallenge.isoWeek(for: date)
+        return lastWeek == currentWeek
+    }
+
+    /// クリアを記録する。通算回数は週1回だけ増える。
+    func markWeeklyChallengeCleared(on date: Date = .now) {
+        if !isWeeklyChallengeCleared(asOf: date) {
+            weeklyChallengeClearCount += 1
+            defaults.set(weeklyChallengeClearCount, forKey: Key.weeklyChallengeCount)
+        }
+        lastWeeklyChallengeClear = date
+        defaults.set(lastWeeklyChallengeClear, forKey: Key.weeklyChallengeClear)
     }
 
     /// 🔥 難易度「鬼」への勝利を記録する（報酬テーマの解放条件）
@@ -158,6 +189,10 @@ final class GameStats {
         defaults.removeObject(forKey: Key.dailyChallengeCount)
         oniWins = 0
         defaults.removeObject(forKey: Key.oniWins)
+        lastWeeklyChallengeClear = nil
+        defaults.removeObject(forKey: Key.weeklyChallengeClear)
+        weeklyChallengeClearCount = 0
+        defaults.removeObject(forKey: Key.weeklyChallengeCount)
         save()
     }
 

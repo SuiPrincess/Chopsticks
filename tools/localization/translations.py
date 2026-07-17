@@ -34,6 +34,15 @@ TRANSLATIONS = {
     "接続中...": "Connecting...",
     "キャンセル": "Cancel",
 
+    # ---- WeeklyChallenge ----
+    "今週の試練": "Weekly Trial",
+    "今週の試練 — %@": "Weekly Trial — %@",
+    "第%lld週": "Week %lld",
+    "⚔️ 今週の試練クリア！鬼に勝った！": "⚔️ Weekly Trial cleared! You beat the Oni!",
+    "割り箸バトル「今週の試練 %@」クリア！⚔️ 鬼＋特殊ルール3種を攻略 #Chopsticks":
+        "Cleared the Chopsticks Weekly Trial (%@)! ⚔️ Oni + 3 special rules #Chopsticks",
+    "⚔️ 試練クリア %lld回": "⚔️ Trials cleared ×%lld",
+
     # ---- GameSessionStore (resume) ----
     "今日の挑戦": "Daily Challenge",
     "ランク戦 Lv.%lld": "Ranked Lv.%lld",

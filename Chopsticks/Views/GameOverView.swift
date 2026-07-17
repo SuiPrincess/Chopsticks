@@ -69,6 +69,13 @@ struct GameOverView: View {
                             .tracking(1)
                     }
 
+                    if viewModel.config.isWeeklyChallenge && isWinTitle {
+                        Text("⚔️ 今週の試練クリア！鬼に勝った！")
+                            .font(.system(size: 15, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.purple)
+                            .tracking(1)
+                    }
+
                     if let rewardTheme = viewModel.unlockedRewardTheme {
                         Text("🎁 限定テーマ「\(rewardTheme.name)」を解放!")
                             .font(.system(size: 15, weight: .heavy, design: .rounded))
@@ -216,6 +223,9 @@ struct GameOverView: View {
 
     private var shareText: String {
         let stats = GameStats.shared
+        if viewModel.config.isWeeklyChallenge {
+            return String(localized: "割り箸バトル「今週の試練 \(WeeklyChallenge.title())」クリア！⚔️ 鬼＋特殊ルール3種を攻略 #Chopsticks")
+        }
         if viewModel.config.isDailyChallenge {
             return String(localized: "割り箸バトル「今日の挑戦 \(DailyChallenge.title())」クリア！🎯 きみは解けた？ #Chopsticks")
         }

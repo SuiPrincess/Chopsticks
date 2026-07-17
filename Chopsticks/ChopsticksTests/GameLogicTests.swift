@@ -284,6 +284,38 @@ final class GameLogicTests: XCTestCase {
         )
     }
 
+    // MARK: - 今週の試練
+
+    func testWeeklyChallengeConfigIsDeterministicPerWeek() {
+        // 2026-01-12(月)〜01-18(日)は同じISO週
+        let monday = Date(timeIntervalSince1970: 1_768_219_200)    // 2026-01-12 12:00 UTC
+        let sunday = Date(timeIntervalSince1970: 1_768_737_600)    // 2026-01-18 12:00 UTC
+        let nextMonday = Date(timeIntervalSince1970: 1_768_824_000) // 2026-01-19 12:00 UTC
+
+        XCTAssertEqual(WeeklyChallenge.config(for: monday), WeeklyChallenge.config(for: sunday),
+                       "同じ週は必ず同じルール")
+        XCTAssertNotEqual(WeeklyChallenge.isoWeek(for: monday).week,
+                          WeeklyChallenge.isoWeek(for: nextMonday).week,
+                          "月曜をまたぐと週が変わる")
+    }
+
+    func testWeeklyChallengeAlwaysOniWithThreeSpecialRules() {
+        // 20週分の構造を検証: 常に鬼難易度＋特殊ルールちょうど3つ
+        for weekOffset in 0..<20 {
+            let date = Date(timeIntervalSince1970: 1_768_219_200 + Double(weekOffset) * 7 * 86_400)
+            let config = WeeklyChallenge.config(for: date)
+            XCTAssertTrue(config.isWeeklyChallenge)
+            XCTAssertEqual(config.gameMode, .vsAI)
+            XCTAssertEqual(config.aiDifficulty, .oni, "試練は常に鬼")
+            XCTAssertNil(config.aiLevel)
+            let specialCount = [
+                config.isSplittingEnabled, config.isPoisonEnabled, config.isBombEnabled,
+                config.isMirrorEnabled, config.isDoubleTapEnabled,
+            ].filter { $0 }.count
+            XCTAssertEqual(specialCount, 3, "特殊ルールは必ず3つ（週\(weekOffset)）")
+        }
+    }
+
     func testMultiplayerMessageCodableRoundTrip() throws {
         let state = GameState()
         let action = GameAction.tap(

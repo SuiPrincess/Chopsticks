@@ -56,6 +56,8 @@ final class GameSessionStore {
         case .vsAI:
             if config.isDailyChallenge {
                 mode = String(localized: "今日の挑戦")
+            } else if config.isWeeklyChallenge {
+                mode = String(localized: "今週の試練")
             } else if let level = config.aiLevel {
                 mode = String(localized: "ランク戦 Lv.\(level)")
             } else {
