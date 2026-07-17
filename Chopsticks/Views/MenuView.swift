@@ -40,6 +40,10 @@ struct MenuView: View {
     @State private var sessionStore = GameSessionStore.shared
     @State private var resumeGame: SavedGame?
 
+    // タイトル下の飾り手（時々指の本数が変わる）
+    @State private var decorLeftCount = 3
+    @State private var decorRightCount = 2
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -72,10 +76,20 @@ struct MenuView: View {
 
                     // Hand decoration
                     HStack(spacing: 40) {
-                        decorationHand(count: 3, color: AppTheme.player1Color)
-                        decorationHand(count: 2, color: AppTheme.player2Color)
+                        decorationHand(count: decorLeftCount, color: AppTheme.player1Color)
+                        decorationHand(count: decorRightCount, color: AppTheme.player2Color)
                     }
                     .padding(.bottom, 40)
+                    .task {
+                        // ゆっくり指の本数が変わり、対戦している雰囲気を出す
+                        while !Task.isCancelled {
+                            try? await Task.sleep(for: .seconds(2.2))
+                            withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
+                                decorLeftCount = Int.random(in: 1...4)
+                                decorRightCount = Int.random(in: 1...4)
+                            }
+                        }
+                    }
 
                     Spacer()
 
