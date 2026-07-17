@@ -57,15 +57,16 @@ struct GameState: Equatable, Codable {
     var turnCount: Int
 
     init(config: GameConfig = GameConfig(), player1Starts: Bool = true) {
-        let p1 = Player(name: "Player 1", handCount: config.handCount)
+        let p1 = Player(name: String(localized: "Player 1"), handCount: config.handCount)
         let p2Name: String
         switch config.gameMode {
         case .vsAI:
-            p2Name = config.aiLevel.map { "CPU Lv.\($0)" } ?? "CPU（\(config.aiDifficulty.label)）"
+            p2Name = config.aiLevel.map { String(localized: "CPU Lv.\($0)") }
+                ?? String(localized: "CPU（\(config.aiDifficulty.label)）")
         case .online, .nearby:
-            p2Name = "対戦相手"
+            p2Name = String(localized: "対戦相手")
         case .localTwoPlayer:
-            p2Name = "Player 2"
+            p2Name = String(localized: "Player 2")
         }
         let p2 = Player(name: p2Name, handCount: config.handCount)
         self.player1 = p1

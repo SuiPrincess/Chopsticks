@@ -50,5 +50,8 @@ SwiftUI製iOSゲーム（iOS 17+ / Xcode 16）。詳細はREADME.md参照。
   差し替える場合は同名で上書きすればpbxproj変更は不要
 - GameConfigはカスタムinit(from:)でdecodeIfPresent。フィールド追加時も
   同じパターンで書くこと（旧保存データ・バージョン混在マルチプレイ互換のため）
+- ローカライズ: キーは日本語原文。en.lprojに英訳、ja.lprojは意図的に空。
+  String型の文脈はString(localized:)、三項演算子は各分岐を包む。
+  文字列を追加したら tools/localization/gen_localization.py で欠落0を検証すること
 - Products.storekitはproject.ymlのexcludesに入っているため、xcodegen再生成後は
   Xcodeナビゲータから消える（ビルドには無関係。必要なら手で再追加）

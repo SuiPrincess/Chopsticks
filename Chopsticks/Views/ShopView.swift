@@ -144,7 +144,7 @@ struct ShopView: View {
     }
 
     @ViewBuilder
-    private func premiumFeature(_ icon: String, _ text: String) -> some View {
+    private func premiumFeature(_ icon: String, _ text: LocalizedStringKey) -> some View {
         HStack(spacing: 10) {
             Image(systemName: icon)
                 .font(.system(size: 13))
@@ -243,7 +243,7 @@ struct ShopView: View {
                 .textCase(.uppercase)
 
             if store.tipProducts.isEmpty {
-                Text(store.isLoadingProducts ? "読み込み中..." : "現在利用できません")
+                Text(store.isLoadingProducts ? String(localized: "読み込み中...") : String(localized: "現在利用できません"))
                     .font(.system(size: 12, design: .rounded))
                     .foregroundStyle(.white.opacity(0.4))
             } else {

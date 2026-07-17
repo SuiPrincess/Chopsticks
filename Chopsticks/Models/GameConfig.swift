@@ -14,9 +14,9 @@ enum AIDifficulty: String, CaseIterable, Equatable, Codable {
 
     var label: String {
         switch self {
-        case .easy: "かんたん"
-        case .hard: "つよい"
-        case .oni: "鬼"
+        case .easy: String(localized: "かんたん")
+        case .hard: String(localized: "つよい")
+        case .oni: String(localized: "鬼")
         }
     }
 }

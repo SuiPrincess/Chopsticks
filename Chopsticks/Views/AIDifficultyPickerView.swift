@@ -39,7 +39,7 @@ struct AIDifficultyPickerView: View {
     }
 
     @ViewBuilder
-    private func difficultyButton(_ level: AIDifficulty, icon: String, description: String) -> some View {
+    private func difficultyButton(_ level: AIDifficulty, icon: String, description: LocalizedStringKey) -> some View {
         Button {
             difficulty = level
         } label: {

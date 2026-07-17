@@ -154,7 +154,7 @@ struct SettingsView: View {
     // MARK: - Components
 
     @ViewBuilder
-    private func settingLabel(_ title: String, desc: String, icon: String) -> some View {
+    private func settingLabel(_ title: LocalizedStringKey, desc: LocalizedStringKey, icon: String) -> some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 18))

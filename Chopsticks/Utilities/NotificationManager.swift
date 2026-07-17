@@ -13,8 +13,8 @@ enum NotificationManager {
         guard granted else { return false }
 
         let content = UNMutableNotificationContent()
-        content.title = "今日の割り箸バトル 🥢"
-        content.body = "1勝して連続プレイ日数をつなごう！CPUが待ってます"
+        content.title = String(localized: "今日の割り箸バトル 🥢")
+        content.body = String(localized: "1勝して連続プレイ日数をつなごう！CPUが待ってます")
         content.sound = .default
 
         var components = DateComponents()

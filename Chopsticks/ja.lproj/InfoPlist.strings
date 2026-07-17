@@ -1,0 +1,1 @@
+/* 日本語のInfo.plist文字列はビルド設定（INFOPLIST_KEY_*）の値を使う。 */

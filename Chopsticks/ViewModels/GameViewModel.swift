@@ -39,7 +39,7 @@ final class GameViewModel {
     var localPlayerId: UUID?
     var showDisconnectAlert: Bool = false
     /// 切断アラートの見出し（リマッチ拒否は「相手が退出しました」になる）
-    var disconnectMessage: String = "接続が切れました"
+    var disconnectMessage: String = String(localized: "接続が切れました")
     var showRematchRequest: Bool = false
     var isWaitingForRematch: Bool = false
     private var isExecutingRemoteAction: Bool = false
@@ -162,7 +162,7 @@ final class GameViewModel {
             }
         case .rematchDeclined:
             isWaitingForRematch = false
-            disconnectMessage = "相手が退出しました"
+            disconnectMessage = String(localized: "相手が退出しました")
             showDisconnectAlert = true
         case .disconnect:
             showDisconnectAlert = true
@@ -309,7 +309,7 @@ final class GameViewModel {
         if config.isDoubleTapEnabled && attacksThisTurn == 0 {
             attacksThisTurn = 1
             if !announced {
-                battleEvent = BattleEvent(text: "もう1回!", color: .purple)
+                battleEvent = BattleEvent(text: String(localized: "もう1回!"), color: .purple)
             }
             persistSession()
             if isAITurn { triggerAITurn() }
@@ -419,7 +419,7 @@ final class GameViewModel {
             HapticManager.handSelect()
             if case .split(let distribution) = action {
                 let text = distribution.map(String.init).joined(separator: "-")
-                self.battleEvent = BattleEvent(text: "分割 \(text) が最善!", color: .yellow)
+                self.battleEvent = BattleEvent(text: String(localized: "分割 \(text) が最善!"), color: .yellow)
             }
         }
     }
@@ -532,7 +532,7 @@ final class GameViewModel {
             return
         }
         if state.turnCount == Self.turnLimit - 10 {
-            battleEvent = BattleEvent(text: "あと10ターンで判定!", color: .yellow)
+            battleEvent = BattleEvent(text: String(localized: "あと10ターンで判定!"), color: .yellow)
         }
 
         persistSession()

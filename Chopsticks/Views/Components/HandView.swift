@@ -94,7 +94,9 @@ struct HandView: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityText.isEmpty
-            ? (hand.isAlive ? "手、指\(hand.fingerCount)本" : "手、死亡")
+            ? (hand.isAlive
+                ? String(localized: "手、指\(hand.fingerCount)本")
+                : String(localized: "手、死亡"))
             : accessibilityText)
         .accessibilityAddTraits(isInteractable ? .isButton : [])
         .accessibilityAddTraits(isSelected ? .isSelected : [])

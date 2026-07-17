@@ -26,7 +26,7 @@ struct RuleDisplayView: View {
                             Image(systemName: "book.fill")
                                 .font(.title2)
                                 .foregroundStyle(AppTheme.accentGradient)
-                            Text(isPreGame ? "ルール確認" : "ルール")
+                            Text(isPreGame ? String(localized: "ルール確認") : String(localized: "ルール"))
                                 .font(.system(size: 20, weight: .bold, design: .rounded))
                                 .foregroundStyle(.white)
                         }
@@ -152,7 +152,7 @@ struct RuleDisplayView: View {
 
     // MARK: - Section builder
     @ViewBuilder
-    private func ruleSection(title: String, items: [RuleItem], dimmed: Bool = false) -> some View {
+    private func ruleSection(title: LocalizedStringKey, items: [RuleItem], dimmed: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(title)
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
@@ -190,5 +190,5 @@ struct RuleDisplayView: View {
 private struct RuleItem: Identifiable {
     let id = UUID()
     let icon: String
-    let text: String
+    let text: LocalizedStringKey
 }

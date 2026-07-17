@@ -441,8 +441,8 @@ struct MenuView: View {
     private var rankButtonLabel: String {
         let level = GameStats.shared.rankLevel
         return level >= GameStats.maxRankLevel
-            ? "ランク戦 Lv.MAX"
-            : "ランク戦 — Lv.\(level)に挑戦"
+            ? String(localized: "ランク戦 Lv.MAX")
+            : String(localized: "ランク戦 — Lv.\(level)に挑戦")
     }
 
     @ViewBuilder
@@ -487,14 +487,14 @@ struct MenuView: View {
 
     private var activeRuleLabels: [String] {
         var labels: [String] = []
-        if config.isOverflowWrapEnabled { labels.append("ループ") }
-        if config.isSplittingEnabled { labels.append("分割") }
-        if config.isDeadHandRevivalEnabled { labels.append("復活") }
-        if config.handCount == 3 { labels.append("3本手") }
-        if config.isPoisonEnabled { labels.append("毒") }
-        if config.isBombEnabled { labels.append("爆弾") }
-        if config.isMirrorEnabled { labels.append("ミラー") }
-        if config.isDoubleTapEnabled { labels.append("2回攻撃") }
+        if config.isOverflowWrapEnabled { labels.append(String(localized: "ループ")) }
+        if config.isSplittingEnabled { labels.append(String(localized: "分割")) }
+        if config.isDeadHandRevivalEnabled { labels.append(String(localized: "復活")) }
+        if config.handCount == 3 { labels.append(String(localized: "3本手")) }
+        if config.isPoisonEnabled { labels.append(String(localized: "毒")) }
+        if config.isBombEnabled { labels.append(String(localized: "爆弾")) }
+        if config.isMirrorEnabled { labels.append(String(localized: "ミラー")) }
+        if config.isDoubleTapEnabled { labels.append(String(localized: "2回攻撃")) }
         return labels
     }
 

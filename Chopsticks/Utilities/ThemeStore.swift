@@ -20,7 +20,7 @@ extension Theme {
     /// デフォルト（無料）: ネオンシアン×ピンク
     static let neon = Theme(
         id: "neon",
-        name: "ネオン",
+        name: String(localized: "ネオン"),
         isPremium: false,
         player1: Color(red: 0.3, green: 0.75, blue: 1.0),
         player2: Color(red: 1.0, green: 0.4, blue: 0.65),
@@ -33,7 +33,7 @@ extension Theme {
 
     static let sunset = Theme(
         id: "sunset",
-        name: "サンセット",
+        name: String(localized: "サンセット"),
         isPremium: true,
         player1: Color(red: 1.0, green: 0.6, blue: 0.2),
         player2: Color(red: 0.85, green: 0.3, blue: 0.85),
@@ -46,7 +46,7 @@ extension Theme {
 
     static let matrix = Theme(
         id: "matrix",
-        name: "マトリックス",
+        name: String(localized: "マトリックス"),
         isPremium: true,
         player1: Color(red: 0.25, green: 0.95, blue: 0.45),
         player2: Color(red: 0.85, green: 1.0, blue: 0.3),
@@ -59,7 +59,7 @@ extension Theme {
 
     static let sakura = Theme(
         id: "sakura",
-        name: "サクラ",
+        name: String(localized: "サクラ"),
         isPremium: true,
         player1: Color(red: 1.0, green: 0.65, blue: 0.8),
         player2: Color(red: 0.75, green: 0.55, blue: 1.0),
@@ -72,7 +72,7 @@ extension Theme {
 
     static let luxeGold = Theme(
         id: "luxeGold",
-        name: "ゴールド",
+        name: String(localized: "ゴールド"),
         isPremium: true,
         player1: Color(red: 1.0, green: 0.83, blue: 0.35),
         player2: Color(red: 0.9, green: 0.92, blue: 0.98),
@@ -85,7 +85,7 @@ extension Theme {
 
     static let deepSea = Theme(
         id: "deepSea",
-        name: "ディープシー",
+        name: String(localized: "ディープシー"),
         isPremium: true,
         player1: Color(red: 0.25, green: 0.85, blue: 0.85),
         player2: Color(red: 0.4, green: 0.55, blue: 1.0),

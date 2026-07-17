@@ -126,8 +126,12 @@ struct PlayerAreaView: View {
     }
 
     private func handAccessibilityText(_ hand: Hand, index: Int) -> String {
-        let position = player.hands.count == 2 ? (index == 0 ? "左" : "右") : "\(index + 1)番目"
-        let state = hand.isAlive ? "指\(hand.fingerCount)本" : "死亡"
-        return "\(player.name)の\(position)の手、\(state)"
+        let position = player.hands.count == 2
+            ? (index == 0 ? String(localized: "左") : String(localized: "右"))
+            : String(localized: "\(index + 1)番目")
+        let state = hand.isAlive
+            ? String(localized: "指\(hand.fingerCount)本")
+            : String(localized: "死亡")
+        return String(localized: "\(player.name)の\(position)の手、\(state)")
     }
 }

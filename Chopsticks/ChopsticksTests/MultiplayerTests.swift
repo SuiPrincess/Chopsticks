@@ -123,7 +123,8 @@ final class MultiplayerTests: XCTestCase {
         service.simulateReceive(.rematchDeclined)
         XCTAssertFalse(viewModel.isWaitingForRematch)
         XCTAssertTrue(viewModel.showDisconnectAlert)
-        XCTAssertEqual(viewModel.disconnectMessage, "相手が退出しました")
+        // シミュレータの言語設定に依らず比較できるよう、同じキーで解決する
+        XCTAssertEqual(viewModel.disconnectMessage, String(localized: "相手が退出しました"))
     }
 
     // MARK: - セーブとの分離

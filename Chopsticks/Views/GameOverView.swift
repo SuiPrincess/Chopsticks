@@ -119,7 +119,7 @@ struct GameOverView: View {
                         }
                         .buttonStyle(GlassButtonStyle(isPrimary: false))
                     } else {
-                        Button(humanLostToAI ? "リベンジ!" : "Play Again") {
+                        Button(humanLostToAI ? String(localized: "リベンジ!") : String(localized: "Play Again")) {
                             viewModel.newGame()
                         }
                         .buttonStyle(GlassButtonStyle())
@@ -167,18 +167,18 @@ struct GameOverView: View {
     private var shareText: String {
         let stats = GameStats.shared
         if viewModel.config.isDailyChallenge {
-            return "割り箸バトル「今日の挑戦 \(DailyChallenge.title())」クリア！🎯 きみは解けた？ #Chopsticks"
+            return String(localized: "割り箸バトル「今日の挑戦 \(DailyChallenge.title())」クリア！🎯 きみは解けた？ #Chopsticks")
         }
         if let beatenLevel = viewModel.config.aiLevel {
-            return "割り箸バトルでCPU Lv.\(beatenLevel)を撃破！現在ランクLv.\(stats.rankLevel) 🔥 #Chopsticks"
+            return String(localized: "割り箸バトルでCPU Lv.\(beatenLevel)を撃破！現在ランクLv.\(stats.rankLevel) 🔥 #Chopsticks")
         }
         if viewModel.config.aiDifficulty == .oni {
-            return "割り箸バトルで「鬼」に勝った！💪 これは自慢していいやつ #Chopsticks"
+            return String(localized: "割り箸バトルで「鬼」に勝った！💪 これは自慢していいやつ #Chopsticks")
         }
         if stats.currentStreak >= 2 {
-            return "割り箸バトルでCPUに\(stats.currentStreak)連勝中！🔥 #Chopsticks"
+            return String(localized: "割り箸バトルでCPUに\(stats.currentStreak)連勝中！🔥 #Chopsticks")
         }
-        return "割り箸バトルでCPUに勝利！✌️ #Chopsticks"
+        return String(localized: "割り箸バトルでCPUに勝利！✌️ #Chopsticks")
     }
 
     /// 「気分が良い瞬間」だけレビューを依頼する（バージョンごとに1回）
@@ -224,12 +224,12 @@ struct GameOverView: View {
     }
 
     private var subtitleText: String {
-        if isDraw { return "引き分け" }
+        if isDraw { return String(localized: "引き分け") }
         if localPlayerLost {
             if viewModel.isMultiplayer, let name = viewModel.winnerName {
-                return "\(name)の勝ち"
+                return String(localized: "\(name)の勝ち")
             }
-            return "もう一回挑戦しよう"
+            return String(localized: "もう一回挑戦しよう")
         }
         return "WIN!"
     }

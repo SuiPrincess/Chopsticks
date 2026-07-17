@@ -52,17 +52,17 @@ final class GameSessionStore {
         switch config.gameMode {
         case .vsAI:
             if config.isDailyChallenge {
-                mode = "今日の挑戦"
+                mode = String(localized: "今日の挑戦")
             } else if let level = config.aiLevel {
-                mode = "ランク戦 Lv.\(level)"
+                mode = String(localized: "ランク戦 Lv.\(level)")
             } else {
-                mode = "CPU戦（\(config.aiDifficulty.label)）"
+                mode = String(localized: "CPU戦（\(config.aiDifficulty.label)）")
             }
         case .localTwoPlayer:
-            mode = "2人対戦"
+            mode = String(localized: "2人対戦")
         case .online, .nearby:
             return nil
         }
-        return "\(mode)・ターン\(saved.state.turnCount + 1)"
+        return String(localized: "\(mode)・ターン\(saved.state.turnCount + 1)")
     }
 }

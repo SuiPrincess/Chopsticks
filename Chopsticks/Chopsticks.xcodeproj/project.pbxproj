@@ -49,6 +49,8 @@
 		6ED4BB0373C41B2A9D3E8103 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED4AA0373C41B2A9D3E8003 /* NotificationManager.swift */; };
 		6ED4BB0473C41B2A9D3E8104 /* ShopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED4AA0473C41B2A9D3E8004 /* ShopView.swift */; };
 		6ED5BB0173C41B2A9D3E9101 /* DailyChallenge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED5AA0173C41B2A9D3E9001 /* DailyChallenge.swift */; };
+		6ED6BB0173C41B2A9D3EA201 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6ED6CC0173C41B2A9D3EA101 /* Localizable.strings */; };
+		6ED6BB0273C41B2A9D3EA202 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6ED6CC0273C41B2A9D3EA102 /* InfoPlist.strings */; };
 		6ED1BB0173C41B2A9D3E6101 /* GameSessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED1AA0173C41B2A9D3E6001 /* GameSessionStore.swift */; };
 		6ED1BB0273C41B2A9D3E6102 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED1AA0273C41B2A9D3E6002 /* SettingsStore.swift */; };
 		6ED1BB0373C41B2A9D3E6103 /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED1AA0373C41B2A9D3E6003 /* SoundManager.swift */; };
@@ -112,6 +114,10 @@
 		6ED4AA0473C41B2A9D3E8004 /* ShopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopView.swift; sourceTree = "<group>"; };
 		6ED4AA0573C41B2A9D3E8005 /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Products.storekit; sourceTree = "<group>"; };
 		6ED5AA0173C41B2A9D3E9001 /* DailyChallenge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyChallenge.swift; sourceTree = "<group>"; };
+		6ED6AA0173C41B2A9D3EA001 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		6ED6AA0273C41B2A9D3EA002 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
+		6ED6AA0373C41B2A9D3EA003 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		6ED6AA0473C41B2A9D3EA004 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		6ED0DD0173C41B2A9D3E5F08 /* ChopsticksTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChopsticksTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6ED1AA0173C41B2A9D3E6001 /* GameSessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSessionStore.swift; sourceTree = "<group>"; };
 		6ED1AA0273C41B2A9D3E6002 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
@@ -136,6 +142,8 @@
 			children = (
 				6ED1AA0673C41B2A9D3E6006 /* Assets.xcassets */,
 				EE45D2D66A0FEE63003021BD /* Chopsticks.entitlements */,
+				6ED6CC0273C41B2A9D3EA102 /* InfoPlist.strings */,
+				6ED6CC0173C41B2A9D3EA101 /* Localizable.strings */,
 				6ED4AA0573C41B2A9D3E8005 /* Products.storekit */,
 			);
 			name = Chopsticks;
@@ -321,6 +329,27 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXVariantGroup section */
+		6ED6CC0173C41B2A9D3EA101 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				6ED6AA0173C41B2A9D3EA001 /* en */,
+				6ED6AA0273C41B2A9D3EA002 /* ja */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		6ED6CC0273C41B2A9D3EA102 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				6ED6AA0373C41B2A9D3EA003 /* en */,
+				6ED6AA0473C41B2A9D3EA004 /* ja */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
 /* Begin PBXNativeTarget section */
 		B21C67B2441A083463BD59E7 /* Chopsticks */ = {
 			isa = PBXNativeTarget;
@@ -392,6 +421,7 @@
 			knownRegions = (
 				Base,
 				en,
+				ja,
 			);
 			mainGroup = 381DA0ADE625A7466DC1B077;
 			minimizedProjectReferenceProxies = 1;
@@ -474,6 +504,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				6ED1BB0673C41B2A9D3E6106 /* Assets.xcassets in Resources */,
+				6ED6BB0273C41B2A9D3EA202 /* InfoPlist.strings in Resources */,
+				6ED6BB0173C41B2A9D3EA201 /* Localizable.strings in Resources */,
 				6ED1BB0B73C41B2A9D3E610B /* boom.wav in Resources */,
 				6ED1BB0A73C41B2A9D3E610A /* break.wav in Resources */,
 				6ED1BB0E73C41B2A9D3E610E /* lose.wav in Resources */,

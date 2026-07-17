@@ -99,7 +99,7 @@ struct RuleSettingsView: View {
 
     // MARK: - Components
     @ViewBuilder
-    private func sectionHeader(_ title: String) -> some View {
+    private func sectionHeader(_ title: LocalizedStringKey) -> some View {
         HStack {
             Text(title)
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
@@ -112,7 +112,7 @@ struct RuleSettingsView: View {
     }
 
     @ViewBuilder
-    private func ruleLabel(_ title: String, desc: String) -> some View {
+    private func ruleLabel(_ title: LocalizedStringKey, desc: LocalizedStringKey) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.system(size: 16, weight: .semibold, design: .rounded))

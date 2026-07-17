@@ -279,7 +279,7 @@ struct GameView: View {
             && !viewModel.showSplitPanel
     }
 
-    private var tutorialHintText: String {
+    private var tutorialHintText: LocalizedStringKey {
         viewModel.selectedAttackerHandId == nil
             ? "① 自分の手をタップしてえらぶ"
             : "② 相手の手をタップしてこうげき！"
@@ -288,7 +288,7 @@ struct GameView: View {
 
 /// 初プレイ時のコーチマーク
 private struct TutorialHintView: View {
-    let text: String
+    let text: LocalizedStringKey
     @State private var pulse = false
 
     var body: some View {

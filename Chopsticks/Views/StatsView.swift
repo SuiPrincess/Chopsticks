@@ -27,8 +27,8 @@ struct StatsView: View {
                                         .font(.title2)
                                         .foregroundStyle(AppTheme.goldGradient)
                                     Text(stats.rankLevel >= GameStats.maxRankLevel
-                                         ? "ランク Lv.MAX"
-                                         : "ランク Lv.\(stats.rankLevel)")
+                                         ? String(localized: "ランク Lv.MAX")
+                                         : String(localized: "ランク Lv.\(stats.rankLevel)"))
                                         .font(.system(size: 24, weight: .bold, design: .rounded))
                                         .foregroundStyle(.white)
                                 }
@@ -48,8 +48,8 @@ struct StatsView: View {
                                 .frame(height: 8)
 
                                 Text(stats.rankLevel >= GameStats.maxRankLevel
-                                     ? "全てのCPUを撃破！"
-                                     : "次はCPU Lv.\(stats.rankLevel)に挑戦")
+                                     ? String(localized: "全てのCPUを撃破！")
+                                     : String(localized: "次はCPU Lv.\(stats.rankLevel)に挑戦"))
                                     .font(.system(size: 12, design: .rounded))
                                     .foregroundStyle(.white.opacity(0.5))
                             }
@@ -92,8 +92,8 @@ struct StatsView: View {
                                         .font(.system(size: 15, weight: .semibold, design: .rounded))
                                         .foregroundStyle(.white)
                                     Text(stats.isDailyChallengeClearedToday
-                                         ? "クリア済み！また明日！"
-                                         : "まだ未クリア。日替わりルールに挑もう")
+                                         ? String(localized: "クリア済み！また明日！")
+                                         : String(localized: "まだ未クリア。日替わりルールに挑もう"))
                                         .font(.system(size: 12, design: .rounded))
                                         .foregroundStyle(.white.opacity(0.5))
                                 }
@@ -142,7 +142,7 @@ struct StatsView: View {
     // MARK: - Components
 
     @ViewBuilder
-    private func sectionLabel(_ title: String, icon: String) -> some View {
+    private func sectionLabel(_ title: LocalizedStringKey, icon: String) -> some View {
         HStack(spacing: 6) {
             Image(systemName: icon)
                 .font(.system(size: 12))
@@ -156,7 +156,7 @@ struct StatsView: View {
     }
 
     @ViewBuilder
-    private func bigNumber(_ value: String, label: String, color: Color) -> some View {
+    private func bigNumber(_ value: String, label: LocalizedStringKey, color: Color) -> some View {
         VStack(spacing: 4) {
             Text(value)
                 .font(.system(size: 28, weight: .bold, design: .rounded))
