@@ -285,7 +285,7 @@ struct MenuView: View {
                         showAIDifficultyPicker = false
                     }
                 )
-                .presentationDetents([.medium])
+                .presentationDetents([.medium, .large])
             }
             .fullScreenCover(isPresented: $showRuleConfirmation, onDismiss: {
                 if pendingGameStart {

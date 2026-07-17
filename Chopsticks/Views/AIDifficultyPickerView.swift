@@ -9,26 +9,31 @@ struct AIDifficultyPickerView: View {
         ZStack {
             AppTheme.bgDark.ignoresSafeArea()
 
-            VStack(spacing: 28) {
-                VStack(spacing: 8) {
-                    Image(systemName: "cpu")
-                        .font(.system(size: 36))
-                        .foregroundStyle(AppTheme.accentGradient)
-                    Text("CPU難易度")
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white)
-                }
+            // 小型端末のmediumデテントでも全ボタンに届くようスクロール可能にする
+            ScrollView {
+                VStack(spacing: 24) {
+                    VStack(spacing: 8) {
+                        Image(systemName: "cpu")
+                            .font(.system(size: 36))
+                            .foregroundStyle(AppTheme.accentGradient)
+                        Text("CPU難易度")
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white)
+                    }
+                    .padding(.top, 24)
 
-                VStack(spacing: 12) {
-                    difficultyButton(.easy, icon: "tortoise.fill", description: "ランダムに行動する")
-                    difficultyButton(.hard, icon: "bolt.fill", description: "最善手を選ぶ")
-                    difficultyButton(.oni, icon: "flame.fill", description: "最深読み。勝てたら自慢していい")
-                }
-                .padding(.horizontal, 24)
+                    VStack(spacing: 12) {
+                        difficultyButton(.easy, icon: "tortoise.fill", description: "ランダムに行動する")
+                        difficultyButton(.hard, icon: "bolt.fill", description: "最善手を選ぶ")
+                        difficultyButton(.oni, icon: "flame.fill", description: "最深読み。勝てたら自慢していい")
+                    }
+                    .padding(.horizontal, 24)
 
-                Button("次へ") { onStart() }
-                    .buttonStyle(GlassButtonStyle())
-                    .padding(.horizontal, 40)
+                    Button("次へ") { onStart() }
+                        .buttonStyle(GlassButtonStyle())
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 24)
+                }
             }
         }
     }
