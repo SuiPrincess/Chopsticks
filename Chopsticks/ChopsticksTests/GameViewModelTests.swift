@@ -106,6 +106,27 @@ final class GameViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.state, endState, "決着後の操作は無効")
     }
 
+    // MARK: - サドンデス（ターン上限）
+
+    func testSuddenDeathDrawAfterTurnLimit() {
+        let viewModel = makeLocalGame { $0.isSplittingEnabled = true }
+        // (1,1)↔(2,0)の分割を交互に繰り返して60ターン膠着させる
+        var toWide = true
+        var iterations = 0
+        while !viewModel.isGameOver && iterations < GameViewModel.turnLimit + 10 {
+            let before = viewModel.state.turnCount
+            viewModel.performSplit(newDistribution: toWide ? [2, 0] : [1, 1])
+            XCTAssertGreaterThan(viewModel.state.turnCount, before, "分割は必ず1ターン進める")
+            // 両者が同じ手を打つため、2手ごとに分配パターンを切り替える
+            if viewModel.state.turnCount % 2 == 0 {
+                toWide.toggle()
+            }
+            iterations += 1
+        }
+        XCTAssertEqual(viewModel.state.turnCount, GameViewModel.turnLimit)
+        XCTAssertTrue(viewModel.isDraw, "完全同型の膠着はサドンデスで引き分け")
+    }
+
     // MARK: - リプレイ
 
     func testReplayMatchesActualGameFlow() {

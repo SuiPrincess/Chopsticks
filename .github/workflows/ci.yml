@@ -6,6 +6,21 @@ on:
   pull_request:
 
 jobs:
+  localization:
+    name: Localization coverage (JP keys ⇄ EN translations)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify translation coverage and .strings generation
+        run: |
+          python3 tools/localization/gen_localization.py
+          git diff --exit-code -- Chopsticks/en.lproj Chopsticks/ja.lproj \
+            || { echo "::error::.strings files are stale — run tools/localization/gen_localization.py"; exit 1; }
+
   test:
     name: Build & Test (iOS Simulator)
     runs-on: macos-15
