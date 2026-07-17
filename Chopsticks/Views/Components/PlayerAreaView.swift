@@ -42,7 +42,14 @@ struct PlayerAreaView: View {
         self.onSplitTapped = onSplitTapped
     }
 
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
     private var isCompact: Bool { player.hands.count > 2 }
+
+    /// iPadなど広い画面では手のカードを拡大する
+    private var sizeScale: CGFloat {
+        horizontalSizeClass == .regular ? 1.35 : 1.0
+    }
 
     var body: some View {
         VStack(spacing: isCompact ? 10 : 16) {
@@ -66,7 +73,7 @@ struct PlayerAreaView: View {
             }
 
             // Hands
-            HStack(spacing: isCompact ? 16 : 32) {
+            HStack(spacing: (isCompact ? 16 : 32) * sizeScale) {
                 ForEach(Array(player.hands.enumerated()), id: \.element.id) { index, hand in
                     HandView(
                         hand: hand,
@@ -77,7 +84,8 @@ struct PlayerAreaView: View {
                         compact: isCompact,
                         showsPoisonBadge: isPoisonEnabled && hand.fingerCount == 1,
                         isHinted: hintedHandIds.contains(hand.id),
-                        accessibilityText: handAccessibilityText(hand, index: index)
+                        accessibilityText: handAccessibilityText(hand, index: index),
+                        sizeScale: sizeScale
                     )
                 }
             }

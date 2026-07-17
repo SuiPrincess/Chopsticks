@@ -13,15 +13,17 @@ struct HandView: View {
     var isHinted: Bool = false
     /// VoiceOver用の説明（例: "Player 1の手、指2本"）
     var accessibilityText: String = ""
+    /// iPadなどの広い画面での拡大率
+    var sizeScale: CGFloat = 1
 
     @State private var showDeath = false
     @State private var previousAlive = true
 
-    private var cardWidth: CGFloat { compact ? 80 : 105 }
-    private var cardHeight: CGFloat { compact ? 110 : 140 }
-    private var fingerHeight: CGFloat { compact ? 32 : 40 }
-    private var fingerWidth: CGFloat { compact ? 11 : 14 }
-    private var countFont: CGFloat { compact ? 22 : 28 }
+    private var cardWidth: CGFloat { (compact ? 80 : 105) * sizeScale }
+    private var cardHeight: CGFloat { (compact ? 110 : 140) * sizeScale }
+    private var fingerHeight: CGFloat { (compact ? 32 : 40) * sizeScale }
+    private var fingerWidth: CGFloat { (compact ? 11 : 14) * sizeScale }
+    private var countFont: CGFloat { (compact ? 22 : 28) * sizeScale }
 
     /// リーチ状態（あと一撃で死亡しうる）
     private var isInDanger: Bool { hand.isAlive && hand.fingerCount == 4 }
