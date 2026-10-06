@@ -51,6 +51,8 @@ struct GameOverView: View {
             }
             .scrollBounceBehavior(.basedOnSize)
         }
+        // 背後の盤面や「やめる」ボタンにVoiceOverが届かないようにする
+        .accessibilityAddTraits(.isModal)
         .onAppear {
             withAnimation(Anim.gameOver) { appeared = true }
         }
@@ -85,7 +87,7 @@ struct GameOverView: View {
             VStack(spacing: 8) {
                 Text(titleText)
                     .font(.system(size: 32, weight: .bold, design: .rounded))
-                    .foregroundStyle(celebrates ? .white : .white.opacity(0.75))
+                    .foregroundStyle(celebrates ? Color.white : Color.white.opacity(0.75))
                     .multilineTextAlignment(.center)
                     .minimumScaleFactor(0.6)
                     .lineLimit(2)

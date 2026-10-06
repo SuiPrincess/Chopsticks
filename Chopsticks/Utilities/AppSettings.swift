@@ -74,6 +74,13 @@ final class AppSettings {
         }
     }
 
+    /// 前後の空白を除き12文字に収める。空なら自動の名前に戻す。
+    func normalizeNickname() {
+        let trimmed = nickname.trimmingCharacters(in: .whitespacesAndNewlines)
+        let limited = String(trimmed.prefix(12))
+        nickname = limited.isEmpty ? "プレイヤー" + String(format: "%04d", Int.random(in: 0...9999)) : limited
+    }
+
     func registerLaunch() {
         launchCount += 1
         defaults.set(launchCount, forKey: Key.launchCount)

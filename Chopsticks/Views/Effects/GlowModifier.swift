@@ -1,5 +1,6 @@
 import SwiftUI
 
+@MainActor
 struct GlowPulse: ViewModifier {
     let isActive: Bool
     let color: Color

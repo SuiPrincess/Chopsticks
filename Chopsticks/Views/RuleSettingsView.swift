@@ -98,6 +98,10 @@ struct RuleSettingsView: View {
                     }
                     .padding(20)
                     .animation(.spring(response: 0.3), value: config)
+                    .onChange(of: config.isSplittingEnabled) { _, enabled in
+                        // 分割をOFFにしたら、復活も一緒にOFF（復活だけONのまま残さない）
+                        if !enabled { config.isDeadHandRevivalEnabled = false }
+                    }
                 }
             }
             .navigationTitle("ルール設定")

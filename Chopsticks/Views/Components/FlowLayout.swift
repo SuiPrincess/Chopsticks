@@ -36,7 +36,8 @@ struct FlowLayout: Layout {
         let rows = makeRows(maxWidth: maxWidth, subviews: subviews)
         let contentWidth = rows.map(\.width).max() ?? 0
         let height = rows.map(\.height).reduce(0, +) + rowSpacing * CGFloat(max(0, rows.count - 1))
-        return CGSize(width: proposal.width ?? contentWidth, height: height)
+        let finiteProposal = proposal.width.flatMap { $0.isFinite ? $0 : nil }
+        return CGSize(width: finiteProposal ?? contentWidth, height: height)
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {

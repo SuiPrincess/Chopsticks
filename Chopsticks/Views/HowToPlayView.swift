@@ -22,6 +22,7 @@ struct HowToPlayView: View {
                         .padding(.horizontal, 8)
                         .opacity(page < pageCount - 1 ? 1 : 0)
                         .accessibilityHidden(page >= pageCount - 1)
+                        .allowsHitTesting(page < pageCount - 1)
                 }
                 .padding(.horizontal, 12)
 
@@ -79,25 +80,31 @@ struct HowToPlayView: View {
     }
 
     private func pageView<Illustration: View>(title: String, text: String, illustration: Illustration) -> some View {
-        VStack(spacing: 28) {
-            Spacer(minLength: 0)
-            illustration
-                .frame(minHeight: 120)
-            VStack(spacing: 12) {
-                Text(title)
-                    .font(.system(.title3, design: .rounded, weight: .bold))
-                    .foregroundStyle(.white)
-                    .multilineTextAlignment(.center)
-                Text(text)
-                    .font(.system(.body, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.7))
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
+        GeometryReader { proxy in
+            ScrollView {
+                VStack(spacing: 28) {
+                    Spacer(minLength: 0)
+                    illustration
+                        .frame(minHeight: 120)
+                    VStack(spacing: 12) {
+                        Text(title)
+                            .font(.system(.title3, design: .rounded, weight: .bold))
+                            .foregroundStyle(.white)
+                            .multilineTextAlignment(.center)
+                        Text(text)
+                            .font(.system(.body, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.7))
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(.horizontal, 32)
+                    Spacer(minLength: 0)
+                }
+                .frame(maxWidth: .infinity, minHeight: proxy.size.height)
+                .padding(.bottom, 40)
             }
-            .padding(.horizontal, 32)
-            Spacer(minLength: 0)
+            .scrollBounceBehavior(.basedOnSize)
         }
-        .padding(.bottom, 40)
     }
 
     // MARK: - Illustrations

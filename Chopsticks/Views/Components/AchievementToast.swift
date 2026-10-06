@@ -59,7 +59,13 @@ struct AchievementToastHost: View {
         }
         .allowsHitTesting(false)
         .task(id: store.pendingToasts.first) {
-            guard let next = store.pendingToasts.first else { return }
+            guard let next = store.pendingToasts.first else {
+                // キューが外から空にされたら、表示中のトーストも片付ける
+                if current != nil {
+                    withAnimation(.easeIn(duration: 0.25)) { current = nil }
+                }
+                return
+            }
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { current = next }
             HapticManager.achievement()
             SoundManager.shared.play(.achievement)

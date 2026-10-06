@@ -40,6 +40,9 @@ struct MenuView: View {
     @State private var showProfile = false
     @State private var showHowToPlay = false
     @State private var showGameCenterAlert = false
+    /// オンライン対戦を押してGame Centerのサインイン完了を待っている
+    @State private var wantsOnline = false
+    @State private var onlineHint: String?
 
     @State private var diceMessage: String?
     @State private var diceToken = 0
@@ -75,6 +78,7 @@ struct MenuView: View {
                 }
                 .scrollBounceBehavior(.basedOnSize)
             }
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(isPresented: $navigateToGame) { gameDestination }
             .sheet(isPresented: $showRuleSettings) {
                 RuleSettingsView(config: $customRules)
@@ -88,7 +92,8 @@ struct MenuView: View {
                         showAIDifficultyPicker = false
                     }
                 )
-                .presentationDetents([.medium])
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
             }
             .fullScreenCover(isPresented: $showRuleConfirmation, onDismiss: runAfterDismiss) {
                 RuleDisplayView(
@@ -163,6 +168,20 @@ struct MenuView: View {
         .onChange(of: navigateToGame) { _, isActive in
             if !isActive { refreshSavedGame() }
         }
+        .onChange(of: gameCenter.isAuthenticated) { _, authenticated in
+            if authenticated && wantsOnline {
+                wantsOnline = false
+                onlineHint = nil
+                showGameKitMatchmaker = true
+            }
+        }
+        .onChange(of: gameCenter.didFinishAuthentication) { _, finished in
+            if finished && wantsOnline && !gameCenter.isAuthenticated {
+                wantsOnline = false
+                onlineHint = nil
+                showGameCenterAlert = true
+            }
+        }
     }
 
     // MARK: - 遷移
@@ -179,6 +198,7 @@ struct MenuView: View {
                 }
             }
             .navigationBarBackButtonHidden()
+            .toolbar(.hidden, for: .navigationBar)
             .onDisappear {
                 self.launch = nil
                 refreshSavedGame()
@@ -261,9 +281,14 @@ struct MenuView: View {
     private func tapOnline() {
         if gameCenter.isAuthenticated {
             showGameKitMatchmaker = true
-        } else if !gameCenter.authenticateLocalPlayer() {
-            // すでに認証を試みたのに未サインイン: 設定アプリへ案内する
+        } else if gameCenter.didFinishAuthentication {
+            // 認証を試みた結果、未サインイン: 設定アプリへ案内する
             showGameCenterAlert = true
+        } else {
+            // サインイン処理中（または未開始）: 終わりしだい自動でマッチングへ進む
+            wantsOnline = true
+            onlineHint = "Game Centerに接続しています…"
+            gameCenter.authenticateLocalPlayer()
         }
     }
 
@@ -272,6 +297,11 @@ struct MenuView: View {
         let service = GameKitService()
         let proceed = {
             service.onConnectionChanged = nil
+            // 待っている間にシートが閉じられていたら、取り残しの遷移を作らずに接続を捨てる
+            guard showGameKitMatchmaker else {
+                service.disconnect()
+                return
+            }
             afterDismiss = { startMultiplayer(.online, service: service) }
             showGameKitMatchmaker = false
         }
@@ -398,6 +428,9 @@ struct MenuView: View {
                     Text(resumeSubtitle(saved))
                         .font(.system(.caption, design: .rounded))
                         .foregroundStyle(.white.opacity(0.6))
+                    Text("別の対戦を始めると、この対戦は破棄されます")
+                        .font(.system(.caption2, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.4))
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
@@ -420,7 +453,7 @@ struct MenuView: View {
         } else {
             kind = "2人対戦"
         }
-        return "\(kind) ・ \(saved.state.turnCount)ターン目"
+        return "\(kind) ・ \(saved.state.turnCount + 1)ターン目"
     }
 
     private var dailyCard: some View {
@@ -432,7 +465,7 @@ struct MenuView: View {
             HStack(spacing: 12) {
                 Image(systemName: cleared ? "checkmark.seal.fill" : "calendar.badge.exclamationmark")
                     .font(.title2)
-                    .foregroundStyle(cleared ? .green : .cyan)
+                    .foregroundStyle(cleared ? Color.green : Color.cyan)
                 VStack(alignment: .leading, spacing: 3) {
                     Text("今日のチャレンジ")
                         .font(.system(.caption, design: .rounded, weight: .semibold))
@@ -450,7 +483,7 @@ struct MenuView: View {
                 Spacer()
                 Text(cleared ? "クリア済み" : "+\(DailyChallenge.bonusXP)XP")
                     .font(.system(.caption, design: .rounded, weight: .heavy))
-                    .foregroundStyle(cleared ? .green : .cyan)
+                    .foregroundStyle(cleared ? Color.green : Color.cyan)
             }
         }
         .buttonStyle(CardButtonStyle(color: .cyan))
@@ -466,6 +499,14 @@ struct MenuView: View {
             HStack(spacing: 12) {
                 modeButton("近くの人と", icon: "antenna.radiowaves.left.and.right", color: .green) { showNearbyMatch = true }
                 modeButton("オンライン", icon: "globe", color: .orange) { tapOnline() }
+            }
+            if let onlineHint {
+                HStack(spacing: 6) {
+                    ProgressView().scaleEffect(0.7).tint(.white.opacity(0.6))
+                    Text(onlineHint)
+                        .font(.system(.footnote, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.6))
+                }
             }
         }
     }

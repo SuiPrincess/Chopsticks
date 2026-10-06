@@ -64,7 +64,7 @@ struct GameConfig: Equatable, Codable, Sendable {
         var labels: [String] = []
         if isOverflowWrapEnabled { labels.append("ループ") }
         if isSplittingEnabled { labels.append("分割") }
-        if isDeadHandRevivalEnabled { labels.append("復活") }
+        if isSplittingEnabled && isDeadHandRevivalEnabled { labels.append("復活") }
         if handCount == 3 { labels.append("3本手") }
         if isPoisonEnabled { labels.append("毒") }
         if isBombEnabled { labels.append("爆弾") }

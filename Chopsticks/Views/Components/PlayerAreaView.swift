@@ -10,6 +10,8 @@ struct PlayerAreaView: View {
     /// この端末の人間が今操作できる
     let isInputEnabled: Bool
     let canSplit: Bool
+    /// 分割ルールが有効な間はボタン分の高さを常に確保し、手番が変わっても手の位置が動かないようにする
+    let reservesSplitSlot: Bool
     let threatenedHandIds: Set<UUID>
     let isPoisonEnabled: Bool
     let isAI: Bool
@@ -65,7 +67,8 @@ struct PlayerAreaView: View {
             }
 
             // Split button
-            if canSplit && isCurrentTurn {
+            if reservesSplitSlot {
+                let isSplitVisible = canSplit && isCurrentTurn
                 Button(action: onSplitTapped) {
                     HStack(spacing: 6) {
                         Image(systemName: "arrow.left.arrow.right")
@@ -85,6 +88,9 @@ struct PlayerAreaView: View {
                             )
                     )
                 }
+                .opacity(isSplitVisible ? 1 : 0)
+                .disabled(!isSplitVisible)
+                .accessibilityHidden(!isSplitVisible)
                 .accessibilityLabel("指を分割する")
             }
         }

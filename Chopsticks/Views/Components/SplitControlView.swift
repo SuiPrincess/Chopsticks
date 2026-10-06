@@ -108,6 +108,7 @@ struct SplitControlView: View {
             .scaleEffect(appeared ? 1 : 0.8)
             .opacity(appeared ? 1 : 0)
         }
+        .accessibilityAddTraits(.isModal)
         .onAppear {
             withAnimation(Anim.splitPanel) { appeared = true }
         }
@@ -123,6 +124,7 @@ struct SplitControlView: View {
 
     private var hintText: Hint? {
         let current = currentPlayer.hands.map(\.fingerCount)
+        if distribution == current { return nil }  // まだ何も動かしていない
         if distribution.sorted() == current.sorted() {
             return Hint(text: "並べ替えだけの分割はできません", icon: "info.circle", color: .white.opacity(0.6))
         }

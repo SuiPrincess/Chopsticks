@@ -16,6 +16,8 @@ final class GameCenterManager {
     }
 
     private(set) var isAuthenticated = false
+    /// 認証の結果（成功・失敗）が一度でも返ってきたか。falseの間は「サインイン処理中／未開始」。
+    private(set) var didFinishAuthentication = false
     private(set) var localPlayerName = ""
     var authenticationError: String?
     private var didStartAuthentication = false
@@ -38,8 +40,10 @@ final class GameCenterManager {
                 if let error {
                     self.authenticationError = error.localizedDescription
                     self.isAuthenticated = false
+                    self.didFinishAuthentication = true
                     return
                 }
+                self.didFinishAuthentication = true
                 self.isAuthenticated = GKLocalPlayer.local.isAuthenticated
                 self.localPlayerName = GKLocalPlayer.local.displayName
                 self.authenticationError = nil

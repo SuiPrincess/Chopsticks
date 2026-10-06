@@ -55,6 +55,7 @@ struct GameView: View {
                     isAttackPhase: viewModel.isBottomPlayerTurn && viewModel.selectedAttackerHandId != nil,
                     isInputEnabled: viewModel.isHumanTurn,
                     canSplit: viewModel.canSplitNow && viewModel.isHumanTurn && !viewModel.isBottomPlayerTurn,
+                    reservesSplitSlot: viewModel.config.isSplittingEnabled,
                     threatenedHandIds: viewModel.threatenedHandIds,
                     isPoisonEnabled: viewModel.config.isPoisonEnabled,
                     isAI: viewModel.isVsAI,
@@ -75,6 +76,7 @@ struct GameView: View {
                     isAttackPhase: !viewModel.isBottomPlayerTurn && viewModel.selectedAttackerHandId != nil,
                     isInputEnabled: viewModel.isHumanTurn,
                     canSplit: viewModel.canSplitNow && viewModel.isHumanTurn && viewModel.isBottomPlayerTurn,
+                    reservesSplitSlot: viewModel.config.isSplittingEnabled,
                     threatenedHandIds: viewModel.threatenedHandIds,
                     isPoisonEnabled: viewModel.config.isPoisonEnabled,
                     isAI: false,
@@ -184,10 +186,15 @@ struct GameView: View {
         } message: {
             Text(quitMessage)
         }
+        .onChange(of: viewModel.notice) { _, notice in
+            // 通知を確実に出すため、開いているルールシートは閉じる
+            if notice != nil { viewModel.showRules = false }
+        }
         .alert(
-            viewModel.notice?.title ?? "",
+            viewModel.notice?.title ?? "通知",
             isPresented: Binding(
-                get: { viewModel.notice != nil },
+                // 他のアラートやシートが閉じるまで待ってから出す
+                get: { viewModel.notice != nil && !viewModel.showRules && !showQuitConfirm },
                 set: { if !$0 { viewModel.notice = nil } }
             ),
             presenting: viewModel.notice
@@ -225,8 +232,7 @@ struct GameView: View {
                     showQuitConfirm = true
                 }
 
-                Spacer()
-
+                // 中央は手番インジケーターの場所なので、ターン表示は左に寄せる
                 turnCounter
 
                 Spacer()
@@ -387,5 +393,6 @@ private struct WaitingOverlay: View {
             }
             .padding(24)
         }
+        .accessibilityAddTraits(.isModal)
     }
 }

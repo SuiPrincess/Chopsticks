@@ -19,6 +19,7 @@ struct HandView: View {
     @State private var showDeath = false
     @State private var previousAlive = true
 
+    private var reducesMotion: Bool { reduceMotion || AppSettings.shared.reducesEffects }
     private var scale: CGFloat { min(sizeScale, 1.25) }
     private var cardWidth: CGFloat { (compact ? 80 : 105) * scale }
     private var cardHeight: CGFloat { (compact ? 110 : 140) * scale }
@@ -38,7 +39,8 @@ struct HandView: View {
     private var accessibilityValueText: String {
         guard hand.isAlive else { return "死亡" }
         var text = "指\(hand.fingerCount)本"
-        if showsDanger { text += "、危険。次の攻撃で死にます" }
+        if showsPoisonBadge { text += "、毒の手。2本以上の手を攻撃すると相討ち" }
+        if showsDanger { text += "、リーチ。次の攻撃で死ぬ状態です" }
         if isSelected { text += "、選択中" }
         return text
     }
@@ -52,8 +54,8 @@ struct HandView: View {
         .buttonStyle(.plain)
         .opacity(isInteractable || isSelected ? 1.0 : (hand.isAlive ? 0.72 : 0.4))
         .scaleEffect(isSelected ? 1.05 : 1.0)
-        .animation(Anim.finger, value: hand.fingerCount)
-        .animation(Anim.finger, value: isSelected)
+        .animation(reducesMotion ? nil : Anim.finger, value: hand.fingerCount)
+        .animation(reducesMotion ? nil : Anim.finger, value: isSelected)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityName)
         .accessibilityValue(accessibilityValueText)
@@ -104,7 +106,7 @@ struct HandView: View {
                     Text("\(hand.fingerCount)")
                         .font(.system(size: countFont, weight: .bold, design: .rounded))
                         .foregroundStyle(showsDanger ? Color(red: 1.0, green: 0.45, blue: 0.45) : .white)
-                        .contentTransition(.numericText(value: Double(hand.fingerCount)))
+                        .contentTransition(reducesMotion ? ContentTransition.identity : ContentTransition.numericText(value: Double(hand.fingerCount)))
                 }
             } else {
                 VStack(spacing: 4) {
@@ -160,7 +162,7 @@ struct HandView: View {
             .frame(width: fingerWidth, height: isActive ? fingerHeight : fingerHeight * 0.55)
             .shadow(color: isActive ? accentColor.opacity(0.5) : .clear, radius: 5)
             .animation(
-                .spring(response: 0.35, dampingFraction: 0.6).delay(Double(index) * 0.05),
+                reducesMotion ? nil : Animation.spring(response: 0.35, dampingFraction: 0.6).delay(Double(index) * 0.05),
                 value: hand.fingerCount
             )
     }

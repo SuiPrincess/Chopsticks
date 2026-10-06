@@ -105,7 +105,7 @@ struct RuleDisplayView: View {
         var items: [RuleItem]
         if config.isOverflowWrapEnabled {
             items = [
-                RuleItem(icon: "arrow.trianglehead.2.clockwise", text: "5を超えたら余りから数え直す（例: 3+4=7 → 2）"),
+                RuleItem(icon: "arrow.triangle.2.circlepath", text: "5を超えたら余りから数え直す（例: 3+4=7 → 2）"),
                 RuleItem(icon: "flame.fill", text: "ちょうど5になったら死亡"),
             ]
         } else {
@@ -123,7 +123,7 @@ struct RuleDisplayView: View {
         if config.isSplittingEnabled {
             items.append(RuleItem(icon: "arrow.left.arrow.right", text: "分割: 攻撃のかわりに指を手の間で動かせる（自分の手を0本にはできない）"))
         }
-        if config.isDeadHandRevivalEnabled {
+        if config.isSplittingEnabled && config.isDeadHandRevivalEnabled {
             items.append(RuleItem(icon: "heart.fill", text: "復活: 分割で、死んだ手に指を配って復活させられる"))
         }
         if config.isPoisonEnabled {
@@ -144,7 +144,7 @@ struct RuleDisplayView: View {
     private var inactiveOptionalRules: [RuleItem] {
         var items: [RuleItem] = []
         if !config.isSplittingEnabled { items.append(RuleItem(icon: "arrow.left.arrow.right", text: "分割")) }
-        if !config.isDeadHandRevivalEnabled { items.append(RuleItem(icon: "heart.fill", text: "復活")) }
+        if !(config.isSplittingEnabled && config.isDeadHandRevivalEnabled) { items.append(RuleItem(icon: "heart.fill", text: "復活")) }
         if !config.isPoisonEnabled { items.append(RuleItem(icon: "drop.fill", text: "毒")) }
         if !config.isBombEnabled { items.append(RuleItem(icon: "flame.circle.fill", text: "爆弾")) }
         if !config.isMirrorEnabled { items.append(RuleItem(icon: "arrow.uturn.backward", text: "ミラー")) }

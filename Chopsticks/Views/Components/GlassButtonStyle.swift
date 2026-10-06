@@ -11,8 +11,8 @@ struct GlassButtonStyle: ButtonStyle {
             .multilineTextAlignment(.center)
             .lineLimit(2)
             .minimumScaleFactor(0.85)
-            .frame(maxWidth: .infinity, minHeight: 44)
             .padding(.vertical, 12)
+            .frame(maxWidth: .infinity, minHeight: 44)
             .background(
                 RoundedRectangle(cornerRadius: 16)
                     .fill(.ultraThinMaterial)

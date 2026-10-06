@@ -10,6 +10,7 @@ struct SettingsView: View {
     @State private var showResetConfirm = false
     @State private var showHowToPlay = false
     @State private var showNotificationDenied = false
+    @State private var showHintsResetNotice = false
 
     var body: some View {
         NavigationStack {
@@ -44,9 +45,7 @@ struct SettingsView: View {
                         TextField("ニックネーム", text: $settings.nickname)
                             .multilineTextAlignment(.trailing)
                             .submitLabel(.done)
-                            .onChange(of: settings.nickname) { _, value in
-                                if value.count > 12 { settings.nickname = String(value.prefix(12)) }
-                            }
+                            .onSubmit { settings.normalizeNickname() }
                     }
                     Text("近くの人と対戦するときに相手の画面に表示されます。")
                         .font(.footnote)
@@ -59,7 +58,7 @@ struct SettingsView: View {
                     Button("操作のヒントをもう一度表示する") {
                         UserDefaults.standard.set(false, forKey: "tutorial.completed")
                         UserDefaults.standard.set(false, forKey: "tutorial.reachSeen")
-                        dismiss()
+                        showHintsResetNotice = true
                     }
                 }
                 .listRowBackground(Color.white.opacity(0.06))
@@ -86,6 +85,7 @@ struct SettingsView: View {
             }
             .scrollContentBackground(.hidden)
             .background(AppTheme.bgDark)
+            .onDisappear { settings.normalizeNickname() }
             .navigationTitle("設定")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -99,6 +99,11 @@ struct SettingsView: View {
                 Button("キャンセル", role: .cancel) {}
             } message: {
                 Text("ランク・経験値・実績・連続記録が消え、元に戻せません。")
+            }
+            .alert("ヒントをリセットしました", isPresented: $showHintsResetNotice) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("次の対戦から、操作のヒントをもう一度表示します。")
             }
             .alert("通知が許可されていません", isPresented: $showNotificationDenied) {
                 Button("設定を開く") {
