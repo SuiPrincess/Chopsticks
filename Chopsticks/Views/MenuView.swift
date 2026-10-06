@@ -217,6 +217,14 @@ struct MenuView: View {
     }
 
     private func start(_ kind: GameLaunch.Kind, service: (any MultiplayerService)? = nil) {
+        if case .new(let config) = kind, !config.isMultiplayer, let old = savedGame {
+            // 別の対戦を始めると、保存していた対戦は破棄される。進行中のランク戦は負け扱い（中断で負けを避けられないように）。
+            if old.state.config.isRanked, old.state.turnCount > 0 {
+                stats.recordAbandonedRankedGame()
+            }
+            GameSessionStore.clear()
+            savedGame = nil
+        }
         launch = GameLaunch(kind: kind, service: service)
         navigateToGame = true
     }
@@ -443,7 +451,9 @@ struct MenuView: View {
                     Text(resumeSubtitle(saved))
                         .font(.system(.caption, design: .rounded))
                         .foregroundStyle(.white.opacity(0.6))
-                    Text("別の対戦を始めると、この対戦は破棄されます")
+                    Text(saved.state.config.isRanked && saved.state.turnCount > 0
+                         ? "別の対戦を始めると、この対戦は負けになります"
+                         : "別の対戦を始めると、この対戦は破棄されます")
                         .font(.system(.caption2, design: .rounded))
                         .foregroundStyle(.white.opacity(0.4))
                 }
@@ -577,7 +587,7 @@ struct MenuView: View {
                 }
             }
 
-            Text("このルールは2人対戦・フリー対戦・対人戦で使われます。ランク戦は標準ルール固定です")
+            Text("このルールは2人対戦・フリー対戦・対人戦で使われます。ランク戦は標準ルール固定。おまかせは、序盤で勝負が決まらない組み合わせから選びます")
                 .font(.system(.caption2, design: .rounded))
                 .foregroundStyle(.white.opacity(0.35))
                 .multilineTextAlignment(.center)
@@ -615,37 +625,29 @@ struct MenuView: View {
             .foregroundStyle(color)
     }
 
-    /// 特殊ルールをランダムに組み合わせて毎回違うゲームにする
+    /// 序盤で勝負が決まらないと確かめた組み合わせ（FairRuleSets）から選んで、毎回違うゲームにする
     private func randomizeRules() {
-        func chance(_ probability: Double) -> Bool {
-            Double.random(in: 0..<1) < probability
-        }
-
         var newConfig = customRules
-        newConfig.isOverflowWrapEnabled = chance(0.7)
-        newConfig.isSplittingEnabled = chance(0.5)
-        newConfig.isDeadHandRevivalEnabled = newConfig.isSplittingEnabled && chance(0.4)
-        newConfig.handCount = chance(0.25) ? 3 : 2
-        newConfig.isPoisonEnabled = chance(0.3)
-        newConfig.isBombEnabled = chance(0.3)
-        newConfig.isMirrorEnabled = chance(0.3)
-        newConfig.isDoubleTapEnabled = chance(0.3)
-
-        // 全部OFFの退屈な結果は避け、どれか1つは必ず入れる
-        if !newConfig.hasSpecialRules && !newConfig.isSplittingEnabled {
-            switch Int.random(in: 0..<5) {
-            case 0: newConfig.isSplittingEnabled = true
-            case 1: newConfig.isPoisonEnabled = true
-            case 2: newConfig.isBombEnabled = true
-            case 3: newConfig.isMirrorEnabled = true
-            default: newConfig.isDoubleTapEnabled = true
+        var chosen: Set<FairRuleSets.Rule>?
+        // 今のルールと違う組み合わせになるまで数回引き直す
+        for _ in 0..<6 {
+            guard let rules = FairRuleSets.all.randomElement() else { break }
+            var candidate = customRules
+            FairRuleSets.apply(rules, to: &candidate)
+            if candidate != customRules {
+                newConfig = candidate
+                chosen = rules
+                break
             }
         }
 
         withAnimation(.spring(response: 0.3)) {
             customRules = newConfig
-            let specials = newConfig.activeRuleLabels.filter { $0 != "ループ" }
-            diceMessage = specials.isEmpty ? "🎲 クラシックルールになりました" : "🎲 " + specials.joined(separator: "・") + " がON"
+            if let chosen {
+                diceMessage = "🎲 " + FairRuleSets.name(for: chosen) + " がON"
+            } else {
+                diceMessage = "🎲 いまのルールのままです"
+            }
         }
         diceToken += 1
         HapticManager.split()

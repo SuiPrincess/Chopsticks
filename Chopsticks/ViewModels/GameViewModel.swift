@@ -86,6 +86,10 @@ final class GameViewModel {
     var notice: MultiplayerNotice?
     private var isExecutingRemoteAction: Bool = false
     private var opponentRequestedRematch = false
+    /// 相手の方が先に決着画面に着いて、こちらの決着前に届いたリマッチ要求
+    private var deferredRematchRequest = false
+    /// 一度切断したら、同じ画面から再接続しない（onAppearの再呼び出し対策）
+    private var hasDisconnected = false
     private var remoteActionQueue: [GameAction] = []
     private var isProcessingRemoteActions = false
     private var rematchTimeoutTask: Task<Void, Never>?
@@ -209,7 +213,7 @@ final class GameViewModel {
 
     // MARK: - Multiplayer Setup
     func setupMultiplayer(service: any MultiplayerService) {
-        guard multiplayerService == nil else { return }
+        guard multiplayerService == nil, !hasDisconnected else { return }
         self.multiplayerService = service
         service.onConnectionChanged = { [weak self] connected in
             if !connected {
@@ -256,10 +260,13 @@ final class GameViewModel {
             showRules = true
         case .action(let action):
             enqueueRemoteAction(action)
-        case .stateSync(let syncState):
-            state = syncState
         case .rematchRequest:
-            guard isGameOver, !isConnectionLost else { return }
+            guard !isConnectionLost else { return }
+            guard isGameOver else {
+                // 相手の方が先に決着画面に着いた: こちらの決着が出てから通知する
+                deferredRematchRequest = true
+                return
+            }
             if isWaitingForRematch {
                 // 両者が同時にリマッチを要求した: 承認扱い（ホストだけが承認を返す）
                 opponentRequestedRematch = true
@@ -281,7 +288,8 @@ final class GameViewModel {
             handleConnectionLost(.opponentLeft)
         case .disconnect:
             handleConnectionLost(.connectionLost)
-        case .configProposal, .configAccepted:
+        case .stateSync, .configProposal, .configAccepted:
+            // 現在は使っていない（ホストが開始時に盤面を配り、以降は操作を送り合う）
             break
         }
     }
@@ -289,6 +297,7 @@ final class GameViewModel {
     private func handleConnectionLost(_ reason: MultiplayerNotice) {
         guard !isConnectionLost else { return }
         isConnectionLost = true
+        deferredRematchRequest = false
         isWaitingForRematch = false
         isWaitingForHost = false
         showRematchRequest = false
@@ -343,6 +352,16 @@ final class GameViewModel {
             service.send(.gameStart(state))
         } else {
             isWaitingForHost = true
+            // 古い要求を承認した場合など、ホストが新しい盤面を配ってこないときは諦める
+            rematchTimeoutTask?.cancel()
+            let generation = gameGeneration
+            rematchTimeoutTask = Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .seconds(15))
+                guard let self, !Task.isCancelled, generation == self.gameGeneration,
+                      self.isWaitingForHost, self.isGameOver else { return }
+                self.isWaitingForHost = false
+                self.notice = .rematchTimedOut
+            }
         }
     }
 
@@ -355,7 +374,8 @@ final class GameViewModel {
     func disconnectMultiplayer() {
         multiplayerService?.disconnect()
         multiplayerService = nil
-        localPlayerId = nil
+        // localPlayerIdは消さない（消すと結果画面が「自分の勝ち敗け」を判定できず、盤面の上下も入れ替わる）
+        hasDisconnected = true
     }
 
     /// バックグラウンドに移動した: 通信セッションは維持できないので対戦を終了する
@@ -400,6 +420,7 @@ final class GameViewModel {
         showRematchRequest = false
         opponentRequestedRematch = false
         remoteActionQueue = []
+        deferredRematchRequest = false
 
         // マルチプレイ時はホスト=player1を維持
         if isMultiplayer, let service = multiplayerService {
@@ -458,11 +479,11 @@ final class GameViewModel {
         let result = state.apply(.tap(attackerHandId: attackerHandId, targetHandId: targetHandId))
         playFeedback(for: result, isSplit: false, isLocalActor: !isExecutingAIAction && !isExecutingRemoteAction)
         let announced = announce(result)
-        trackComeback()
 
         selectedAttackerHandId = nil
 
         if checkWinCondition() { return }
+        trackComeback()
 
         // ダブルタップ: 1ターンに2回攻撃
         if config.isDoubleTapEnabled && attacksThisTurn == 0 {
@@ -500,7 +521,6 @@ final class GameViewModel {
         if !announce(result) && !isLocalActor {
             battleEvent = BattleEvent(text: "\(actorName)が分割", color: .cyan)
         }
-        trackComeback()
 
         showSplitPanel = false
         selectedAttackerHandId = nil
@@ -508,6 +528,7 @@ final class GameViewModel {
 
         // 爆弾ルールでは分割が爆発（→決着）につながることがある
         if checkWinCondition() { return }
+        trackComeback()
         advanceTurn()
     }
 
@@ -540,7 +561,8 @@ final class GameViewModel {
     }
 
     private func persistSession() {
-        guard !isMultiplayer else { return }
+        // 1手も指していない対戦は保存しない（「続きから」に空の対戦が出ない・前の中断対戦を上書きしない）
+        guard !isMultiplayer, state.turnCount > 0 || attacksThisTurn > 0 else { return }
         GameSessionStore.save(state: state, attacksThisTurn: attacksThisTurn)
     }
 
@@ -766,10 +788,12 @@ final class GameViewModel {
             outcome = winnerId == nil ? .draw : .completed
         }
         let localWon = outcome == .win
+        // 決着した手を含めた「遊んだターン数」（画面のターン表示と同じ数え方）
+        let turnsPlayed = bySuddenDeath ? state.turnCount : state.turnCount + 1
         let summary = GameSummary(
             mode: config.gameMode,
             outcome: outcome,
-            turnCount: state.turnCount,
+            turnCount: turnsPlayed,
             config: config,
             isPerfect: localWon && isPerfectWin,
             isComeback: localWon && player1WasDownToOneHand && isVsAI,
@@ -792,15 +816,36 @@ final class GameViewModel {
 
         // 戦績・XP・実績
         let stats = GameStats.shared
-        let gameRewards = stats.record(summary)
+        let levelBefore = stats.playerLevel
+        let titleBefore = stats.playerTitle
+        var gameRewards = stats.record(summary)
         didRankUp = gameRewards.rankedUp
-        rewards = gameRewards
-        let newAchievements = AchievementStore.shared.evaluate(summary: summary, stats: stats)
-        unlockedAchievements = newAchievements
-        for achievement in newAchievements {
-            stats.addXP(achievement.xpReward)
+
+        // 実績のXPで次の実績（レベル到達など）の条件が揃うことがあるので、新しい解除がなくなるまで繰り返す
+        var unlocked = AchievementStore.shared.evaluate(summary: summary, stats: stats)
+        var batch = unlocked
+        while !batch.isEmpty {
+            for achievement in batch {
+                stats.addXP(achievement.xpReward)
+                gameRewards.xpGained += achievement.xpReward
+            }
+            batch = AchievementStore.shared.evaluate(summary: nil, stats: stats)
+            unlocked += batch
         }
-        GameCenterManager.shared.report(achievements: newAchievements)
+        if stats.playerLevel > levelBefore {
+            gameRewards.leveledUp = true
+            if stats.playerTitle != titleBefore { gameRewards.newTitle = stats.playerTitle }
+        }
+        rewards = gameRewards
+        unlockedAchievements = unlocked
+        GameCenterManager.shared.report(achievements: unlocked)
         GameCenterManager.shared.submitScores(stats: stats)
+
+        // 決着前に相手のリマッチ要求が届いていたら、ここで通知する
+        if deferredRematchRequest && isMultiplayer && !isConnectionLost {
+            deferredRematchRequest = false
+            opponentRequestedRematch = true
+            showRematchRequest = true
+        }
     }
 }

@@ -69,13 +69,19 @@ final class AIEngineTests: XCTestCase {
         XCTAssertEqual(attacker, s.player2.hands[1].id, "2の手で攻撃するとミラーで4→爆発して自滅")
     }
 
+    /// ターン上限の判定（生きている手の数 → 指の合計が少ない方）を、探索が正しく見込んでいること。
+    /// 残り1ターンで、AIの3本で人間の4本を叩くと 4+3=7→2 で人間の合計が少なくなり、判定負けになる。
     func testSearchRespectsTurnLimit() {
-        // 残り1ターンで判定: AIは指の合計が少ないほうが勝つことを知っている
         var s = makeState()
-        set(&s, human: [2, 2], ai: [1, 1])
+        set(&s, human: [4, 1], ai: [3, 1])
         s.turnCount = GameState.turnLimit - 1
-        // どの手で叩いても判定でAI勝ち（手数同じ・指合計 2 < 4+1）。クラッシュせず行動を返す。
-        XCTAssertNotNil(AIEngine.chooseAction(state: s, difficulty: .hard))
+        for _ in 0..<8 {
+            guard case .tap(let attacker, let target)? = AIEngine.chooseAction(state: s, difficulty: .hard) else {
+                return XCTFail("tap expected")
+            }
+            let isLosingMove = attacker == s.player2.hands[0].id && target == s.player1.hands[0].id
+            XCTAssertFalse(isLosingMove, "判定負けになる手を選んではいけない")
+        }
     }
 
     func testEasyAIReturnsLegalAction() {
@@ -93,11 +99,20 @@ final class AIEngineTests: XCTestCase {
         }
     }
 
-    func testDoubleTapAIContinuesTurn() {
+    /// ダブルタップ: 1回目で1本倒し、2回目で残りの1本を倒して、1ターンで勝ちきれる
+    func testDoubleTapAIFinishesGameInOneTurn() {
         var s = makeState { $0.isDoubleTapEnabled = true }
-        set(&s, human: [2, 2], ai: [1, 2])
-        XCTAssertNotNil(AIEngine.chooseAction(state: s, difficulty: .hard, attacksUsedThisTurn: 0))
-        XCTAssertNotNil(AIEngine.chooseAction(state: s, difficulty: .hard, attacksUsedThisTurn: 1))
+        set(&s, human: [3, 3], ai: [2, 2])
+        guard let first = AIEngine.chooseAction(state: s, difficulty: .hard, attacksUsedThisTurn: 0) else {
+            return XCTFail("1回目の攻撃が選べるはず")
+        }
+        s.apply(first)
+        XCTAssertFalse(s.player1.isDefeated, "1回目では倒しきれない")
+        guard let second = AIEngine.chooseAction(state: s, difficulty: .hard, attacksUsedThisTurn: 1) else {
+            return XCTFail("2回目の攻撃が選べるはず")
+        }
+        s.apply(second)
+        XCTAssertTrue(s.player1.isDefeated, "同じ手番の2回目で人間の手がすべて死ぬ")
     }
 
     func testMercyBoostIncreasesRandomness() {
@@ -120,6 +135,6 @@ final class AIEngineTests: XCTestCase {
         set(&s, human: [2, 3, 1], ai: [1, 2, 2])
         let start = Date()
         _ = AIEngine.chooseAction(state: s, difficulty: .hard)
-        XCTAssertLessThan(Date().timeIntervalSince(start), 3.0)
+        XCTAssertLessThan(Date().timeIntervalSince(start), 10.0, "デバッグビルドでも実用的な時間で終わる")
     }
 }

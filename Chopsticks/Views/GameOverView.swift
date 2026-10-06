@@ -25,6 +25,7 @@ struct GameOverView: View {
     }
 
     private var celebrates: Bool { result == .win || result == .neutral }
+    private var turnsPlayed: Int { viewModel.lastSummary?.turnCount ?? viewModel.state.turnCount }
     private var summary: GameSummary? { viewModel.lastSummary }
     private var rewards: GameRewards? { viewModel.rewards }
 
@@ -145,10 +146,10 @@ struct GameOverView: View {
 
     private var subtitleText: String {
         switch result {
-        case .win: "おめでとう！ \(viewModel.state.turnCount)ターンで決着"
+        case .win: "おめでとう！ \(turnsPlayed)ターンで決着"
         case .loss: lossMessage
-        case .draw: "同点でした（\(viewModel.state.turnCount)ターン）"
-        case .neutral: "\(viewModel.state.turnCount)ターンで決着"
+        case .draw: "同点でした（\(turnsPlayed)ターン）"
+        case .neutral: "\(turnsPlayed)ターンで決着"
         }
     }
 
@@ -373,6 +374,11 @@ struct GameOverView: View {
                     .font(.system(.subheadline, design: .rounded))
                     .foregroundStyle(.white.opacity(0.65))
             }
+            Button("メニューへ") {
+                viewModel.leaveMultiplayer()
+                onDismiss()
+            }
+            .buttonStyle(GlassButtonStyle(isPrimary: false))
         } else {
             Button("リマッチ") {
                 viewModel.requestRematch()

@@ -12,7 +12,7 @@ enum GameSessionStore {
     /// これより古い保存は破棄する
     private static let maxAge: TimeInterval = 60 * 60 * 24 * 3
 
-    static func save(state: GameState, attacksThisTurn: Int, defaults: UserDefaults = .standard, now: Date = Date()) {
+    static func save(state: GameState, attacksThisTurn: Int, defaults: UserDefaults = AppDefaults.store, now: Date = Date()) {
         guard state.phase == .playing, !state.config.isMultiplayer else {
             clear(defaults: defaults)
             return
@@ -23,7 +23,7 @@ enum GameSessionStore {
         }
     }
 
-    static func load(defaults: UserDefaults = .standard, now: Date = Date()) -> SavedGame? {
+    static func load(defaults: UserDefaults = AppDefaults.store, now: Date = Date()) -> SavedGame? {
         guard let data = defaults.data(forKey: key),
               let saved = try? JSONDecoder().decode(SavedGame.self, from: data)
         else { return nil }
@@ -37,7 +37,7 @@ enum GameSessionStore {
         return saved
     }
 
-    static func clear(defaults: UserDefaults = .standard) {
+    static func clear(defaults: UserDefaults = AppDefaults.store) {
         defaults.removeObject(forKey: key)
     }
 }

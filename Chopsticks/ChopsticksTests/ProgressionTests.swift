@@ -188,6 +188,41 @@ final class ProgressionTests: XCTestCase {
         XCTAssertEqual(stats.dailyChallengeClears, 2)
     }
 
+    func testDailyChallengeAlwaysUsesFairRules() async {
+        var titles = Set<String>()
+        for offset in 0..<400 {
+            let date = calendar.date(byAdding: .day, value: offset, to: now)!
+            let challenge = DailyChallenge.forDate(date, calendar: calendar)
+            let c = challenge.config
+            XCTAssertTrue(c.isOverflowWrapEnabled, "クラシックは使わない")
+            XCTAssertFalse(c.isBombEnabled, "爆弾の単独使用は使わない")
+            XCTAssertTrue((3...8).contains(challenge.cpuLevel))
+            XCTAssertTrue(c.isSplittingEnabled || c.isPoisonEnabled || c.isMirrorEnabled || c.isDoubleTapEnabled || c.handCount == 3,
+                          "標準ルールのままの日はない")
+            XCTAssertEqual(challenge, DailyChallenge.forDate(date, calendar: calendar), "同じ日は同じ内容")
+            titles.insert(challenge.title)
+        }
+        XCTAssertGreaterThan(titles.count, 10, "日ごとに十分違う内容になる")
+    }
+
+    func testDayKeyIgnoresUserCalendar() async {
+        for identifier in [Calendar.Identifier.japanese, .buddhist, .gregorian] {
+            var userCalendar = Calendar(identifier: identifier)
+            userCalendar.timeZone = TimeZone(identifier: "Asia/Tokyo")!
+            XCTAssertEqual(DailyChallenge.dayKey(for: now, calendar: userCalendar), "2026-10-01", "\(identifier)でも西暦の日付になる")
+        }
+    }
+
+    func testDailyWinOnlyCountsWithTodaysRules() async {
+        let stats = makeStats()
+        let yesterday = DailyChallenge.forDayKey("2026-09-30")
+        XCTAssertNotEqual(yesterday.config, stats.todaysChallenge.config, "前提: 前日と今日で条件が違う")
+        let rewards = stats.record(GameSummary(mode: .vsAI, outcome: .win, turnCount: 15, config: yesterday.config))
+        XCTAssertFalse(rewards.dailyChallengeCleared, "前日の条件で遊んだ勝利は今日のクリアにならない")
+        XCTAssertFalse(stats.hasClearedTodaysChallenge)
+        XCTAssertEqual(rewards.xpGained, PlayerLevel.xpReward(for: GameSummary(mode: .vsAI, outcome: .win, turnCount: 15, config: yesterday.config), rankLevel: 1) - DailyChallenge.bonusXP)
+    }
+
     // MARK: - 実績
 
     func testAchievementsUnlockOnce() async {

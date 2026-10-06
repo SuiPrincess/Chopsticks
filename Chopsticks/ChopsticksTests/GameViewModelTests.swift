@@ -1,8 +1,8 @@
 import XCTest
 @testable import Chopsticks
 
-/// GameViewModelの統合テスト。戦績・実績・保存セッションなどのシングルトンも触るため、
-/// 各テストの前後で初期化する（シミュレータ上のアプリのデータも消えるので注意）。
+/// GameViewModelの統合テスト。戦績・実績・保存セッションなどのシングルトンも触るため、各テストの前後で初期化する。
+/// XCTest実行中はアプリ本来のデータとは別の保存領域（`AppDefaults`）を使うので、実データは消えない。
 @MainActor
 final class GameViewModelTests: XCTestCase {
 
@@ -55,8 +55,12 @@ final class GameViewModelTests: XCTestCase {
         XCTAssertEqual(a.config, b.config, message, file: file, line: line)
     }
 
-    private func settle(_ milliseconds: Int = 30) async {
-        try? await Task.sleep(for: .milliseconds(milliseconds))
+    /// 条件が満たされるまで待つ（固定時間の待機は、遅い環境で結果が不安定になる）
+    private func waitUntil(timeout: Duration = .seconds(5), _ condition: () -> Bool) async {
+        let end = ContinuousClock.now + timeout
+        while !condition() && ContinuousClock.now < end {
+            try? await Task.sleep(for: .milliseconds(5))
+        }
     }
 
     // MARK: - ローカル対戦
@@ -79,6 +83,10 @@ final class GameViewModelTests: XCTestCase {
         XCTAssertNil(GameSessionStore.load(), "終了したゲームは保存を残さない")
         let score = vm.sessionScore.player1 + vm.sessionScore.player2
         XCTAssertEqual(score, vm.isDraw ? 0 : 1)
+        // 遊んだターン数は、決着した手を含めて数える（画面のターン表示と同じ）
+        if let summary = vm.lastSummary, !summary.decidedBySuddenDeath {
+            XCTAssertEqual(summary.turnCount, vm.state.turnCount + 1)
+        }
     }
 
     func testLocalRematchAlternatesStartingPlayer() async {
@@ -124,9 +132,31 @@ final class GameViewModelTests: XCTestCase {
         XCTAssertEqual(vm.attacksThisTurn, 0)
     }
 
+    /// ルールに基づく危険判定（リーチ表示）。4本の手は1本の攻撃で死に、相手の1本の手も4本の攻撃で死ぬ。
     func testThreatenedHandsFollowRules() async {
-        let vm = GameViewModel(config: localConfig())
-        XCTAssertTrue(vm.threatenedHandIds.isEmpty, "開幕に危険な手はない")
+        XCTAssertTrue(GameViewModel(config: localConfig()).threatenedHandIds.isEmpty, "開幕に危険な手はない")
+
+        var state = GameState(config: localConfig())
+        state.player1.hands[0].fingerCount = 4   // P2の1本攻撃で 4+1=5 → 死
+        let vm = GameViewModel(savedGame: SavedGame(state: state, attacksThisTurn: 0, savedAt: Date()))
+        XCTAssertEqual(
+            vm.threatenedHandIds,
+            [state.player1.hands[0].id, state.player2.hands[0].id, state.player2.hands[1].id],
+            "P1の4本と、P1の4本の攻撃で死ぬP2の1本×2が危険。P1の1本は危険でない"
+        )
+    }
+
+    func testNothingIsSavedBeforeTheFirstMove() async {
+        var config = GameConfig()
+        config.gameMode = .vsAI
+        config.aiDifficulty = .easy
+        let vm = GameViewModel(config: config)
+        vm.skipsPacingDelays = true
+        vm.suspendGame()
+        XCTAssertNil(GameSessionStore.load(), "1手も指していない対戦は「続きから」に出さない")
+        vm.selectAttackerHand(vm.currentPlayer.hands[0].id)
+        vm.tapOpponentHand(vm.opponentPlayer.hands[0].id)
+        XCTAssertNotNil(GameSessionStore.load())
     }
 
     // MARK: - CPU戦
@@ -145,7 +175,7 @@ final class GameViewModelTests: XCTestCase {
         // AIの手番中の入力は受け付けない
         vm.selectAttackerHand(vm.state.player1.hands[0].id)
         XCTAssertNil(vm.selectedAttackerHandId.flatMap { vm.state.player1.hand(for: $0) })
-        await settle(400)
+        await waitUntil { vm.state.turnCount == 2 }
         XCTAssertEqual(vm.state.turnCount, 2, "AIが1手指して人間の手番に戻る")
         XCTAssertTrue(vm.isHumanTurn)
     }
@@ -186,7 +216,7 @@ final class GameViewModelTests: XCTestCase {
     // MARK: - マルチプレイ
 
     /// ホストとゲストを作り、画面表示（setupMultiplayer）まで進める。
-    /// `guestFirst`がtrueなら、ゲストが先に準備できる（通常ありえないが順序依存の確認用）。
+    /// `hostFirst`がfalseなら、ゲストが先に準備できる（順序依存の確認用）。
     private func makeMatch(config: GameConfig? = nil, hostFirst: Bool = true)
         -> (host: GameViewModel, guest: GameViewModel, hostService: MockMultiplayerService, guestService: MockMultiplayerService)
     {
@@ -238,26 +268,35 @@ final class GameViewModelTests: XCTestCase {
 
         m.host.selectAttackerHand(m.host.state.player1.hands[0].id)
         m.host.tapOpponentHand(m.host.state.player2.hands[0].id)
-        await settle()
+        await waitUntil { m.guest.state.turnCount == 1 }
         assertSameBoard(m.guest.state, m.host.state)
         XCTAssertTrue(m.guest.isHumanTurn)
         XCTAssertFalse(m.host.isHumanTurn)
 
         m.guest.selectAttackerHand(m.guest.state.player2.hands[1].id)
         m.guest.tapOpponentHand(m.guest.state.player1.hands[1].id)
-        await settle()
+        await waitUntil { m.host.state.turnCount == 2 }
         assertSameBoard(m.guest.state, m.host.state)
         XCTAssertEqual(m.host.state.turnCount, 2)
     }
 
+    /// 2つの操作がまとめて届いても、順番どおりに適用される（ダブルタップで同じ手番に2回送る）
     func testRemoteActionsApplyInOrderEvenWhenBurstDelivered() async {
-        let m = makeMatch()
+        var cfg = GameConfig()
+        cfg.isDoubleTapEnabled = true
+        let m = makeMatch(config: cfg)
         m.hostService.holdsOutgoing = true
         m.host.selectAttackerHand(m.host.state.player1.hands[0].id)
         m.host.tapOpponentHand(m.host.state.player2.hands[0].id)
+        m.host.selectAttackerHand(m.host.state.player1.hands[1].id)
+        m.host.tapOpponentHand(m.host.state.player2.hands[1].id)
+        let sentActions = m.hostService.sent.filter { if case .action = $0 { return true } else { return false } }
+        XCTAssertEqual(sentActions.count, 2, "前提: 2つの操作を溜めてある")
+        XCTAssertEqual(m.guest.state.turnCount, 0, "まだ届いていない")
+
         m.hostService.holdsOutgoing = false
         m.hostService.flushOutgoing()
-        await settle()
+        await waitUntil { m.guest.state.turnCount == 1 }
         assertSameBoard(m.guest.state, m.host.state)
     }
 
@@ -266,11 +305,13 @@ final class GameViewModelTests: XCTestCase {
         var steps = 0
         while !m.host.isGameOver && steps < 300 {
             let actor = m.host.isHumanTurn ? m.host : m.guest
+            let other = actor === m.host ? m.guest : m.host
             playOneMove(actor)
-            await settle(8)
+            // 相手側に反映されるまで待つ
+            await waitUntil { other.state.turnCount == actor.state.turnCount && other.isGameOver == actor.isGameOver }
             steps += 1
         }
-        await settle(40)
+        await waitUntil { m.guest.isGameOver == m.host.isGameOver }
     }
 
     func testMatchRunsToCompletionAndBothSidesAgree() async {
@@ -290,13 +331,11 @@ final class GameViewModelTests: XCTestCase {
     func testRematchRequestedByGuestAcceptedByHost() async {
         let m = makeMatch()
         await playMatchToCompletion(m)
-        let firstHostStarted = m.host.state.currentPlayerId
-        _ = firstHostStarted
         m.guest.requestRematch()
         XCTAssertTrue(m.guest.isWaitingForRematch)
         XCTAssertTrue(m.host.showRematchRequest)
         m.host.acceptRematch()
-        await settle()
+        await waitUntil { !m.guest.isGameOver && !m.host.isGameOver }
         XCTAssertFalse(m.host.isGameOver)
         XCTAssertFalse(m.guest.isGameOver)
         assertSameBoard(m.host.state, m.guest.state, "ホストが配った新しい盤面にゲストが同期する")
@@ -319,7 +358,7 @@ final class GameViewModelTests: XCTestCase {
         m.guestService.holdsOutgoing = false
         m.hostService.flushOutgoing()
         m.guestService.flushOutgoing()
-        await settle()
+        await waitUntil { !m.guest.isGameOver && !m.host.isGameOver }
         XCTAssertFalse(m.host.isGameOver)
         XCTAssertFalse(m.guest.isGameOver)
         assertSameBoard(m.host.state, m.guest.state)
@@ -336,17 +375,26 @@ final class GameViewModelTests: XCTestCase {
         await playMatchToCompletion(m)
         m.guest.requestRematch()
         m.host.declineRematch()
-        await settle()
+        await waitUntil { m.guest.notice != nil }
         XCTAssertEqual(m.guest.notice, .rematchDeclined)
         XCTAssertTrue(m.guest.isConnectionLost)
         XCTAssertFalse(m.guest.isWaitingForRematch)
+    }
+
+    /// 相手の方が先に決着画面に着いて要求を送ってきても、こちらの決着後に通知される
+    func testRematchRequestArrivingBeforeOwnGameOverIsShownAfterwards() async {
+        let m = makeMatch()
+        m.guestService.deliverToSelf(.rematchRequest)
+        XCTAssertFalse(m.guest.showRematchRequest, "まだ決着していないので出さない")
+        await playMatchToCompletion(m)
+        XCTAssertTrue(m.guest.showRematchRequest, "決着後に通知される")
     }
 
     func testDuplicateGameStartDoesNotWipeGameInProgress() async {
         let m = makeMatch()
         m.host.selectAttackerHand(m.host.state.player1.hands[0].id)
         m.host.tapOpponentHand(m.host.state.player2.hands[0].id)
-        await settle()
+        await waitUntil { m.guest.state.turnCount == 1 }
         let before = m.guest.state
         m.guestService.deliverToSelf(.gameStart(GameState(config: before.config)))
         XCTAssertEqual(m.guest.state, before)
@@ -382,6 +430,25 @@ final class GameViewModelTests: XCTestCase {
         let state = m.host.state
         m.host.setupMultiplayer(service: m.hostService)
         XCTAssertEqual(m.host.state, state, "onAppearが複数回呼ばれても盤面を作り直さない")
+    }
+
+    func testSetupAfterLeavingIsIgnored() async {
+        let m = makeMatch()
+        m.host.leaveMultiplayer()
+        let sentBefore = m.hostService.sent.count
+        m.host.setupMultiplayer(service: m.hostService)
+        XCTAssertEqual(m.hostService.sent.count, sentBefore, "切断後のonAppearで、開始メッセージを再送しない")
+    }
+
+    /// 結果画面から退出しても、勝敗の判定と盤面の上下が入れ替わらない
+    func testLeavingDoesNotFlipTheResultScreen() async {
+        let m = makeMatch()
+        await playMatchToCompletion(m)
+        let winBefore = m.guest.didLocalPlayerWin
+        let bottomBefore = m.guest.bottomPlayer.id
+        m.guest.leaveMultiplayer()
+        XCTAssertEqual(m.guest.didLocalPlayerWin, winBefore)
+        XCTAssertEqual(m.guest.bottomPlayer.id, bottomBefore)
     }
 
     func testDisconnectBeforeGameViewAppearsIsDetected() async {

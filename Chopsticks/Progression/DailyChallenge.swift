@@ -11,58 +11,37 @@ struct DailyChallenge: Equatable {
     /// 報酬XP（通常の勝利XPに上乗せ）
     static let bonusXP = 50
 
+    /// "yyyy-MM-dd"。ユーザーのカレンダー（和暦・仏暦など）に左右されないよう、年月日は常に西暦で数える。
+    /// タイムゾーンだけはユーザーのものを使う（日付の切り替わりは端末のローカル時間）。
     static func dayKey(for date: Date, calendar: Calendar = .current) -> String {
-        let c = calendar.dateComponents([.year, .month, .day], from: date)
+        var gregorian = Calendar(identifier: .gregorian)
+        gregorian.timeZone = calendar.timeZone
+        let c = gregorian.dateComponents([.year, .month, .day], from: date)
         return String(format: "%04d-%02d-%02d", c.year ?? 0, c.month ?? 0, c.day ?? 0)
     }
 
     static func forDate(_ date: Date, calendar: Calendar = .current) -> DailyChallenge {
-        let key = dayKey(for: date, calendar: calendar)
-        return forDayKey(key)
+        forDayKey(dayKey(for: date, calendar: calendar))
     }
 
+    /// 同じ日付キーなら、誰の端末でも・どのOSバージョンでも同じ内容になる（自前のシード付き乱数のみを使う）。
     static func forDayKey(_ key: String) -> DailyChallenge {
-        var rng = SeededGenerator(seed: UInt64(truncatingIfNeeded: stableHash(key)))
+        var rng = SeededGenerator(seed: stableHash(key))
 
         var config = GameConfig()
         config.gameMode = .vsAI
         config.isDailyChallenge = true
 
-        // 特殊ルールを1〜2個。毎日違う組み合わせになるよう重みづけ。
-        let specials = ["poison", "bomb", "mirror", "double", "split", "three"].shuffled(using: &rng)
-        let count = rng.next(in: 1...2)
-        for rule in specials.prefix(count) {
-            switch rule {
-            case "poison": config.isPoisonEnabled = true
-            case "bomb": config.isBombEnabled = true
-            case "mirror": config.isMirrorEnabled = true
-            case "double": config.isDoubleTapEnabled = true
-            case "split":
-                config.isSplittingEnabled = true
-                config.isDeadHandRevivalEnabled = rng.next(in: 0...2) == 0
-            default: config.handCount = 3
-            }
-        }
-        config.isOverflowWrapEnabled = rng.next(in: 0...4) != 0  // 2割でクラシック
+        // 先手でも後手でも序盤で勝負が決まらないと確かめた組み合わせだけから選ぶ
+        let rules = FairRuleSets.all[rng.next(in: 0...(FairRuleSets.all.count - 1))]
+        FairRuleSets.apply(rules, to: &config)
 
         let level = rng.next(in: 3...8)
         config.aiLevel = level
 
-        let title = Self.title(for: config, rng: &rng)
-        return DailyChallenge(dayKey: key, config: config, cpuLevel: level, title: title)
-    }
-
-    private static func title(for config: GameConfig, rng: inout SeededGenerator) -> String {
-        var parts: [String] = []
-        if config.isPoisonEnabled { parts.append("毒") }
-        if config.isBombEnabled { parts.append("爆弾") }
-        if config.isMirrorEnabled { parts.append("ミラー") }
-        if config.isDoubleTapEnabled { parts.append("連撃") }
-        if config.isSplittingEnabled { parts.append("分割") }
-        if config.handCount == 3 { parts.append("三本手") }
         let suffixes = ["の試練", "デー", "バトル", "の洗礼", "チャレンジ"]
-        let suffix = suffixes[rng.next(in: 0...(suffixes.count - 1))]
-        return parts.joined(separator: "×") + suffix
+        let title = FairRuleSets.name(for: rules) + suffixes[rng.next(in: 0...(suffixes.count - 1))]
+        return DailyChallenge(dayKey: key, config: config, cpuLevel: level, title: title)
     }
 
     /// 文字列から決定論的な64bitハッシュ（Swiftの`hashValue`はプロセスごとに変わるため使わない）
@@ -93,7 +72,9 @@ struct SeededGenerator: RandomNumberGenerator {
         return z ^ (z >> 31)
     }
 
+    /// 範囲への割り当ても自前で行う（標準ライブラリの実装に依存しない）
     mutating func next(in range: ClosedRange<Int>) -> Int {
-        Int.random(in: range, using: &self)
+        let span = UInt64(range.upperBound - range.lowerBound + 1)
+        return range.lowerBound + Int(next() % span)
     }
 }

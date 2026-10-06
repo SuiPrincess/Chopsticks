@@ -38,7 +38,7 @@ final class AppSettings {
         static let customRules = "settings.customRules"
     }
 
-    init(defaults: UserDefaults = .standard) {
+    init(defaults: UserDefaults = AppDefaults.store) {
         self.defaults = defaults
         isSoundEnabled = defaults.object(forKey: Key.sound) as? Bool ?? true
         isHapticsEnabled = defaults.object(forKey: Key.haptics) as? Bool ?? true

@@ -88,7 +88,7 @@ final class GameStats {
         ]
     }
 
-    init(defaults: UserDefaults = .standard, calendar: Calendar = .current, now: @escaping () -> Date = { Date() }) {
+    init(defaults: UserDefaults = AppDefaults.store, calendar: Calendar = .autoupdatingCurrent, now: @escaping () -> Date = { Date() }) {
         self.defaults = defaults
         self.calendar = calendar
         self.now = now
@@ -220,9 +220,11 @@ final class GameStats {
                     }
                 }
                 if summary.config.isDailyChallenge {
-                    let key = DailyChallenge.dayKey(for: now(), calendar: calendar)
-                    if lastDailyChallengeClearKey != key {
-                        lastDailyChallengeClearKey = key
+                    // 「今日の内容」と同じ条件で遊んだ勝利だけを今日のクリアにする
+                    // （前日から持ち越した対戦や、日をまたいだ対戦は対象外）
+                    let today = DailyChallenge.forDate(now(), calendar: calendar)
+                    if summary.config == today.config, lastDailyChallengeClearKey != today.dayKey {
+                        lastDailyChallengeClearKey = today.dayKey
                         dailyChallengeClears += 1
                         rewards.dailyChallengeCleared = true
                     }

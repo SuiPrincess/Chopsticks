@@ -157,7 +157,7 @@ final class AchievementStore {
     private let now: () -> Date
     private static let key = "achievements.unlocked"
 
-    init(defaults: UserDefaults = .standard, now: @escaping () -> Date = { Date() }) {
+    init(defaults: UserDefaults = AppDefaults.store, now: @escaping () -> Date = { Date() }) {
         self.defaults = defaults
         self.now = now
         if let data = defaults.data(forKey: Self.key),

@@ -51,13 +51,28 @@ struct Player: Identifiable, Equatable, Codable, Sendable {
             .filter { isValidSplit(newDistribution: $0, allowRevival: allowRevival) }
     }
 
-    /// total本の指をhandCount個の手へ0〜4本ずつ配る全パターン（結果はキャッシュ）
+    /// total本の指をhandCount個の手へ0〜4本ずつ配る全パターン（AIの探索で何度も呼ばれるので表を作っておく）
     static func distributions(total: Int, handCount: Int) -> [[Int]] {
+        if let cached = distributionTable[handCount * 100 + total] { return cached }
+        return computeDistributions(total: total, handCount: handCount)
+    }
+
+    private static let distributionTable: [Int: [[Int]]] = {
+        var table: [Int: [[Int]]] = [:]
+        for handCount in 1...4 {
+            for total in 0...(handCount * 4) {
+                table[handCount * 100 + total] = computeDistributions(total: total, handCount: handCount)
+            }
+        }
+        return table
+    }()
+
+    private static func computeDistributions(total: Int, handCount: Int) -> [[Int]] {
         guard handCount > 0 else { return total == 0 ? [[]] : [] }
-        guard total <= handCount * 4 else { return [] }
+        guard total >= 0, total <= handCount * 4 else { return [] }
         var results: [[Int]] = []
         for count in 0...min(total, 4) {
-            for rest in distributions(total: total - count, handCount: handCount - 1) {
+            for rest in computeDistributions(total: total - count, handCount: handCount - 1) {
                 results.append([count] + rest)
             }
         }
