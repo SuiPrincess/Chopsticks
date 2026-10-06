@@ -51,6 +51,7 @@
 		A19E1DC60E6249F84643FD2E /* MultiplayerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A0C1A32579E77E769BFA1E /* MultiplayerService.swift */; };
 		A44AFB32508D53A8E20D5FC6 /* ChopsticksApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3986FA592B6089FB67D72938 /* ChopsticksApp.swift */; };
 		A4F0652EF4185570DBF7CC57 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 954E87CDC807FE7CE0335ADF /* HapticManager.swift */; };
+		A682758EBEB6C008A5A81DAD /* AppSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AC321D70FBACCC1129175D4 /* AppSettingsTests.swift */; };
 		C0827C62243735C40B6ABD0D /* AIEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55ACB8D5197621ADDD8A441D /* AIEngine.swift */; };
 		C21D206E465E350529B473CC /* ProgressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F0C5900549EED52E5AD2855 /* ProgressionTests.swift */; };
 		C81A513D63C3FCB3A00B17C6 /* GameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD409937881D7185F3B3E88 /* GameViewModel.swift */; };
@@ -107,6 +108,7 @@
 		518DF398D70AC34155207DCC /* GameCenterManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCenterManager.swift; sourceTree = "<group>"; };
 		55ACB8D5197621ADDD8A441D /* AIEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIEngine.swift; sourceTree = "<group>"; };
 		66F1053167AC11638D352377 /* GameStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameStats.swift; sourceTree = "<group>"; };
+		6AC321D70FBACCC1129175D4 /* AppSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsTests.swift; sourceTree = "<group>"; };
 		6CC027C780C0B6A7BC9E6D17 /* CircleIconButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleIconButton.swift; sourceTree = "<group>"; };
 		6D3B1AD46D44330C57C6504A /* MultipeerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipeerService.swift; sourceTree = "<group>"; };
 		7736242C6E7A921962DF97B9 /* GameState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameState.swift; sourceTree = "<group>"; };
@@ -327,6 +329,7 @@
 			isa = PBXGroup;
 			children = (
 				8C9781A3213264BC3B43F7E9 /* AIEngineTests.swift */,
+				6AC321D70FBACCC1129175D4 /* AppSettingsTests.swift */,
 				DDD60D580FAEE9AB4107B549 /* GameRulesTests.swift */,
 				B8C1333E39E24A384E1B737B /* GameViewModelTests.swift */,
 				824EE3A24A37A3DDA113F823 /* MockMultiplayerService.swift */,
@@ -423,6 +426,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				773D14830A056217AF488833 /* AIEngineTests.swift in Sources */,
+				A682758EBEB6C008A5A81DAD /* AppSettingsTests.swift in Sources */,
 				4E79AF2377730FD00937AD83 /* GameRulesTests.swift in Sources */,
 				4CC91775218E63AD5B8D677E /* GameViewModelTests.swift in Sources */,
 				9958AD717E79C0A923BA3A90 /* MockMultiplayerService.swift in Sources */,

@@ -42,7 +42,8 @@ final class SoundManager {
         isPrepared = true
 
         let session = AVAudioSession.sharedInstance()
-        try? session.setCategory(.ambient, mode: .default, options: [.mixWithOthers])
+        // .ambient はマナーモードを尊重し、他アプリの音楽と重ねて再生できる
+        try? session.setCategory(.ambient, mode: .default)
 
         for _ in 0..<4 {
             let node = AVAudioPlayerNode()
@@ -56,6 +57,18 @@ final class SoundManager {
             buffers[effect] = Synth.render(effect, sampleRate: sampleRate, format: format)
         }
         engine.prepare()
+        // 最初の効果音で起動の待ちが出ないよう、先にエンジンを動かしておく
+        try? session.setActive(true)
+        try? engine.start()
+
+        // イヤホンの抜き差しなどでエンジンが止まったら、次の再生時に起動し直す
+        NotificationCenter.default.addObserver(
+            forName: .AVAudioEngineConfigurationChange,
+            object: engine,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.engineNeedsRestart = true }
+        }
 
         NotificationCenter.default.addObserver(
             forName: AVAudioSession.interruptionNotification,

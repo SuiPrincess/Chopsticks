@@ -218,6 +218,8 @@ struct GameView: View {
         }
         .onDisappear {
             viewModel.onDisappear()
+            // ボタン以外の経路で画面が閉じられても、相手を待たせないよう対戦から抜ける（二重呼び出しは無害）
+            if viewModel.isMultiplayer { viewModel.leaveMultiplayer() }
         }
     }
 

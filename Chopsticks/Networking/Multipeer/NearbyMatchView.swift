@@ -15,6 +15,8 @@ final class NearbyMatchState {
     var discoveredPeers: [MCPeerID] { service?.discoveredPeers ?? [] }
     var invitationFrom: String? { service?.receivedInvitation?.from.displayName }
     var errorMessage: String? { service?.lastError }
+    var errorIsPermission: Bool { service?.lastErrorIsPermission ?? false }
+    private var connectTimeout: Task<Void, Never>?
 
     func startHosting(onConnected: @escaping (MultipeerService) -> Void) {
         let svc = MultipeerService(displayName: AppSettings.shared.nickname, isHost: true)
@@ -35,6 +37,7 @@ final class NearbyMatchState {
     }
 
     func cancel() {
+        connectTimeout?.cancel()
         hintTask?.cancel()
         showsSearchHint = false
         service?.stop()
@@ -44,6 +47,7 @@ final class NearbyMatchState {
 
     func acceptInvitation() {
         phase = .connecting
+        startConnectTimeout()
         service?.acceptInvitation()
     }
 
@@ -53,13 +57,26 @@ final class NearbyMatchState {
 
     func invitePeer(_ peer: MCPeerID) {
         phase = .connecting
+        startConnectTimeout()
         service?.invitePeer(peer)
+    }
+
+    /// 古い招待を承認した場合などは接続の成否が通知されないため、一定時間で諦めて待機状態に戻す
+    private func startConnectTimeout() {
+        connectTimeout?.cancel()
+        connectTimeout = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(20))
+            guard !Task.isCancelled, let self, self.phase == .connecting, let svc = self.service else { return }
+            svc.abortConnecting()
+            self.phase = svc.isHost ? .hosting : .browsing
+        }
     }
 
     private func setupCallbacks(_ svc: MultipeerService, onConnected: @escaping (MultipeerService) -> Void) {
         svc.onConnectionChanged = { [weak self, weak svc] connected in
             guard let self, let svc else { return }
             if connected {
+                self.connectTimeout?.cancel()
                 self.hintTask?.cancel()
                 // 接続後のコールバックはゲーム画面側が引き継ぐ
                 svc.onConnectionChanged = nil
@@ -324,13 +341,15 @@ struct NearbyMatchView: View {
                         .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(.orange)
                         .multilineTextAlignment(.center)
-                    Button("設定を開く") {
-                        if let url = URL(string: UIApplication.openSettingsURLString) {
-                            UIApplication.shared.open(url)
+                    if matchState.errorIsPermission {
+                        Button("設定を開く") {
+                            if let url = URL(string: UIApplication.openSettingsURLString) {
+                                UIApplication.shared.open(url)
+                            }
                         }
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundStyle(AppTheme.accent)
                     }
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .foregroundStyle(AppTheme.accent)
                 }
                 .padding(.horizontal, 32)
             } else if matchState.showsSearchHint {

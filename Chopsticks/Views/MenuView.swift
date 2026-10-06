@@ -42,6 +42,8 @@ struct MenuView: View {
     @State private var showGameCenterAlert = false
     /// オンライン対戦を押してGame Centerのサインイン完了を待っている
     @State private var wantsOnline = false
+    /// 相手の接続が完了するまで保持するGame Centerの対戦サービス
+    @State private var pendingGameKitService: GameKitService?
     @State private var onlineHint: String?
 
     @State private var diceMessage: String?
@@ -119,7 +121,15 @@ struct MenuView: View {
                     onCancel: { showNearbyMatch = false }
                 )
             }
-            .sheet(isPresented: $showGameKitMatchmaker, onDismiss: runAfterDismiss) {
+            .sheet(isPresented: $showGameKitMatchmaker, onDismiss: {
+                // 接続完了を待つ間にシートが閉じられたら、取り残しの対戦を破棄する
+                if let pending = pendingGameKitService {
+                    pending.onConnectionChanged = nil
+                    pending.disconnect()
+                    pendingGameKitService = nil
+                }
+                runAfterDismiss()
+            }) {
                 GameKitMatchmakerView(
                     onMatchFound: { match in handleMatchFound(match) },
                     onCancel: { showGameKitMatchmaker = false }
@@ -295,29 +305,34 @@ struct MenuView: View {
     /// 対戦相手が見つかったら、相手の接続が完了（ホスト確定）してから画面を進める
     private func handleMatchFound(_ match: GKMatch) {
         let service = GameKitService()
-        let proceed = {
-            service.onConnectionChanged = nil
-            // 待っている間にシートが閉じられていたら、取り残しの遷移を作らずに接続を捨てる
-            guard showGameKitMatchmaker else {
-                service.disconnect()
-                return
-            }
-            afterDismiss = { startMultiplayer(.online, service: service) }
-            showGameKitMatchmaker = false
-        }
         service.configure(with: match)
         if service.isConnected {
-            proceed()
+            proceedWithMatch(service)
         } else {
-            service.onConnectionChanged = { connected in
+            pendingGameKitService = service
+            service.onConnectionChanged = { [weak service] connected in
+                guard let service else { return }
                 if connected {
-                    proceed()
+                    proceedWithMatch(service)
                 } else {
+                    pendingGameKitService = nil
                     service.disconnect()
                     showGameKitMatchmaker = false
                 }
             }
         }
+    }
+
+    private func proceedWithMatch(_ service: GameKitService) {
+        service.onConnectionChanged = nil
+        pendingGameKitService = nil
+        // 待っている間にシートが閉じられていたら、取り残しの遷移を作らずに接続を捨てる
+        guard showGameKitMatchmaker else {
+            service.disconnect()
+            return
+        }
+        afterDismiss = { startMultiplayer(.online, service: service) }
+        showGameKitMatchmaker = false
     }
 
     // MARK: - パーツ

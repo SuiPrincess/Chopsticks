@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 import UserNotifications
 
 /// ローカル通知による「戻ってくるきっかけ」。
@@ -16,6 +17,9 @@ final class NotificationManager {
     private static let reminderMinute = 30
     private static let streakHour = 20
     private static let streakMinute = 45
+
+    /// 直近の予約処理。新しい呼び出しは前の処理を取り消し、終わるのを待ってから実行する。
+    private var refreshTask: Task<Void, Never>?
 
     private init() {}
 
@@ -37,13 +41,23 @@ final class NotificationManager {
         !AppSettings.shared.hasAskedNotificationPermission && stats.wins >= 2
     }
 
-    /// 現在の戦績と設定に合わせて予定を組み直す（アプリがバックグラウンドに入るたびに呼ぶ）
+    /// 現在の戦績と設定に合わせて予定を組み直す（起動時・バックグラウンド移行時・設定変更時に呼ぶ）。
+    /// 何度呼んでも、組み直しは1つずつ順番に行われる（途中の古い処理が新しい予定を壊さない）。
     func refreshSchedule(stats: GameStats, settings: AppSettings, calendar: Calendar = .current, now: Date = Date()) {
-        Task {
-            await center.removeAllPendingNotificationRequests()
+        let previous = refreshTask
+        previous?.cancel()
+        // バックグラウンドへ移る直前でも、予約を最後まで終えられるようにする
+        let background = UIApplication.shared.beginBackgroundTask(withName: "refreshNotifications")
+        refreshTask = Task { @MainActor in
+            defer { UIApplication.shared.endBackgroundTask(background) }
+            await previous?.value
+            guard !Task.isCancelled else { return }
+
+            center.removeAllPendingNotificationRequests()
             guard settings.isNotificationsEnabled else { return }
             let status = await authorizationStatus()
             guard status == .authorized || status == .provisional else { return }
+            guard !Task.isCancelled else { return }
 
             var requests: [UNNotificationRequest] = []
 
@@ -79,12 +93,16 @@ final class NotificationManager {
             }
 
             for request in requests {
+                guard !Task.isCancelled else { return }
                 try? await center.add(request)
             }
         }
     }
 
+    /// 予約済みの通知をすべて消す（設定でOFFにしたとき）。進行中の予約処理も止める。
     func cancelAll() {
+        refreshTask?.cancel()
+        refreshTask = nil
         center.removeAllPendingNotificationRequests()
     }
 }

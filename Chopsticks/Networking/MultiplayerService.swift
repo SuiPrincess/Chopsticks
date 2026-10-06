@@ -14,6 +14,15 @@ protocol MultiplayerService: AnyObject {
     func disconnect()
 }
 
+/// 通信のコールバック（バックグラウンドのキュー）から、到着順を保ったままメインアクターで実行する。
+/// `Task { @MainActor in }` は生成順の実行が保証されないが、開始・再戦などは順序が意味を持つため、
+/// 通信まわりでは必ずこちらを使う。
+func deliverOnMain(_ work: @escaping @MainActor @Sendable () -> Void) {
+    DispatchQueue.main.async {
+        MainActor.assumeIsolated { work() }
+    }
+}
+
 /// 受信メッセージのバッファリングを両サービスで共通化する
 @MainActor
 final class MessageInbox {

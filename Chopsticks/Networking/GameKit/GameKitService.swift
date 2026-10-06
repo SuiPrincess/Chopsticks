@@ -52,10 +52,15 @@ final class GameKitService: NSObject, MultiplayerService {
     func disconnect() {
         send(.disconnect)
         onConnectionChanged = nil
-        match?.delegate = nil
-        match?.disconnect()
-        match = nil
         isConnected = false
+        let closing = match
+        match = nil
+        // 直前に送った「退出」などが相手に届くまで少し待ってから切る
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(300))
+            closing?.delegate = nil
+            closing?.disconnect()
+        }
     }
 
     private func handleLostConnection() {
@@ -69,20 +74,21 @@ final class GameKitService: NSObject, MultiplayerService {
 extension GameKitService: GKMatchDelegate {
     nonisolated func match(_ match: GKMatch, didReceive data: Data, fromRemotePlayer player: GKPlayer) {
         guard let message = MultiplayerMessage.decoded(from: data) else { return }
-        Task { @MainActor in
-            self.inbox.deliver(message)
+        deliverOnMain { [weak self] in
+            self?.inbox.deliver(message)
         }
     }
 
     nonisolated func match(_ match: GKMatch, player: GKPlayer, didChange state: GKPlayerConnectionState) {
-        Task { @MainActor in
+        let isComplete = match.expectedPlayerCount == 0
+        deliverOnMain { [weak self] in
             switch state {
             case .connected:
-                if match.expectedPlayerCount == 0 {
-                    self.finishSetup()
+                if isComplete {
+                    self?.finishSetup()
                 }
             case .disconnected:
-                self.handleLostConnection()
+                self?.handleLostConnection()
             default:
                 break
             }
@@ -90,8 +96,8 @@ extension GameKitService: GKMatchDelegate {
     }
 
     nonisolated func match(_ match: GKMatch, didFailWithError error: Error?) {
-        Task { @MainActor in
-            self.handleLostConnection()
+        deliverOnMain { [weak self] in
+            self?.handleLostConnection()
         }
     }
 }

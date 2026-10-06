@@ -49,6 +49,9 @@ final class GameCenterManager {
                 self.authenticationError = nil
                 if self.isAuthenticated {
                     GKAccessPoint.shared.isActive = false
+                    // サインイン前に獲得した実績やスコアも送る（以降は獲得のたびに送信される）
+                    self.report(achievements: Array(AchievementStore.shared.unlocked.keys))
+                    self.submitScores(stats: GameStats.shared)
                 }
             }
         }
