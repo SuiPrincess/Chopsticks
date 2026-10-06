@@ -1,251 +1,562 @@
 import SwiftUI
 import GameKit
 
+/// ゲーム画面に渡す起動内容
+struct GameLaunch {
+    enum Kind {
+        case new(GameConfig)
+        case resume(SavedGame)
+    }
+
+    var kind: Kind
+    var service: (any MultiplayerService)?
+}
+
 struct MenuView: View {
-    @State private var config = GameConfig()
+    @State private var settings = AppSettings.shared
+    @State private var stats = GameStats.shared
+    @State private var gameCenter = GameCenterManager.shared
+
+    /// 2人対戦・フリー対戦・対人戦で使うルール（端末に保存される）
+    @State private var customRules: GameConfig
+
+    @State private var launch: GameLaunch?
+    @State private var navigateToGame = false
+    @State private var savedGame: SavedGame?
+
+    // 前の画面を閉じ終えてから次を出すためのチェーン。
+    // 同時にdismissとpresentを行うと遷移が無視されることがあるため、必ずonDismissで次へ進む。
+    @State private var afterDismiss: (() -> Void)?
+    @State private var pendingConfig: GameConfig?
+    @State private var pendingConfirmKey: String?
+    @State private var pendingConfirmTitle: String?
+
     @State private var showRuleSettings = false
     @State private var showRuleConfirmation = false
     @State private var showAIDifficultyPicker = false
-    @State private var navigateToGame = false
-    @State private var titleGlow: CGFloat = 0.3
-
-    // 前の画面の閉じるアニメーション完了後（onDismiss）に次を出すためのフラグ。
-    // 同時にpresentすると遷移が無視されることがある。
-    @State private var pendingRuleConfirmation = false
-    @State private var pendingGameStart = false
-
-    /// ランク戦用の固定設定。非nilのときはユーザーのルール設定より優先する。
-    /// ルール設定の影響を受けると毒ルール等でランクが攻略できてしまうため。
-    @State private var rankedConfig: GameConfig?
-
-    private var activeConfig: GameConfig { rankedConfig ?? config }
-
-    /// ランク戦は標準ルール固定（ループあり・分割なし・特殊ルールなし）
-    private static func makeRankedConfig() -> GameConfig {
-        var rankedConfig = GameConfig()
-        rankedConfig.gameMode = .vsAI
-        rankedConfig.aiLevel = GameStats.shared.rankLevel
-        return rankedConfig
-    }
-
-    // Multiplayer
     @State private var showNearbyMatch = false
     @State private var showGameKitMatchmaker = false
-    @State private var multiplayerService: (any MultiplayerService)?
-    @State private var gameCenterManager = GameCenterManager.shared
+    @State private var showSettings = false
+    @State private var showProfile = false
+    @State private var showHowToPlay = false
+    @State private var showGameCenterAlert = false
+
+    @State private var diceMessage: String?
+    @State private var diceToken = 0
+    @State private var titleGlow: CGFloat = 0.3
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+
+    init() {
+        _customRules = State(initialValue: AppSettings.shared.loadCustomRules())
+    }
+
+    private var reducesMotion: Bool { systemReduceMotion || settings.reducesEffects }
 
     var body: some View {
         NavigationStack {
             ZStack {
                 BackgroundGradientView()
 
-                VStack(spacing: 0) {
-                    Spacer()
-
-                    // Title
-                    VStack(spacing: 12) {
-                        Text("CHOPSTICKS")
-                            .font(.system(size: 36, weight: .black, design: .rounded))
-                            .foregroundStyle(
-                                LinearGradient(
-                                    colors: [AppTheme.accent, AppTheme.accentSecondary],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .shadow(color: AppTheme.accent.opacity(titleGlow), radius: 20)
-                            .shadow(color: AppTheme.accentSecondary.opacity(titleGlow * 0.5), radius: 40)
-
-                        Text("waribashi")
-                            .font(.system(size: 14, weight: .medium, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.4))
-                            .tracking(8)
-                    }
-
-                    Spacer()
-
-                    // Hand decoration
-                    HStack(spacing: 40) {
-                        decorationHand(count: 3, color: AppTheme.player1Color)
-                        decorationHand(count: 2, color: AppTheme.player2Color)
-                    }
-                    .padding(.bottom, 40)
-
-                    Spacer()
-
-                    // Buttons
-                    VStack(spacing: 12) {
-                        // ランク戦（メインの進行ループ・固定標準ルール）
-                        Button {
-                            rankedConfig = Self.makeRankedConfig()
-                            showRuleConfirmation = true
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "trophy.fill")
-                                Text(rankButtonLabel)
-                            }
-                        }
-                        .buttonStyle(GlassButtonStyle(color: .orange))
-
-                        // 2P Local
-                        Button {
-                            rankedConfig = nil
-                            config.gameMode = .localTwoPlayer
-                            config.aiLevel = nil
-                            showRuleConfirmation = true
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "person.2.fill")
-                                Text("2人対戦")
-                            }
-                        }
-                        .buttonStyle(GlassButtonStyle())
-
-                        // VS AI (フリー対戦)
-                        Button {
-                            rankedConfig = nil
-                            config.gameMode = .vsAI
-                            config.aiLevel = nil
-                            showAIDifficultyPicker = true
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "cpu")
-                                Text("フリー対戦")
-                            }
-                        }
-                        .buttonStyle(GlassButtonStyle(color: AppTheme.accentSecondary))
-
-                        // Nearby (Multipeer)
-                        Button {
-                            config.gameMode = .nearby
-                            showNearbyMatch = true
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "antenna.radiowaves.left.and.right")
-                                Text("近くの人と対戦")
-                            }
-                        }
-                        .buttonStyle(GlassButtonStyle(color: .green))
-
-                        // Online (Game Center)
-                        Button {
-                            config.gameMode = .online
-                            showGameKitMatchmaker = true
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "globe")
-                                Text("オンライン対戦")
-                            }
-                        }
-                        .buttonStyle(GlassButtonStyle(color: .orange))
-                        .opacity(gameCenterManager.isAuthenticated ? 1 : 0.4)
-                        .disabled(!gameCenterManager.isAuthenticated)
-
-                        // Rules + random rules
-                        HStack(spacing: 12) {
-                            Button {
-                                showRuleSettings = true
-                            } label: {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "gearshape")
-                                    Text("ルール設定")
-                                }
-                            }
-                            .buttonStyle(GlassButtonStyle(isPrimary: false))
-
-                            Button {
-                                randomizeRules()
-                            } label: {
-                                Image(systemName: "dice.fill")
-                            }
-                            .buttonStyle(GlassButtonStyle(color: .orange))
-                            .frame(width: 64)
-                        }
-
+                ScrollView {
+                    VStack(spacing: 16) {
+                        topBar
+                        titleBlock
+                        rankCard
+                        if let savedGame { resumeCard(savedGame) }
+                        dailyCard
+                        modeButtons
+                        rulesRow
                         statsIndicator
-                        activeRulesIndicator
-
-                        if !gameCenterManager.isAuthenticated {
-                            Text("Game Centerにログインするとオンライン対戦が可能")
-                                .font(.system(size: 11, design: .rounded))
-                                .foregroundStyle(.white.opacity(0.3))
-                                .multilineTextAlignment(.center)
-                        }
                     }
-                    .padding(.horizontal, 40)
-                    .padding(.bottom, 50)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .frame(maxWidth: 480)
+                    .frame(maxWidth: .infinity)
                 }
+                .scrollBounceBehavior(.basedOnSize)
             }
-            .navigationDestination(isPresented: $navigateToGame) {
-                GameView(config: activeConfig, multiplayerService: multiplayerService)
-                    .navigationBarBackButtonHidden()
-                    .onDisappear {
-                        multiplayerService = nil
-                    }
-            }
+            .navigationDestination(isPresented: $navigateToGame) { gameDestination }
             .sheet(isPresented: $showRuleSettings) {
-                RuleSettingsView(config: $config)
+                RuleSettingsView(config: $customRules)
                     .presentationDetents([.large])
             }
-            .sheet(isPresented: $showAIDifficultyPicker, onDismiss: {
-                if pendingRuleConfirmation {
-                    pendingRuleConfirmation = false
-                    showRuleConfirmation = true
-                }
-            }) {
+            .sheet(isPresented: $showAIDifficultyPicker, onDismiss: runAfterDismiss) {
                 AIDifficultyPickerView(
-                    difficulty: $config.aiDifficulty,
+                    difficulty: $customRules.aiDifficulty,
                     onStart: {
-                        pendingRuleConfirmation = true
+                        afterDismiss = { startFreePlay() }
                         showAIDifficultyPicker = false
                     }
                 )
                 .presentationDetents([.medium])
             }
-            .fullScreenCover(isPresented: $showRuleConfirmation, onDismiss: {
-                if pendingGameStart {
-                    pendingGameStart = false
-                    navigateToGame = true
-                }
-            }) {
+            .fullScreenCover(isPresented: $showRuleConfirmation, onDismiss: runAfterDismiss) {
                 RuleDisplayView(
-                    config: activeConfig,
+                    config: pendingConfig ?? customRules,
                     isPreGame: true,
+                    title: pendingConfirmTitle,
                     onStart: {
-                        pendingGameStart = true
+                        settings.lastConfirmedRulesKey = pendingConfirmKey
+                        afterDismiss = {
+                            if let config = pendingConfig { start(.new(config)) }
+                        }
                         showRuleConfirmation = false
                     },
                     onDismiss: { showRuleConfirmation = false }
                 )
             }
-            .fullScreenCover(isPresented: $showNearbyMatch) {
+            .fullScreenCover(isPresented: $showNearbyMatch, onDismiss: runAfterDismiss) {
                 NearbyMatchView(
-                    config: $config,
                     onConnected: { service in
-                        multiplayerService = service
+                        afterDismiss = { startMultiplayer(.nearby, service: service) }
                         showNearbyMatch = false
-                        showRuleConfirmation = true
                     },
                     onCancel: { showNearbyMatch = false }
                 )
             }
-            .sheet(isPresented: $showGameKitMatchmaker) {
+            .sheet(isPresented: $showGameKitMatchmaker, onDismiss: runAfterDismiss) {
                 GameKitMatchmakerView(
-                    onMatchFound: { match in
-                        let service = GameKitService()
-                        service.configure(with: match)
-                        multiplayerService = service
-                        showGameKitMatchmaker = false
-                        showRuleConfirmation = true
-                    },
+                    onMatchFound: { match in handleMatchFound(match) },
                     onCancel: { showGameKitMatchmaker = false }
                 )
             }
+            .sheet(isPresented: $showSettings) {
+                SettingsView()
+                    .presentationDetents([.large])
+            }
+            .sheet(isPresented: $showProfile) {
+                ProfileView()
+                    .presentationDetents([.large])
+            }
+            .fullScreenCover(isPresented: $showHowToPlay) {
+                HowToPlayView(onFinish: {
+                    settings.hasSeenTutorial = true
+                    showHowToPlay = false
+                })
+            }
+            .alert("Game Centerにサインインしてください", isPresented: $showGameCenterAlert) {
+                Button("設定を開く") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                Button("閉じる", role: .cancel) {}
+            } message: {
+                Text("設定アプリの「Game Center」でサインインすると、オンライン対戦が遊べます。")
+            }
         }
         .onAppear {
-            withAnimation(Anim.glowPulse) { titleGlow = 0.8 }
-            GameCenterManager.shared.authenticateLocalPlayer()
+            refreshSavedGame()
+            if !reducesMotion {
+                withAnimation(Anim.glowPulse) { titleGlow = 0.8 }
+            }
         }
+        .task {
+            // 初回起動は遊び方から（一度見たら二度と自動では出さない）
+            if !settings.hasSeenTutorial && !stats.hasPlayed {
+                showHowToPlay = true
+            }
+        }
+        .onChange(of: customRules) { _, rules in
+            settings.saveCustomRules(rules)
+        }
+        .onChange(of: navigateToGame) { _, isActive in
+            if !isActive { refreshSavedGame() }
+        }
+    }
+
+    // MARK: - 遷移
+
+    @ViewBuilder
+    private var gameDestination: some View {
+        if let launch {
+            Group {
+                switch launch.kind {
+                case .new(let config):
+                    GameView(config: config, multiplayerService: launch.service)
+                case .resume(let saved):
+                    GameView(savedGame: saved)
+                }
+            }
+            .navigationBarBackButtonHidden()
+            .onDisappear {
+                self.launch = nil
+                refreshSavedGame()
+            }
+        }
+    }
+
+    private func start(_ kind: GameLaunch.Kind, service: (any MultiplayerService)? = nil) {
+        launch = GameLaunch(kind: kind, service: service)
+        navigateToGame = true
+    }
+
+    private func runAfterDismiss() {
+        guard let action = afterDismiss else { return }
+        afterDismiss = nil
+        action()
+    }
+
+    private func refreshSavedGame() {
+        savedGame = GameSessionStore.load()
+    }
+
+    /// ルールの組み合わせが前回確認したものと同じなら、確認画面を省略して直接始める
+    private func confirmThenStart(_ config: GameConfig, title: String? = nil) {
+        let key = rulesKey(config)
+        if settings.lastConfirmedRulesKey == key {
+            start(.new(config))
+        } else {
+            pendingConfig = config
+            pendingConfirmKey = key
+            pendingConfirmTitle = title
+            showRuleConfirmation = true
+        }
+    }
+
+    private func rulesKey(_ config: GameConfig) -> String {
+        "\(config.gameMode.rawValue)|\(config.activeRuleLabels.joined(separator: ","))|\(config.isDailyChallenge ? "daily" : "")"
+    }
+
+    // MARK: - 各モードの開始
+
+    private func startRanked() {
+        var config = GameConfig()
+        config.gameMode = .vsAI
+        config.aiLevel = stats.rankLevel
+        // ランク戦は標準ルール固定。確認画面は出さずにすぐ始める。
+        start(.new(config))
+    }
+
+    private func startDaily() {
+        let challenge = stats.todaysChallenge
+        confirmThenStart(challenge.config, title: "今日のチャレンジ「\(challenge.title)」")
+    }
+
+    private func startLocal() {
+        var config = customRules
+        config.gameMode = .localTwoPlayer
+        config.aiLevel = nil
+        config.isDailyChallenge = false
+        confirmThenStart(config)
+    }
+
+    private func startFreePlay() {
+        var config = customRules
+        config.gameMode = .vsAI
+        config.aiLevel = nil
+        config.isDailyChallenge = false
+        confirmThenStart(config)
+    }
+
+    private func startMultiplayer(_ mode: GameMode, service: any MultiplayerService) {
+        // ルールはホストのものが使われる（ゲーム画面で双方に表示される）
+        var config = customRules
+        config.gameMode = mode
+        config.aiLevel = nil
+        config.isDailyChallenge = false
+        start(.new(config), service: service)
+    }
+
+    private func tapOnline() {
+        if gameCenter.isAuthenticated {
+            showGameKitMatchmaker = true
+        } else if !gameCenter.authenticateLocalPlayer() {
+            // すでに認証を試みたのに未サインイン: 設定アプリへ案内する
+            showGameCenterAlert = true
+        }
+    }
+
+    /// 対戦相手が見つかったら、相手の接続が完了（ホスト確定）してから画面を進める
+    private func handleMatchFound(_ match: GKMatch) {
+        let service = GameKitService()
+        let proceed = {
+            service.onConnectionChanged = nil
+            afterDismiss = { startMultiplayer(.online, service: service) }
+            showGameKitMatchmaker = false
+        }
+        service.configure(with: match)
+        if service.isConnected {
+            proceed()
+        } else {
+            service.onConnectionChanged = { connected in
+                if connected {
+                    proceed()
+                } else {
+                    service.disconnect()
+                    showGameKitMatchmaker = false
+                }
+            }
+        }
+    }
+
+    // MARK: - パーツ
+
+    private var topBar: some View {
+        HStack(spacing: 8) {
+            Button {
+                showProfile = true
+            } label: {
+                HStack(spacing: 8) {
+                    Text("Lv.\(stats.playerLevel)")
+                        .font(.system(.footnote, design: .rounded, weight: .heavy))
+                        .foregroundStyle(AppTheme.accent)
+                    Text(stats.playerTitle)
+                        .font(.system(.footnote, design: .rounded, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.8))
+                    ProgressView(value: stats.levelProgress)
+                        .tint(AppTheme.accent)
+                        .frame(width: 40)
+                }
+                .padding(.horizontal, 12)
+                .frame(minHeight: 44)
+                .background(Capsule().fill(.ultraThinMaterial))
+            }
+            .accessibilityLabel("プロフィール。レベル\(stats.playerLevel)、称号\(stats.playerTitle)")
+
+            Spacer()
+
+            CircleIconButton(systemName: "questionmark", label: "遊び方") { showHowToPlay = true }
+            CircleIconButton(systemName: "gearshape.fill", label: "設定") { showSettings = true }
+        }
+    }
+
+    private var titleBlock: some View {
+        VStack(spacing: 10) {
+            Text("CHOPSTICKS")
+                .font(.system(size: 34, weight: .black, design: .rounded))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [AppTheme.accent, AppTheme.accentSecondary],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .shadow(color: AppTheme.accent.opacity(titleGlow), radius: 20)
+                .shadow(color: AppTheme.accentSecondary.opacity(titleGlow * 0.5), radius: 40)
+                .minimumScaleFactor(0.6)
+                .lineLimit(1)
+
+            Text("割り箸バトル")
+                .font(.system(.footnote, design: .rounded, weight: .medium))
+                .foregroundStyle(.white.opacity(0.5))
+                .tracking(6)
+
+            HStack(spacing: 28) {
+                FingerRow(count: 3, color: AppTheme.player1Color, small: true)
+                FingerRow(count: 2, color: AppTheme.player2Color, small: true)
+            }
+            .padding(.top, 2)
+            .accessibilityHidden(true)
+
+            Text("指をたたいて、手を5にしたら勝ち！")
+                .font(.system(.footnote, design: .rounded))
+                .foregroundStyle(.white.opacity(0.55))
+        }
+        .padding(.vertical, 6)
+    }
+
+    private var rankCard: some View {
+        Button {
+            startRanked()
+        } label: {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 8) {
+                    Image(systemName: "trophy.fill")
+                        .foregroundStyle(AppTheme.goldGradient)
+                    Text(stats.isRankMaxed ? "ランク戦 Lv.MAX" : "ランク戦 Lv.\(stats.rankLevel)に挑戦")
+                        .font(.system(.headline, design: .rounded, weight: .heavy))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(.white.opacity(0.4))
+                }
+                RankLadderView(level: stats.rankLevel, stars: stats.rankStars, starsRequired: stats.starsRequiredForCurrentLevel)
+                if !stats.hasPlayed {
+                    Text("はじめての方はここから！ 標準ルールのCPU戦で、1勝すればLv.2です")
+                        .font(.system(.caption, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.6))
+                }
+            }
+        }
+        .buttonStyle(CardButtonStyle(color: .orange))
+    }
+
+    private func resumeCard(_ saved: SavedGame) -> some View {
+        Button {
+            start(.resume(saved))
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "play.circle.fill")
+                    .font(.title2)
+                    .foregroundStyle(.green)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("続きから遊ぶ")
+                        .font(.system(.headline, design: .rounded, weight: .bold))
+                    Text(resumeSubtitle(saved))
+                        .font(.system(.caption, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.6))
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.4))
+            }
+        }
+        .buttonStyle(CardButtonStyle(color: .green))
+    }
+
+    private func resumeSubtitle(_ saved: SavedGame) -> String {
+        let config = saved.state.config
+        let kind: String
+        if config.isDailyChallenge {
+            kind = "デイリーチャレンジ"
+        } else if config.isRanked, let level = config.aiLevel {
+            kind = "ランク戦 Lv.\(level)"
+        } else if config.gameMode == .vsAI {
+            kind = "フリー対戦"
+        } else {
+            kind = "2人対戦"
+        }
+        return "\(kind) ・ \(saved.state.turnCount)ターン目"
+    }
+
+    private var dailyCard: some View {
+        let challenge = stats.todaysChallenge
+        let cleared = stats.hasClearedTodaysChallenge
+        return Button {
+            startDaily()
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: cleared ? "checkmark.seal.fill" : "calendar.badge.exclamationmark")
+                    .font(.title2)
+                    .foregroundStyle(cleared ? .green : .cyan)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("今日のチャレンジ")
+                        .font(.system(.caption, design: .rounded, weight: .semibold))
+                        .foregroundStyle(.cyan.opacity(0.9))
+                    Text(challenge.title)
+                        .font(.system(.subheadline, design: .rounded, weight: .bold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                    Text("CPU Lv.\(challenge.cpuLevel) ・ \(challenge.config.activeRuleLabels.joined(separator: " "))")
+                        .font(.system(.caption2, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.55))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+                Spacer()
+                Text(cleared ? "クリア済み" : "+\(DailyChallenge.bonusXP)XP")
+                    .font(.system(.caption, design: .rounded, weight: .heavy))
+                    .foregroundStyle(cleared ? .green : .cyan)
+            }
+        }
+        .buttonStyle(CardButtonStyle(color: .cyan))
+        .accessibilityLabel("今日のチャレンジ、\(challenge.title)、CPUレベル\(challenge.cpuLevel)、\(cleared ? "クリア済み" : "クリアすると\(DailyChallenge.bonusXP)経験値")")
+    }
+
+    private var modeButtons: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 12) {
+                modeButton("2人対戦", icon: "person.2.fill", color: AppTheme.accent) { startLocal() }
+                modeButton("フリー対戦", icon: "cpu", color: AppTheme.accentSecondary) { showAIDifficultyPicker = true }
+            }
+            HStack(spacing: 12) {
+                modeButton("近くの人と", icon: "antenna.radiowaves.left.and.right", color: .green) { showNearbyMatch = true }
+                modeButton("オンライン", icon: "globe", color: .orange) { tapOnline() }
+            }
+        }
+    }
+
+    private func modeButton(_ title: String, icon: String, color: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.title3)
+                Text(title)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+        }
+        .buttonStyle(GlassButtonStyle(color: color))
+    }
+
+    private var rulesRow: some View {
+        VStack(spacing: 10) {
+            HStack(spacing: 12) {
+                Button {
+                    showRuleSettings = true
+                } label: {
+                    Label("ルール設定", systemImage: "gearshape")
+                }
+                .buttonStyle(GlassButtonStyle(isPrimary: false))
+
+                Button {
+                    randomizeRules()
+                } label: {
+                    Label("おまかせ", systemImage: "dice.fill")
+                }
+                .buttonStyle(GlassButtonStyle(color: .orange))
+                .accessibilityLabel("おまかせルール。特殊ルールをランダムに決める")
+            }
+
+            if let diceMessage {
+                Text(diceMessage)
+                    .font(.system(.footnote, design: .rounded, weight: .semibold))
+                    .foregroundStyle(.orange)
+                    .multilineTextAlignment(.center)
+                    .transition(.opacity)
+            }
+
+            FlowLayout(spacing: 10, rowSpacing: 4) {
+                ForEach(customRules.activeRuleLabels, id: \.self) { label in
+                    HStack(spacing: 3) {
+                        Circle().fill(.green).frame(width: 5, height: 5)
+                        Text(label)
+                    }
+                    .font(.system(.caption2, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.55))
+                }
+            }
+
+            Text("このルールは2人対戦・フリー対戦・対人戦で使われます。ランク戦は標準ルール固定です")
+                .font(.system(.caption2, design: .rounded))
+                .foregroundStyle(.white.opacity(0.35))
+                .multilineTextAlignment(.center)
+        }
+        .task(id: diceToken) {
+            guard diceMessage != nil else { return }
+            try? await Task.sleep(for: .seconds(3))
+            guard !Task.isCancelled else { return }
+            withAnimation { diceMessage = nil }
+        }
+    }
+
+    @ViewBuilder
+    private var statsIndicator: some View {
+        if stats.hasPlayed {
+            FlowLayout(spacing: 10, rowSpacing: 4) {
+                if stats.effectiveDailyStreak >= 2 {
+                    chip("🗓️ \(stats.effectiveDailyStreak)日連続", color: .cyan)
+                } else if stats.isDailyStreakAtRisk {
+                    chip("今日遊ぶと連続記録が続きます", color: .cyan)
+                }
+                if stats.currentStreak >= 2 {
+                    chip("🔥 \(stats.currentStreak)連勝中", color: .orange)
+                }
+                chip("CPU戦 \(stats.wins)勝\(stats.losses)敗", color: .white.opacity(0.55))
+                chip("ベスト連勝 \(stats.bestStreak)", color: .white.opacity(0.55))
+            }
+            .padding(.top, 4)
+        }
+    }
+
+    private func chip(_ text: String, color: Color) -> some View {
+        Text(text)
+            .font(.system(.caption, design: .rounded, weight: .medium))
+            .foregroundStyle(color)
     }
 
     /// 特殊ルールをランダムに組み合わせて毎回違うゲームにする
@@ -254,7 +565,7 @@ struct MenuView: View {
             Double.random(in: 0..<1) < probability
         }
 
-        var newConfig = config
+        var newConfig = customRules
         newConfig.isOverflowWrapEnabled = chance(0.7)
         newConfig.isSplittingEnabled = chance(0.5)
         newConfig.isDeadHandRevivalEnabled = newConfig.isSplittingEnabled && chance(0.4)
@@ -265,9 +576,7 @@ struct MenuView: View {
         newConfig.isDoubleTapEnabled = chance(0.3)
 
         // 全部OFFの退屈な結果は避け、どれか1つは必ず入れる
-        if !newConfig.isSplittingEnabled && !newConfig.isPoisonEnabled
-            && !newConfig.isBombEnabled && !newConfig.isMirrorEnabled
-            && !newConfig.isDoubleTapEnabled {
+        if !newConfig.hasSpecialRules && !newConfig.isSplittingEnabled {
             switch Int.random(in: 0..<5) {
             case 0: newConfig.isSplittingEnabled = true
             case 1: newConfig.isPoisonEnabled = true
@@ -277,79 +586,13 @@ struct MenuView: View {
             }
         }
 
-        withAnimation(.spring(response: 0.3)) { config = newConfig }
+        withAnimation(.spring(response: 0.3)) {
+            customRules = newConfig
+            let specials = newConfig.activeRuleLabels.filter { $0 != "ループ" }
+            diceMessage = specials.isEmpty ? "🎲 クラシックルールになりました" : "🎲 " + specials.joined(separator: "・") + " がON"
+        }
+        diceToken += 1
         HapticManager.split()
-    }
-
-    private var rankButtonLabel: String {
-        let level = GameStats.shared.rankLevel
-        return level >= GameStats.maxRankLevel
-            ? "ランク戦 Lv.MAX"
-            : "ランク戦 — Lv.\(level)に挑戦"
-    }
-
-    @ViewBuilder
-    private var statsIndicator: some View {
-        let stats = GameStats.shared
-        if stats.wins + stats.losses > 0 {
-            HStack(spacing: 8) {
-                if stats.dailyStreak >= 2 {
-                    Text("🗓️ \(stats.dailyStreak)日連続")
-                        .foregroundStyle(.cyan)
-                }
-                if stats.currentStreak >= 2 {
-                    Text("🔥 \(stats.currentStreak)連勝中")
-                        .foregroundStyle(.orange)
-                }
-                Text("CPU戦 \(stats.wins)勝 \(stats.losses)敗")
-                Text("ベスト連勝 \(stats.bestStreak)")
-            }
-            .font(.system(size: 11, weight: .medium, design: .rounded))
-            .foregroundStyle(.white.opacity(0.45))
-            .padding(.top, 8)
-        }
-    }
-
-    @ViewBuilder
-    private var activeRulesIndicator: some View {
-        let labels = activeRuleLabels
-        if !labels.isEmpty {
-            HStack(spacing: 6) {
-                ForEach(labels, id: \.self) { label in
-                    HStack(spacing: 3) {
-                        Circle().fill(.green).frame(width: 5, height: 5)
-                        Text(label)
-                    }
-                }
-            }
-            .font(.system(size: 11, design: .rounded))
-            .foregroundStyle(.white.opacity(0.45))
-            .padding(.top, 4)
-        }
-    }
-
-    private var activeRuleLabels: [String] {
-        var labels: [String] = []
-        if config.isOverflowWrapEnabled { labels.append("ループ") }
-        if config.isSplittingEnabled { labels.append("分割") }
-        if config.isDeadHandRevivalEnabled { labels.append("復活") }
-        if config.handCount == 3 { labels.append("3本手") }
-        if config.isPoisonEnabled { labels.append("毒") }
-        if config.isBombEnabled { labels.append("爆弾") }
-        if config.isMirrorEnabled { labels.append("ミラー") }
-        if config.isDoubleTapEnabled { labels.append("2回攻撃") }
-        return labels
-    }
-
-    @ViewBuilder
-    private func decorationHand(count: Int, color: Color) -> some View {
-        HStack(spacing: 4) {
-            ForEach(0..<4, id: \.self) { i in
-                Capsule()
-                    .fill(i < count ? color.opacity(0.6) : Color.white.opacity(0.05))
-                    .frame(width: 10, height: i < count ? 30 : 16)
-                    .shadow(color: i < count ? color.opacity(0.3) : .clear, radius: 4)
-            }
-        }
+        SoundManager.shared.play(.split)
     }
 }

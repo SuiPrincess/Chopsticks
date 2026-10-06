@@ -1,6 +1,6 @@
 import Foundation
 
-struct Hand: Identifiable, Equatable, Codable {
+struct Hand: Identifiable, Equatable, Codable, Sendable {
     let id: UUID
     var fingerCount: Int
 

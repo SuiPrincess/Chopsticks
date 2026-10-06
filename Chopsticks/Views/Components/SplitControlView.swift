@@ -8,11 +8,10 @@ struct SplitControlView: View {
     @State private var appeared = false
 
     private var currentPlayer: Player { viewModel.currentPlayer }
-    private var total: Int { currentPlayer.totalFingers }
     private var handCount: Int { currentPlayer.hands.count }
+    private var allowRevival: Bool { viewModel.config.isDeadHandRevivalEnabled }
     private var isValid: Bool {
-        let allowRevival = viewModel.config.isDeadHandRevivalEnabled
-        return currentPlayer.isValidSplit(newDistribution: distribution, allowRevival: allowRevival)
+        currentPlayer.isValidSplit(newDistribution: distribution, allowRevival: allowRevival)
     }
 
     init(viewModel: GameViewModel, playerColor: Color) {
@@ -27,11 +26,17 @@ struct SplitControlView: View {
             Color.black.opacity(0.5)
                 .ignoresSafeArea()
                 .onTapGesture { viewModel.showSplitPanel = false }
+                .accessibilityHidden(true)
 
-            VStack(spacing: 24) {
-                Text("Split")
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
+            VStack(spacing: 22) {
+                Text("指を分割")
+                    .font(.system(.title3, design: .rounded, weight: .bold))
                     .foregroundStyle(.white)
+
+                Text("攻撃のかわりに、指を手の間で動かします")
+                    .font(.system(.caption, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.5))
+                    .multilineTextAlignment(.center)
 
                 // Preview
                 HStack(spacing: 16) {
@@ -39,49 +44,40 @@ struct SplitControlView: View {
                         splitPreview(count: distribution[i], label: handLabel(i))
                     }
                 }
+                .accessibilityHidden(true)
 
                 // Steppers
-                VStack(spacing: 12) {
+                VStack(spacing: 8) {
                     ForEach(0..<handCount, id: \.self) { i in
-                        HStack(spacing: 16) {
+                        HStack(spacing: 12) {
                             Text(handLabel(i))
-                                .font(.system(size: 14, weight: .medium, design: .rounded))
+                                .font(.system(.subheadline, design: .rounded, weight: .medium))
                                 .foregroundStyle(.white.opacity(0.7))
-                                .frame(width: 24)
+                                .frame(width: 56, alignment: .leading)
 
-                            Button { adjust(i, by: -1) } label: {
-                                Image(systemName: "minus.circle.fill")
-                                    .font(.title3)
-                                    .foregroundStyle(distribution[i] > 0 ? playerColor : .white.opacity(0.2))
+                            stepButton(systemName: "minus.circle.fill", enabled: canDecrease(i), label: "\(handLabel(i))の指を1本減らす") {
+                                adjust(i, by: -1)
                             }
-                            .disabled(distribution[i] <= 0)
 
                             Text("\(distribution[i])")
-                                .font(.system(size: 22, weight: .bold, design: .rounded))
+                                .font(.system(size: 24, weight: .bold, design: .rounded))
                                 .foregroundStyle(.white)
-                                .frame(width: 28)
+                                .frame(width: 32)
+                                .accessibilityLabel("\(handLabel(i)) \(distribution[i])本")
 
-                            Button { adjust(i, by: 1) } label: {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.title3)
-                                    .foregroundStyle(distribution[i] < 4 ? playerColor : .white.opacity(0.2))
+                            stepButton(systemName: "plus.circle.fill", enabled: canIncrease(i), label: "\(handLabel(i))の指を1本増やす") {
+                                adjust(i, by: 1)
                             }
-                            .disabled(distribution[i] >= 4)
                         }
                     }
                 }
 
-                // Total
-                let currentTotal = distribution.reduce(0, +)
-                Text("合計: \(currentTotal) / \(total)")
-                    .font(.system(size: 12, design: .rounded))
-                    .foregroundStyle(currentTotal == total ? .white.opacity(0.5) : .red)
-
-                // 爆弾ルールでは4本にした手が即爆発するため事前に警告
-                if viewModel.config.isBombEnabled && distribution.contains(4) {
-                    Label("4本にした手は分割直後に爆発します！", systemImage: "flame.fill")
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.orange)
+                // 無効な理由・警告（決定が押せない理由を必ず説明する）
+                if let hint = hintText {
+                    Label(hint.text, systemImage: hint.icon)
+                        .font(.system(.footnote, design: .rounded, weight: .semibold))
+                        .foregroundStyle(hint.color)
+                        .multilineTextAlignment(.center)
                 }
 
                 // Buttons
@@ -99,7 +95,7 @@ struct SplitControlView: View {
                     .opacity(isValid ? 1 : 0.4)
                 }
             }
-            .padding(28)
+            .padding(24)
             .background(
                 RoundedRectangle(cornerRadius: 24)
                     .fill(.ultraThinMaterial)
@@ -108,7 +104,7 @@ struct SplitControlView: View {
                             .stroke(AppTheme.glassBorder, lineWidth: 0.5)
                     )
             )
-            .padding(.horizontal, 32)
+            .padding(.horizontal, 24)
             .scaleEffect(appeared ? 1 : 0.8)
             .opacity(appeared ? 1 : 0)
         }
@@ -117,25 +113,78 @@ struct SplitControlView: View {
         }
     }
 
-    private func adjust(_ index: Int, by delta: Int) {
-        let newVal = distribution[index] + delta
-        guard newVal >= 0, newVal <= 4 else { return }
-        let others = (0..<handCount).filter { $0 != index }
-        for other in others {
-            let otherNew = distribution[other] - delta
-            if otherNew >= 0 && otherNew <= 4 {
-                distribution[index] = newVal
-                distribution[other] = otherNew
-                return
+    // MARK: - Validation hints
+
+    private struct Hint {
+        let text: String
+        let icon: String
+        let color: Color
+    }
+
+    private var hintText: Hint? {
+        let current = currentPlayer.hands.map(\.fingerCount)
+        if distribution.sorted() == current.sorted() {
+            return Hint(text: "並べ替えだけの分割はできません", icon: "info.circle", color: .white.opacity(0.6))
+        }
+        for (i, hand) in currentPlayer.hands.enumerated() {
+            if hand.isAlive && distribution[i] == 0 {
+                return Hint(text: "生きている手を0本にはできません", icon: "exclamationmark.circle", color: .yellow)
+            }
+            if !hand.isAlive && distribution[i] > 0 && !allowRevival {
+                return Hint(text: "死んだ手には配れません（復活ルールがOFF）", icon: "exclamationmark.circle", color: .yellow)
             }
         }
+        // 爆弾ルールでは4本にした手が即爆発するため事前に警告
+        if viewModel.config.isBombEnabled && distribution.contains(4) {
+            return Hint(text: "4本にした手は分割直後に爆発します！", icon: "flame.fill", color: .orange)
+        }
+        return nil
+    }
+
+    // MARK: - Editing
+
+    private func canDecrease(_ index: Int) -> Bool {
+        distribution[index] > 0 && transferTarget(from: index, delta: -1) != nil
+    }
+
+    private func canIncrease(_ index: Int) -> Bool {
+        distribution[index] < 4 && transferTarget(from: index, delta: 1) != nil
+    }
+
+    /// indexの手をdelta増減したとき、反対側で逆に増減できる手
+    private func transferTarget(from index: Int, delta: Int) -> Int? {
+        let newValue = distribution[index] + delta
+        guard newValue >= 0, newValue <= 4 else { return nil }
+        for other in 0..<handCount where other != index {
+            let otherNew = distribution[other] - delta
+            if otherNew >= 0 && otherNew <= 4 { return other }
+        }
+        return nil
+    }
+
+    private func adjust(_ index: Int, by delta: Int) {
+        guard let other = transferTarget(from: index, delta: delta) else { return }
+        distribution[index] += delta
+        distribution[other] -= delta
     }
 
     private func handLabel(_ index: Int) -> String {
         if handCount == 2 {
-            return index == 0 ? "L" : "R"
+            return index == 0 ? "左手" : "右手"
         }
-        return "\(index + 1)"
+        return "手\(index + 1)"
+    }
+
+    private func stepButton(systemName: String, enabled: Bool, label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: systemName)
+                .font(.title2)
+                .foregroundStyle(enabled ? playerColor : .white.opacity(0.2))
+                .frame(width: 44, height: 44)
+                .contentShape(Circle())
+        }
+        .disabled(!enabled)
+        .accessibilityLabel(label)
     }
 
     @ViewBuilder
@@ -149,7 +198,7 @@ struct SplitControlView: View {
                 }
             }
             Text(label)
-                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .font(.system(.caption, design: .rounded, weight: .medium))
                 .foregroundStyle(.white.opacity(0.5))
         }
     }

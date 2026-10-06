@@ -8,6 +8,9 @@ enum MultiplayerMessage: Codable {
     case stateSync(GameState)
     case rematchRequest
     case rematchAccepted
+    case rematchDeclined
+    /// 相手が自分の意思で退出した（切断エラーとは区別して表示する）
+    case playerLeft
     case disconnect
 
     // MARK: - Codable
@@ -36,6 +39,10 @@ enum MultiplayerMessage: Codable {
             try container.encode("rematchRequest", forKey: .type)
         case .rematchAccepted:
             try container.encode("rematchAccepted", forKey: .type)
+        case .rematchDeclined:
+            try container.encode("rematchDeclined", forKey: .type)
+        case .playerLeft:
+            try container.encode("playerLeft", forKey: .type)
         case .disconnect:
             try container.encode("disconnect", forKey: .type)
         }
@@ -59,6 +66,10 @@ enum MultiplayerMessage: Codable {
             self = .rematchRequest
         case "rematchAccepted":
             self = .rematchAccepted
+        case "rematchDeclined":
+            self = .rematchDeclined
+        case "playerLeft":
+            self = .playerLeft
         case "disconnect":
             self = .disconnect
         default:

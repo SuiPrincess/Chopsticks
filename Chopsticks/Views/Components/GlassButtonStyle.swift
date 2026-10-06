@@ -6,10 +6,13 @@ struct GlassButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 16, weight: .semibold, design: .rounded))
+            .font(.system(.callout, design: .rounded, weight: .semibold))
             .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
+            .multilineTextAlignment(.center)
+            .lineLimit(2)
+            .minimumScaleFactor(0.85)
+            .frame(maxWidth: .infinity, minHeight: 44)
+            .padding(.vertical, 12)
             .background(
                 RoundedRectangle(cornerRadius: 16)
                     .fill(.ultraThinMaterial)
@@ -32,6 +35,41 @@ struct GlassButtonStyle: ButtonStyle {
             .shadow(color: isPrimary ? color.opacity(0.3) : .clear, radius: 12)
             .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
             .opacity(configuration.isPressed ? 0.8 : 1.0)
+            .animation(Anim.buttonPress, value: configuration.isPressed)
+    }
+}
+
+/// メニューの大きなカード型ボタン（ランク戦・デイリー・続きから）
+struct CardButtonStyle: ButtonStyle {
+    var color: Color = AppTheme.accent
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .foregroundStyle(.white)
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(.ultraThinMaterial)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(color.opacity(0.10))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(
+                                LinearGradient(
+                                    colors: [color.opacity(0.9), color.opacity(0.25)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1.2
+                            )
+                    )
+            )
+            .shadow(color: color.opacity(0.25), radius: 14)
+            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
+            .opacity(configuration.isPressed ? 0.85 : 1.0)
             .animation(Anim.buttonPress, value: configuration.isPressed)
     }
 }

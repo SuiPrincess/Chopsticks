@@ -4,7 +4,10 @@ struct GlowPulse: ViewModifier {
     let isActive: Bool
     let color: Color
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var glow: CGFloat = 0.3
+
+    private var animates: Bool { !reduceMotion && !AppSettings.shared.reducesEffects }
 
     func body(content: Content) -> some View {
         content
@@ -19,7 +22,11 @@ struct GlowPulse: ViewModifier {
             withAnimation(.easeOut(duration: 0.3)) { glow = 0 }
             return
         }
-        withAnimation(Anim.glowPulse) { glow = 0.9 }
+        if animates {
+            withAnimation(Anim.glowPulse) { glow = 0.9 }
+        } else {
+            glow = 0.7
+        }
     }
 }
 

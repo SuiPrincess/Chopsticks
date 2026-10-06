@@ -23,17 +23,19 @@ struct AIEngine {
 
     /// ランク戦用: レベル1〜10で段階的に強くなる。
     /// 低レベルはランダム行動が混ざり、高レベルほど深く読む。
+    /// - Parameter mercyBoost: 同じレベルで負け続けているプレイヤー向けに、ランダム行動率に上乗せする値（0〜0.3）
     static func chooseAction(
         state: GameState,
         level: Int,
-        attacksUsedThisTurn: Int = 0
+        attacksUsedThisTurn: Int = 0,
+        mercyBoost: Double = 0
     ) -> GameAction? {
         let actions = generateAllActions(state: state)
         guard !actions.isEmpty else { return nil }
 
         let clamped = min(max(level, 1), 10)
         // Lv.1: 76%ランダム → Lv.10: 0%ランダム
-        let randomMoveChance = max(0.0, 0.85 - 0.09 * Double(clamped))
+        let randomMoveChance = min(0.9, max(0.0, 0.85 - 0.09 * Double(clamped)) + max(0, mercyBoost))
         if Double.random(in: 0..<1) < randomMoveChance {
             return actions.randomElement()
         }
@@ -64,26 +66,12 @@ struct AIEngine {
         // 分割アクション
         if state.config.isSplittingEnabled {
             let allowRevival = state.config.isDeadHandRevivalEnabled
-            for distribution in distributions(total: current.totalFingers, handCount: current.hands.count)
-            where current.isValidSplit(newDistribution: distribution, allowRevival: allowRevival) {
+            for distribution in current.validSplits(allowRevival: allowRevival) {
                 actions.append(.split(newDistribution: distribution))
             }
         }
 
         return actions
-    }
-
-    /// total本の指をhandCount個の手へ0〜4本ずつ配る全パターン
-    private static func distributions(total: Int, handCount: Int) -> [[Int]] {
-        guard handCount > 0 else { return total == 0 ? [[]] : [] }
-        guard total <= handCount * 4 else { return [] }
-        var results: [[Int]] = []
-        for count in 0...min(total, 4) {
-            for rest in distributions(total: total - count, handCount: handCount - 1) {
-                results.append([count] + rest)
-            }
-        }
-        return results
     }
 
     // MARK: - Hard AI: αβ探索
@@ -168,6 +156,13 @@ struct AIEngine {
         let nextAttacksUsed = continuesTurn ? 1 : 0
         if !continuesTurn {
             next.switchTurn()
+            // ターン上限: 実プレイと同じサドンデス判定で終局する
+            if next.turnCount >= GameState.turnLimit {
+                switch next.suddenDeathOutcome() {
+                case .winner(let id): return id == aiId ? winScore / 2 - ply : -winScore / 2 + ply
+                case .draw: return 0
+                }
+            }
         }
 
         let moves = generateAllActions(state: next)

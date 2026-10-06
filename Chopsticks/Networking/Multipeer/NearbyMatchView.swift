@@ -7,31 +7,38 @@ final class NearbyMatchState {
     enum Phase { case rolePick, hosting, browsing, connecting }
 
     var phase: Phase = .rolePick
-    var discoveredPeers: [MCPeerID] = []
-    var invitationFrom: String?
     var service: MultipeerService?
+    /// 検索開始からしばらく誰も見つからないときのヒント表示
+    var showsSearchHint = false
+    private var hintTask: Task<Void, Never>?
+
+    var discoveredPeers: [MCPeerID] { service?.discoveredPeers ?? [] }
+    var invitationFrom: String? { service?.receivedInvitation?.from.displayName }
+    var errorMessage: String? { service?.lastError }
 
     func startHosting(onConnected: @escaping (MultipeerService) -> Void) {
-        let svc = MultipeerService(displayName: UIDevice.current.name, isHost: true)
+        let svc = MultipeerService(displayName: AppSettings.shared.nickname, isHost: true)
         setupCallbacks(svc, onConnected: onConnected)
         service = svc
         phase = .hosting
         svc.startAdvertising()
+        startHintTimer()
     }
 
     func startBrowsing(onConnected: @escaping (MultipeerService) -> Void) {
-        let svc = MultipeerService(displayName: UIDevice.current.name, isHost: false)
+        let svc = MultipeerService(displayName: AppSettings.shared.nickname, isHost: false)
         setupCallbacks(svc, onConnected: onConnected)
         service = svc
         phase = .browsing
         svc.startBrowsing()
+        startHintTimer()
     }
 
     func cancel() {
+        hintTask?.cancel()
+        showsSearchHint = false
         service?.stop()
         service = nil
-        discoveredPeers = []
-        invitationFrom = nil
         phase = .rolePick
     }
 
@@ -41,7 +48,6 @@ final class NearbyMatchState {
     }
 
     func declineInvitation() {
-        invitationFrom = nil
         service?.declineInvitation()
     }
 
@@ -51,30 +57,39 @@ final class NearbyMatchState {
     }
 
     private func setupCallbacks(_ svc: MultipeerService, onConnected: @escaping (MultipeerService) -> Void) {
-        svc.onConnectionChanged = { [weak self] connected in
-            if connected { onConnected(svc) }
-            else { self?.phase = .rolePick }
-        }
-        // Poll published properties via observation
-        // Use a timer to sync published state from MultipeerService → Observable state
-        Task { @MainActor [weak self] in
-            while self?.service === svc {
-                self?.discoveredPeers = svc.discoveredPeers
-                if let invitation = svc.receivedInvitation {
-                    self?.invitationFrom = invitation.from.displayName
-                }
-                try? await Task.sleep(for: .milliseconds(250))
+        svc.onConnectionChanged = { [weak self, weak svc] connected in
+            guard let self, let svc else { return }
+            if connected {
+                self.hintTask?.cancel()
+                // 接続後のコールバックはゲーム画面側が引き継ぐ
+                svc.onConnectionChanged = nil
+                onConnected(svc)
+            } else {
+                // 接続失敗・拒否: 役割選択画面に戻さず、同じ画面で再試行できるようにする
+                self.phase = svc.isHost ? .hosting : .browsing
             }
+        }
+    }
+
+    private func startHintTimer() {
+        hintTask?.cancel()
+        showsSearchHint = false
+        hintTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(15))
+            guard !Task.isCancelled else { return }
+            self?.showsSearchHint = true
         }
     }
 }
 
 struct NearbyMatchView: View {
-    @Binding var config: GameConfig
     let onConnected: (MultipeerService) -> Void
     let onCancel: () -> Void
 
     @State private var matchState = NearbyMatchState()
+    @State private var settings = AppSettings.shared
+    @State private var isEditingNickname = false
+    @State private var nicknameDraft = ""
 
     var body: some View {
         ZStack {
@@ -86,6 +101,16 @@ struct NearbyMatchView: View {
             case .browsing: guestView
             case .connecting: connectingView
             }
+        }
+        .alert("ニックネーム", isPresented: $isEditingNickname) {
+            TextField("ニックネーム", text: $nicknameDraft)
+            Button("保存") {
+                let trimmed = nicknameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !trimmed.isEmpty { settings.nickname = String(trimmed.prefix(12)) }
+            }
+            Button("キャンセル", role: .cancel) {}
+        } message: {
+            Text("相手の画面に表示される名前です")
         }
     }
 
@@ -100,7 +125,31 @@ struct NearbyMatchView: View {
                 Text("近くの人と対戦")
                     .font(.system(size: 20, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
+                Text("同じWi-Fi、またはBluetoothが有効な端末どうしで対戦できます")
+                    .font(.system(size: 12, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.45))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
             }
+
+            Button {
+                nicknameDraft = settings.nickname
+                isEditingNickname = true
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "person.crop.circle")
+                    Text(settings.nickname)
+                    Image(systemName: "pencil")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.white.opacity(0.4))
+                }
+                .font(.system(size: 14, weight: .medium, design: .rounded))
+                .foregroundStyle(.white.opacity(0.8))
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background(Capsule().fill(.ultraThinMaterial))
+            }
+            .accessibilityLabel("ニックネームを変更: \(settings.nickname)")
 
             VStack(spacing: 12) {
                 Button {
@@ -126,8 +175,8 @@ struct NearbyMatchView: View {
             .padding(.horizontal, 40)
 
             Button("戻る") { onCancel() }
-                .font(.system(size: 14, design: .rounded))
-                .foregroundStyle(.white.opacity(0.5))
+                .buttonStyle(GlassButtonStyle(isPrimary: false))
+                .padding(.horizontal, 100)
         }
     }
 
@@ -142,7 +191,7 @@ struct NearbyMatchView: View {
                 Text("対戦相手を待っています")
                     .font(.system(size: 18, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white)
-                Text(UIDevice.current.name)
+                Text("「\(settings.nickname)」として公開中")
                     .font(.system(size: 13, design: .rounded))
                     .foregroundStyle(.white.opacity(0.4))
             }
@@ -155,6 +204,8 @@ struct NearbyMatchView: View {
                 invitationCard(from: name)
             }
 
+            statusMessages(waitingText: "相手の端末で「部屋を探す」を選んでもらってください")
+
             cancelButton()
         }
     }
@@ -162,17 +213,17 @@ struct NearbyMatchView: View {
     @ViewBuilder
     private func invitationCard(from name: String) -> some View {
         VStack(spacing: 12) {
-            Text("\(name) から接続要求")
+            Text("\(name) から対戦の申し込み")
                 .font(.system(size: 16, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white)
 
             HStack(spacing: 12) {
-                Button("承認") {
+                Button("対戦する") {
                     matchState.acceptInvitation()
                 }
                 .buttonStyle(GlassButtonStyle())
 
-                Button("拒否") {
+                Button("断る") {
                     matchState.declineInvitation()
                 }
                 .buttonStyle(GlassButtonStyle(isPrimary: false))
@@ -207,7 +258,7 @@ struct NearbyMatchView: View {
                 VStack(spacing: 8) {
                     ProgressView()
                         .tint(AppTheme.accent)
-                    Text("近くのデバイスを検索中...")
+                    Text("近くの端末を検索中...")
                         .font(.system(size: 13, design: .rounded))
                         .foregroundStyle(.white.opacity(0.4))
                 }
@@ -238,10 +289,13 @@ struct NearbyMatchView: View {
                                     )
                             )
                         }
+                        .accessibilityLabel("\(peer.displayName)に対戦を申し込む")
                     }
                 }
                 .padding(.horizontal, 24)
             }
+
+            statusMessages(waitingText: "相手の端末で「部屋を作る」を選んでもらってください")
 
             cancelButton()
         }
@@ -257,6 +311,35 @@ struct NearbyMatchView: View {
             Text("接続中...")
                 .font(.system(size: 18, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white)
+            cancelButton()
+        }
+    }
+
+    @ViewBuilder
+    private func statusMessages(waitingText: String) -> some View {
+        VStack(spacing: 10) {
+            if let error = matchState.errorMessage {
+                VStack(spacing: 8) {
+                    Label(error, systemImage: "exclamationmark.triangle.fill")
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundStyle(.orange)
+                        .multilineTextAlignment(.center)
+                    Button("設定を開く") {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    }
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundStyle(AppTheme.accent)
+                }
+                .padding(.horizontal, 32)
+            } else if matchState.showsSearchHint {
+                Text(waitingText + "\n見つからないときは両方の端末でWi-FiとBluetoothをオンにし、ローカルネットワークを許可してください")
+                    .font(.system(size: 12, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.45))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+            }
         }
     }
 
@@ -265,7 +348,7 @@ struct NearbyMatchView: View {
         Button("キャンセル") {
             matchState.cancel()
         }
-        .font(.system(size: 14, design: .rounded))
-        .foregroundStyle(.white.opacity(0.5))
+        .buttonStyle(GlassButtonStyle(isPrimary: false))
+        .padding(.horizontal, 100)
     }
 }

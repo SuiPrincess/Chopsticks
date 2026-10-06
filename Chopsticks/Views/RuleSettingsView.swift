@@ -11,6 +11,12 @@ struct RuleSettingsView: View {
 
                 ScrollView {
                     VStack(spacing: 16) {
+                        Label("ここで決めたルールは「2人対戦」「フリー対戦」「近くの人と対戦」「オンライン対戦」で使われます。ランク戦は標準ルール固定です。",
+                              systemImage: "info.circle")
+                            .font(.system(.footnote, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.55))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
                         // --- 基本ルール ---
                         sectionHeader("基本ルール")
 
@@ -23,7 +29,7 @@ struct RuleSettingsView: View {
 
                         ruleCard {
                             Toggle(isOn: $config.isSplittingEnabled) {
-                                ruleLabel("分割", desc: "攻撃の代わりに両手の指を再分配できる")
+                                ruleLabel("分割", desc: "攻撃のかわりに両手の指を再分配できる")
                             }
                             .tint(AppTheme.accent)
                         }
@@ -56,21 +62,21 @@ struct RuleSettingsView: View {
 
                         ruleCard {
                             Toggle(isOn: $config.isPoisonEnabled) {
-                                ruleLabel("毒", desc: "指1本の攻撃で相手の手を即死。ただし毒を使った手も死ぬ（相討ち）")
+                                ruleLabel("毒", desc: "指1本の手で指2本以上の手を攻撃すると即死。ただし毒を使った手も死ぬ（相討ち）")
                             }
                             .tint(.green)
                         }
 
                         ruleCard {
                             Toggle(isOn: $config.isBombEnabled) {
-                                ruleLabel("爆弾", desc: "手がちょうど4になると爆発、全他の手に1ダメージ")
+                                ruleLabel("爆弾", desc: "手がちょうど4本になると爆発、他の全ての手に1ダメージ")
                             }
                             .tint(.orange)
                         }
 
                         ruleCard {
                             Toggle(isOn: $config.isMirrorEnabled) {
-                                ruleLabel("ミラー", desc: "攻撃後、自分の手にも同じ数が加算される")
+                                ruleLabel("ミラー", desc: "攻撃後、自分の手にも同じ数が足される")
                             }
                             .tint(.cyan)
                         }
@@ -81,6 +87,14 @@ struct RuleSettingsView: View {
                             }
                             .tint(.purple)
                         }
+
+                        Button {
+                            withAnimation(.spring(response: 0.3)) { resetToStandard() }
+                        } label: {
+                            Label("標準ルールに戻す", systemImage: "arrow.counterclockwise")
+                        }
+                        .buttonStyle(GlassButtonStyle(isPrimary: false))
+                        .padding(.top, 8)
                     }
                     .padding(20)
                     .animation(.spring(response: 0.3), value: config)
@@ -97,29 +111,38 @@ struct RuleSettingsView: View {
         }
     }
 
+    /// モードの設定（gameMode/aiDifficulty）は残し、ルールだけを標準に戻す
+    private func resetToStandard() {
+        let mode = config.gameMode
+        let difficulty = config.aiDifficulty
+        config = GameConfig()
+        config.gameMode = mode
+        config.aiDifficulty = difficulty
+    }
+
     // MARK: - Components
     @ViewBuilder
     private func sectionHeader(_ title: String) -> some View {
         HStack {
             Text(title)
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
-                .foregroundStyle(AppTheme.accent.opacity(0.7))
+                .font(.system(.footnote, design: .rounded, weight: .semibold))
+                .foregroundStyle(AppTheme.accent.opacity(0.8))
                 .tracking(1)
-                .textCase(.uppercase)
             Spacer()
         }
         .padding(.top, 8)
+        .accessibilityAddTraits(.isHeader)
     }
 
     @ViewBuilder
     private func ruleLabel(_ title: String, desc: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
-                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                .font(.system(.body, design: .rounded, weight: .semibold))
                 .foregroundStyle(.white)
             Text(desc)
-                .font(.system(size: 13, design: .rounded))
-                .foregroundStyle(.white.opacity(0.5))
+                .font(.system(.footnote, design: .rounded))
+                .foregroundStyle(.white.opacity(0.55))
         }
     }
 

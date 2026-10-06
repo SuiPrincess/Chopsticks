@@ -9,19 +9,24 @@ struct AIDifficultyPickerView: View {
         ZStack {
             AppTheme.bgDark.ignoresSafeArea()
 
-            VStack(spacing: 28) {
+            VStack(spacing: 24) {
                 VStack(spacing: 8) {
                     Image(systemName: "cpu")
                         .font(.system(size: 36))
                         .foregroundStyle(AppTheme.accentGradient)
-                    Text("CPU難易度")
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                    Text("CPUの強さ")
+                        .font(.system(.title3, design: .rounded, weight: .bold))
                         .foregroundStyle(.white)
+                    Text("好きなルールで遊べるフリー対戦です。勝ち負けは連勝記録に入ります")
+                        .font(.system(.caption, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.45))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 32)
                 }
 
                 VStack(spacing: 12) {
-                    difficultyButton(.easy, icon: "tortoise.fill", description: "ランダムに行動する")
-                    difficultyButton(.hard, icon: "bolt.fill", description: "最善手を選ぶ")
+                    difficultyButton(.easy, icon: "tortoise.fill", description: "ランダムに行動する。気軽に遊びたいときに")
+                    difficultyButton(.hard, icon: "bolt.fill", description: "先を読んで最善手を選ぶ。手ごわい！")
                 }
                 .padding(.horizontal, 24)
 
@@ -43,10 +48,11 @@ struct AIDifficultyPickerView: View {
                     .frame(width: 40)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(level.label)
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .font(.system(.body, design: .rounded, weight: .semibold))
                     Text(description)
-                        .font(.system(size: 12, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.5))
+                        .font(.system(.caption, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.55))
+                        .multilineTextAlignment(.leading)
                 }
                 Spacer()
                 if difficulty == level {
@@ -72,5 +78,6 @@ struct AIDifficultyPickerView: View {
                     )
             )
         }
+        .accessibilityAddTraits(difficulty == level ? .isSelected : [])
     }
 }

@@ -1,6 +1,8 @@
 import SwiftUI
 import GameKit
 
+/// Game Centerのマッチメイキング画面。閉じる処理はSwiftUI側のバインディングに任せる
+/// （ここで`dismiss`まで呼ぶとシートの状態と食い違う）。
 struct GameKitMatchmakerView: UIViewControllerRepresentable {
     let onMatchFound: (GKMatch) -> Void
     let onCancel: () -> Void
@@ -9,6 +11,7 @@ struct GameKitMatchmakerView: UIViewControllerRepresentable {
         let request = GKMatchRequest()
         request.minPlayers = 2
         request.maxPlayers = 2
+        request.inviteMessage = "割り箸バトルで対戦しよう！"
 
         guard let matchmakerVC = GKMatchmakerViewController(matchRequest: request) else {
             // フォールバック: 空のVCを返す
@@ -29,6 +32,7 @@ struct GameKitMatchmakerView: UIViewControllerRepresentable {
     final class Coordinator: NSObject, GKMatchmakerViewControllerDelegate {
         let onMatchFound: (GKMatch) -> Void
         let onCancel: () -> Void
+        private var didFinish = false
 
         init(onMatchFound: @escaping (GKMatch) -> Void, onCancel: @escaping () -> Void) {
             self.onMatchFound = onMatchFound
@@ -36,17 +40,20 @@ struct GameKitMatchmakerView: UIViewControllerRepresentable {
         }
 
         func matchmakerViewControllerWasCancelled(_ viewController: GKMatchmakerViewController) {
-            viewController.dismiss(animated: true)
+            guard !didFinish else { return }
+            didFinish = true
             onCancel()
         }
 
         func matchmakerViewController(_ viewController: GKMatchmakerViewController, didFailWithError error: Error) {
-            viewController.dismiss(animated: true)
+            guard !didFinish else { return }
+            didFinish = true
             onCancel()
         }
 
         func matchmakerViewController(_ viewController: GKMatchmakerViewController, didFind match: GKMatch) {
-            viewController.dismiss(animated: true)
+            guard !didFinish else { return }
+            didFinish = true
             onMatchFound(match)
         }
     }

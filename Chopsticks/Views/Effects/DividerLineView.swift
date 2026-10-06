@@ -1,7 +1,9 @@
 import SwiftUI
 
 struct DividerLineView: View {
-    let isPlayer1Turn: Bool
+    /// 画面下側のプレイヤーの手番か
+    let isBottomTurn: Bool
+    let turnLabel: String
 
     var body: some View {
         ZStack {
@@ -31,15 +33,17 @@ struct DividerLineView: View {
                 Image(systemName: "arrowtriangle.down.fill")
                     .font(.system(size: 12, weight: .bold))
                     .foregroundStyle(accentColor)
-                    .rotationEffect(.degrees(isPlayer1Turn ? 0 : 180))
+                    .rotationEffect(.degrees(isBottomTurn ? 0 : 180))
             }
             .shadow(color: accentColor.opacity(0.5), radius: 8)
         }
         .frame(height: 44)
-        .animation(Anim.turnSwitch, value: isPlayer1Turn)
+        .animation(Anim.turnSwitch, value: isBottomTurn)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(turnLabel)
     }
 
     private var accentColor: Color {
-        isPlayer1Turn ? AppTheme.player1Color : AppTheme.player2Color
+        isBottomTurn ? AppTheme.player1Color : AppTheme.player2Color
     }
 }

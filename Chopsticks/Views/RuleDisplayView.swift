@@ -3,12 +3,20 @@ import SwiftUI
 struct RuleDisplayView: View {
     let config: GameConfig
     let isPreGame: Bool
+    let title: String?
     let onStart: (() -> Void)?
     let onDismiss: () -> Void
 
-    init(config: GameConfig, isPreGame: Bool = false, onStart: (() -> Void)? = nil, onDismiss: @escaping () -> Void) {
+    init(
+        config: GameConfig,
+        isPreGame: Bool = false,
+        title: String? = nil,
+        onStart: (() -> Void)? = nil,
+        onDismiss: @escaping () -> Void
+    ) {
         self.config = config
         self.isPreGame = isPreGame
+        self.title = title
         self.onStart = onStart
         self.onDismiss = onDismiss
     }
@@ -18,7 +26,7 @@ struct RuleDisplayView: View {
             AppTheme.bgDark.ignoresSafeArea()
 
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: 20) {
                     // Header
                     HStack {
                         Spacer()
@@ -26,51 +34,54 @@ struct RuleDisplayView: View {
                             Image(systemName: "book.fill")
                                 .font(.title2)
                                 .foregroundStyle(AppTheme.accentGradient)
-                            Text(isPreGame ? "ルール確認" : "ルール")
-                                .font(.system(size: 20, weight: .bold, design: .rounded))
+                            Text(title ?? (isPreGame ? "ルール確認" : "ルール"))
+                                .font(.system(.title3, design: .rounded, weight: .bold))
                                 .foregroundStyle(.white)
+                                .multilineTextAlignment(.center)
                         }
                         Spacer()
                     }
                     .padding(.top, 8)
 
-                    // Basic rules
                     ruleSection(title: "基本ルール", items: basicRuleItems)
-
-                    // Death rule
                     ruleSection(title: "死亡ルール", items: deathRuleItems)
 
-                    // Active optional rules
                     let active = activeOptionalRules
                     if !active.isEmpty {
-                        ruleSection(title: "追加ルール (ON)", items: active)
+                        ruleSection(title: "追加ルール（ON）", items: active)
                     }
 
-                    // Inactive rules
+                    // 対戦前は「いま使わないルール」を出さず、開始ボタンまでの距離を縮める
                     let inactive = inactiveOptionalRules
-                    if !inactive.isEmpty {
-                        ruleSection(title: "追加ルール (OFF)", items: inactive, dimmed: true)
-                    }
-
-                    // Buttons
-                    if isPreGame {
-                        Button(action: { onStart?() }) {
-                            Text("ゲーム開始")
-                        }
-                        .buttonStyle(GlassButtonStyle())
-                        .padding(.top, 8)
+                    if !isPreGame && !inactive.isEmpty {
+                        ruleSection(title: "追加ルール（OFF）", items: inactive, dimmed: true)
                     }
                 }
                 .padding(24)
+                .padding(.top, 20)
             }
         }
         .overlay(alignment: .topTrailing) {
             Button(action: onDismiss) {
                 Image(systemName: "xmark.circle.fill")
                     .font(.title2)
-                    .foregroundStyle(.white.opacity(0.5))
+                    .foregroundStyle(.white.opacity(0.55))
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
-            .padding(20)
+            .padding(8)
+            .accessibilityLabel("閉じる")
+        }
+        .safeAreaInset(edge: .bottom) {
+            if isPreGame {
+                Button(action: { onStart?() }) {
+                    Text("ゲーム開始")
+                }
+                .buttonStyle(GlassButtonStyle())
+                .padding(.horizontal, 24)
+                .padding(.vertical, 12)
+                .background(AppTheme.bgDark.opacity(0.92))
+            }
         }
     }
 
@@ -79,74 +90,65 @@ struct RuleDisplayView: View {
         var items = [
             RuleItem(icon: "hand.raised.fill", text: "各プレイヤーは\(config.handCount)本の手、指1本ずつでスタート"),
             RuleItem(icon: "hand.point.up.left.fill", text: "自分の手を選んでから、相手の手をタップして攻撃"),
-            RuleItem(icon: "plus", text: "叩かれた手に、攻撃側の指の本数が加算される"),
+            RuleItem(icon: "plus", text: "叩かれた手に、攻撃した手の指の本数が足される"),
             RuleItem(icon: "xmark.circle.fill", text: "全ての手が死んだプレイヤーの負け"),
-            RuleItem(icon: "hourglass", text: "\(GameViewModel.turnLimit)ターンで決着しない場合は判定（手の数→指が少ない方）"),
+            RuleItem(icon: "hourglass", text: "\(GameState.turnLimit)ターンで決着しない場合は判定（生きている手の数 → 指が少ない方の勝ち）"),
         ]
         if config.handCount == 3 {
-            items.insert(RuleItem(icon: "hand.raised.fingers.spread", text: "3本手モード: 通常より多い手で戦略的に!"), at: 1)
+            items.insert(RuleItem(icon: "hand.raised.fingers.spread", text: "3本手モード: 通常より多い手で戦略的に！"), at: 1)
         }
         return items
     }
 
     // MARK: - Death rule items
     private var deathRuleItems: [RuleItem] {
+        var items: [RuleItem]
         if config.isOverflowWrapEnabled {
-            return [
-                RuleItem(icon: "arrow.trianglehead.2.clockwise", text: "5を超えたら余りからカウント (例: 3+4=7→2)"),
+            items = [
+                RuleItem(icon: "arrow.trianglehead.2.clockwise", text: "5を超えたら余りから数え直す（例: 3+4=7 → 2）"),
                 RuleItem(icon: "flame.fill", text: "ちょうど5になったら死亡"),
             ]
         } else {
-            return [
-                RuleItem(icon: "flame.fill", text: "5以上になったら即死亡 (クラシック)"),
+            items = [
+                RuleItem(icon: "flame.fill", text: "5以上になったら即死亡（クラシック）"),
             ]
         }
+        items.append(RuleItem(icon: "exclamationmark.triangle.fill", text: "赤く光る手は、次の攻撃で死んでしまうサイン"))
+        return items
     }
 
     // MARK: - Optional rules
     private var activeOptionalRules: [RuleItem] {
         var items: [RuleItem] = []
         if config.isSplittingEnabled {
-            items.append(RuleItem(icon: "arrow.left.arrow.right", text: "分割: 攻撃の代わりに両手の指を再分配できる"))
+            items.append(RuleItem(icon: "arrow.left.arrow.right", text: "分割: 攻撃のかわりに指を手の間で動かせる（自分の手を0本にはできない）"))
         }
         if config.isDeadHandRevivalEnabled {
-            items.append(RuleItem(icon: "heart.fill", text: "復活: 分割で死亡した手を復活させられる"))
+            items.append(RuleItem(icon: "heart.fill", text: "復活: 分割で、死んだ手に指を配って復活させられる"))
         }
         if config.isPoisonEnabled {
-            items.append(RuleItem(icon: "drop.fill", text: "毒: 指1本の攻撃で相手の手を即死（毒を使った手も死ぬ相討ち）"))
+            items.append(RuleItem(icon: "drop.fill", text: "毒: 指1本の手で、指2本以上の相手の手を攻撃すると即死。ただし毒を使った手も死ぬ（相討ち）"))
         }
         if config.isBombEnabled {
-            items.append(RuleItem(icon: "flame.circle.fill", text: "爆弾: 手が4になると爆発し全他の手に1ダメージ"))
+            items.append(RuleItem(icon: "flame.circle.fill", text: "爆弾: 手がちょうど4本になると爆発して死に、他の全ての手に1ダメージ（連鎖あり）"))
         }
         if config.isMirrorEnabled {
-            items.append(RuleItem(icon: "arrow.uturn.backward", text: "ミラー: 攻撃した分が自分にも加算"))
+            items.append(RuleItem(icon: "arrow.uturn.backward", text: "ミラー: 攻撃した本数が自分の手にも足される"))
         }
         if config.isDoubleTapEnabled {
-            items.append(RuleItem(icon: "hand.tap.fill", text: "ダブルタップ: 1ターンに2回攻撃可能"))
+            items.append(RuleItem(icon: "hand.tap.fill", text: "ダブルタップ: 1ターンに2回攻撃できる"))
         }
         return items
     }
 
     private var inactiveOptionalRules: [RuleItem] {
         var items: [RuleItem] = []
-        if !config.isSplittingEnabled {
-            items.append(RuleItem(icon: "arrow.left.arrow.right", text: "分割"))
-        }
-        if !config.isDeadHandRevivalEnabled {
-            items.append(RuleItem(icon: "heart.fill", text: "復活"))
-        }
-        if !config.isPoisonEnabled {
-            items.append(RuleItem(icon: "drop.fill", text: "毒"))
-        }
-        if !config.isBombEnabled {
-            items.append(RuleItem(icon: "flame.circle.fill", text: "爆弾"))
-        }
-        if !config.isMirrorEnabled {
-            items.append(RuleItem(icon: "arrow.uturn.backward", text: "ミラー"))
-        }
-        if !config.isDoubleTapEnabled {
-            items.append(RuleItem(icon: "hand.tap.fill", text: "ダブルタップ"))
-        }
+        if !config.isSplittingEnabled { items.append(RuleItem(icon: "arrow.left.arrow.right", text: "分割")) }
+        if !config.isDeadHandRevivalEnabled { items.append(RuleItem(icon: "heart.fill", text: "復活")) }
+        if !config.isPoisonEnabled { items.append(RuleItem(icon: "drop.fill", text: "毒")) }
+        if !config.isBombEnabled { items.append(RuleItem(icon: "flame.circle.fill", text: "爆弾")) }
+        if !config.isMirrorEnabled { items.append(RuleItem(icon: "arrow.uturn.backward", text: "ミラー")) }
+        if !config.isDoubleTapEnabled { items.append(RuleItem(icon: "hand.tap.fill", text: "ダブルタップ")) }
         return items
     }
 
@@ -155,10 +157,9 @@ struct RuleDisplayView: View {
     private func ruleSection(title: String, items: [RuleItem], dimmed: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(title)
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .font(.system(.subheadline, design: .rounded, weight: .semibold))
                 .foregroundStyle(dimmed ? .white.opacity(0.3) : AppTheme.accent)
                 .tracking(1)
-                .textCase(.uppercase)
 
             VStack(alignment: .leading, spacing: 10) {
                 ForEach(items) { item in
@@ -167,9 +168,10 @@ struct RuleDisplayView: View {
                             .font(.system(size: 14))
                             .foregroundStyle(dimmed ? .white.opacity(0.2) : AppTheme.accent.opacity(0.8))
                             .frame(width: 20)
+                            .accessibilityHidden(true)
                         Text(item.text)
-                            .font(.system(size: 14, design: .rounded))
-                            .foregroundStyle(dimmed ? .white.opacity(0.3) : .white.opacity(0.8))
+                            .font(.system(.subheadline, design: .rounded))
+                            .foregroundStyle(dimmed ? .white.opacity(0.35) : .white.opacity(0.85))
                     }
                 }
             }

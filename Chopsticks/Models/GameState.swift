@@ -1,6 +1,6 @@
 import Foundation
 
-enum GamePhase: Equatable, Codable {
+enum GamePhase: Equatable, Codable, Sendable {
     case playing
     case gameOver(winnerId: UUID)
     /// ターン上限のサドンデス判定で完全に同点だった場合
@@ -42,13 +42,13 @@ enum GamePhase: Equatable, Codable {
 }
 
 /// アクション適用の結果。演出（ハプティクス・エフェクト）の判断に使う。
-struct ActionResult: Equatable {
+struct ActionResult: Equatable, Sendable {
     var deadHandIds: [UUID] = []
     var poisonTriggered = false
     var bombTriggered = false
 }
 
-struct GameState: Equatable, Codable {
+struct GameState: Equatable, Codable, Sendable {
     var player1: Player
     var player2: Player
     var currentPlayerId: UUID
@@ -56,17 +56,24 @@ struct GameState: Equatable, Codable {
     var config: GameConfig
     var turnCount: Int
 
+    /// このターン数に達したらサドンデス判定（千日手・膠着対策）
+    static let turnLimit = 60
+
     init(config: GameConfig = GameConfig(), player1Starts: Bool = true) {
-        let p1 = Player(name: "Player 1", handCount: config.handCount)
+        let p1Name: String
         let p2Name: String
         switch config.gameMode {
         case .vsAI:
-            p2Name = config.aiLevel.map { "CPU Lv.\($0)" } ?? "CPU"
+            p1Name = "あなた"
+            p2Name = config.aiLevel.map { "CPU Lv.\($0)" } ?? (config.aiDifficulty == .hard ? "CPU つよい" : "CPU かんたん")
         case .online, .nearby:
+            p1Name = "あなた"
             p2Name = "対戦相手"
         case .localTwoPlayer:
-            p2Name = "Player 2"
+            p1Name = "プレイヤー1"
+            p2Name = "プレイヤー2"
         }
+        let p1 = Player(name: p1Name, handCount: config.handCount)
         let p2 = Player(name: p2Name, handCount: config.handCount)
         self.player1 = p1
         self.player2 = p2
@@ -118,9 +125,9 @@ extension GameState {
         let overflowWraps = config.isOverflowWrapEnabled
         let attackingFingers = attackerHand.fingerCount
 
-        // 毒（相討ち）: 指1本で攻撃すると相手の手を即死させるが、毒を使った手も死ぬ。
-        // 開始時の手は全て指1本のため、ノーリスク即死だと先手必勝になってしまう。
-        if config.isPoisonEnabled && attackingFingers == 1 {
+        // 毒（相討ち）: 指1本の手で「2本以上の手」を攻撃すると相手の手を即死させるが、毒を使った手も死ぬ。
+        // 1本同士の攻撃は通常どおり（全員1本で始まるため、開幕から相討ちしか選べないと後手必勝になる）。
+        if Self.isPoisonAttack(config: config, attackingFingers: attackingFingers, targetFingers: targetHand.fingerCount) {
             withOpponentPlayer { player in
                 player.updateHand(id: targetHandId) { $0.fingerCount = 0 }
             }
@@ -167,36 +174,43 @@ extension GameState {
         }
     }
 
-    /// 爆弾: ちょうど4本になった手は爆発して死に、他の全ての生きた手に1ダメージ（連鎖あり）
+    /// 爆弾: ちょうど4本になった手は爆発して死に、他の全ての生きた手に1ダメージ（連鎖あり）。
+    /// 常に最新の盤面を見て判定する（古いスナップショットで二重に爆発させない）。
+    /// 爆風の1ダメージで5になって死んだ手も`deadHandIds`に含める。
     private mutating func processBombs(result: inout ActionResult) {
         var exploded: Set<UUID> = []
-        var didExplode = true
+        let overflowWraps = config.isOverflowWrapEnabled
 
-        while didExplode {
-            didExplode = false
+        while let bomb = (player1.hands + player2.hands).first(where: {
+            $0.isAlive && $0.fingerCount == 4 && !exploded.contains($0.id)
+        }) {
+            exploded.insert(bomb.id)
+            result.bombTriggered = true
+            result.deadHandIds.append(bomb.id)
 
-            for hand in player1.hands + player2.hands {
-                guard hand.fingerCount == 4, hand.isAlive, !exploded.contains(hand.id) else { continue }
-                exploded.insert(hand.id)
-                didExplode = true
-                result.bombTriggered = true
-                result.deadHandIds.append(hand.id)
+            let aliveBefore = Set((player1.hands + player2.hands).filter(\.isAlive).map(\.id))
 
-                if let idx = player1.handIndex(for: hand.id) {
-                    player1.hands[idx].fingerCount = 0
-                } else if let idx = player2.handIndex(for: hand.id) {
-                    player2.hands[idx].fingerCount = 0
-                }
+            if let idx = player1.handIndex(for: bomb.id) {
+                player1.hands[idx].fingerCount = 0
+            } else if let idx = player2.handIndex(for: bomb.id) {
+                player2.hands[idx].fingerCount = 0
+            }
+            for i in player1.hands.indices where player1.hands[i].id != bomb.id {
+                player1.hands[i].receiveTap(from: 1, overflowWraps: overflowWraps)
+            }
+            for i in player2.hands.indices where player2.hands[i].id != bomb.id {
+                player2.hands[i].receiveTap(from: 1, overflowWraps: overflowWraps)
+            }
 
-                let overflowWraps = config.isOverflowWrapEnabled
-                for i in player1.hands.indices where player1.hands[i].id != hand.id {
-                    player1.hands[i].receiveTap(from: 1, overflowWraps: overflowWraps)
-                }
-                for i in player2.hands.indices where player2.hands[i].id != hand.id {
-                    player2.hands[i].receiveTap(from: 1, overflowWraps: overflowWraps)
-                }
+            let aliveAfter = Set((player1.hands + player2.hands).filter(\.isAlive).map(\.id))
+            for id in aliveBefore.subtracting(aliveAfter) where id != bomb.id {
+                result.deadHandIds.append(id)
             }
         }
+    }
+
+    static func isPoisonAttack(config: GameConfig, attackingFingers: Int, targetFingers: Int) -> Bool {
+        config.isPoisonEnabled && attackingFingers == 1 && targetFingers >= 2
     }
 
     private mutating func withCurrentPlayer(_ body: (inout Player) -> Void) {
@@ -205,5 +219,47 @@ extension GameState {
 
     private mutating func withOpponentPlayer(_ body: (inout Player) -> Void) {
         if isPlayer1Turn { body(&player2) } else { body(&player1) }
+    }
+}
+
+// MARK: - Sudden death / threat analysis
+extension GameState {
+    enum SuddenDeathOutcome: Equatable {
+        case winner(UUID)
+        case draw
+    }
+
+    /// ターン上限到達時の判定: 生きてる手の数 → 指の合計が少ない方 → 引き分け
+    func suddenDeathOutcome() -> SuddenDeathOutcome {
+        if player1.aliveHands.count != player2.aliveHands.count {
+            return .winner(player1.aliveHands.count > player2.aliveHands.count ? player1.id : player2.id)
+        }
+        if player1.totalFingers != player2.totalFingers {
+            return .winner(player1.totalFingers < player2.totalFingers ? player1.id : player2.id)
+        }
+        return .draw
+    }
+
+    /// その手が、相手のいずれかの手からの1回の攻撃で死にうるか（リーチ表示用）
+    func isHandThreatened(_ handId: UUID) -> Bool {
+        let (owner, enemy): (Player, Player)
+        if player1.hand(for: handId) != nil {
+            (owner, enemy) = (player1, player2)
+        } else if player2.hand(for: handId) != nil {
+            (owner, enemy) = (player2, player1)
+        } else {
+            return false
+        }
+        guard let hand = owner.hand(for: handId), hand.isAlive else { return false }
+        for attacker in enemy.aliveHands {
+            if Self.isPoisonAttack(config: config, attackingFingers: attacker.fingerCount, targetFingers: hand.fingerCount) {
+                return true
+            }
+            var simulated = hand
+            simulated.receiveTap(from: attacker.fingerCount, overflowWraps: config.isOverflowWrapEnabled)
+            if !simulated.isAlive { return true }
+            if config.isBombEnabled && simulated.fingerCount == 4 { return true }
+        }
+        return false
     }
 }

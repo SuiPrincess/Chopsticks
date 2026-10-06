@@ -1,6 +1,6 @@
 import Foundation
 
-enum GameAction: Equatable, Codable {
+enum GameAction: Equatable, Codable, Sendable {
     case tap(attackerHandId: UUID, targetHandId: UUID)
     case split(newDistribution: [Int])
 
